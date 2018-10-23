@@ -68,8 +68,8 @@ sort_p( species_t * RESTRICT sp );
 // In advance_p.cxx
 
 void
-advance_p( /**/  species_t            * RESTRICT sp,
-           /**/  accumulator_array_t  * RESTRICT aa,
+advance_p( species_t * RESTRICT sp,
+           accumulator_array_t * RESTRICT aa,
            const interpolator_array_t * RESTRICT ia );
 
 // In center_p.cxx
@@ -80,7 +80,7 @@ advance_p( /**/  species_t            * RESTRICT sp,
 // the time step.
 
 void
-center_p( /**/  species_t            * RESTRICT sp,
+center_p( species_t * RESTRICT sp,
           const interpolator_array_t * RESTRICT ia );
 
 // In uncenter_p.cxx
@@ -90,7 +90,7 @@ center_p( /**/  species_t            * RESTRICT sp,
 // step stale.
 
 void
-uncenter_p( /**/  species_t            * RESTRICT sp,
+uncenter_p( species_t * RESTRICT sp,
             const interpolator_array_t * RESTRICT ia );
 
 // In energy.cxx
@@ -100,26 +100,26 @@ uncenter_p( /**/  species_t            * RESTRICT sp,
 // result.
 
 double
-energy_p( const species_t            * RESTRICT sp,
+energy_p( const species_t * RESTRICT sp,
           const interpolator_array_t * RESTRICT ia );
 
 // In rho_p.cxx
 
 void
-accumulate_rho_p( /**/  field_array_t * RESTRICT fa,
-                  const species_t     * RESTRICT sp );
+accumulate_rho_p( field_array_t * RESTRICT fa,
+                  const species_t * RESTRICT sp );
 
 void
-accumulate_rhob( field_t          * RESTRICT ALIGNED(128) f,
+accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
                  const particle_t * RESTRICT ALIGNED(32)  p,
-                 const grid_t     * RESTRICT              g,
-                 const float                              qsp );
+                 const grid_t * RESTRICT g,
+                 const float qsp );
 
 // In hydro_p.c
 
 void
-accumulate_hydro_p( /**/  hydro_array_t        * RESTRICT ha,
-                    const species_t            * RESTRICT sp,
+accumulate_hydro_p( hydro_array_t * RESTRICT ha,
+                    const species_t * RESTRICT sp,
                     const interpolator_array_t * RESTRICT ia );
 
 // In move_p.cxx
