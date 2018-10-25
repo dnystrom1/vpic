@@ -1010,4 +1010,6 @@ namespace v4 {
 
 } // namespace v4
 
+#undef ALWAYS_INLINE
+
 #endif // _v4_avx_h_

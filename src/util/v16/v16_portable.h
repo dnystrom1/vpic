@@ -4250,4 +4250,6 @@ namespace v16
 
 } // namespace v16
 
+#undef ALWAYS_INLINE
+
 #endif // _v16_portable_h_

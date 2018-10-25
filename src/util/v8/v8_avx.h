@@ -1685,4 +1685,7 @@ namespace v8
 
 } // namespace v8
 
+#undef ALWAYS_INLINE
+#undef _mm256_set_m128
+
 #endif // _v8_avx_h_

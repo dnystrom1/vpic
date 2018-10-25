@@ -2864,4 +2864,6 @@ namespace v16
 
 } // namespace v16
 
+#undef ALWAYS_INLINE
+
 #endif // _v16_avx512_h_

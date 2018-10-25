@@ -1520,4 +1520,7 @@ namespace v8
 
 } // namespace v8
 
+#undef ALWAYS_INLINE
+#undef ALWAYS_VECTORIZE
+
 #endif // _v8_portable_h_

@@ -1782,4 +1782,6 @@ namespace v8
 
 } // namespace v8
 
+#undef ALWAYS_INLINE
+
 #endif // _v8_portable_h_

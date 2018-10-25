@@ -3586,4 +3586,7 @@ namespace v16
 
 } // namespace v16
 
+#undef ALWAYS_INLINE
+#undef ALWAYS_VECTORIZE
+
 #endif // _v16_portable_h_

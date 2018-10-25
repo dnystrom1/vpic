@@ -1180,4 +1180,7 @@ namespace v4
 
 } // namespace v4
 
+#undef ALWAYS_INLINE
+#undef ALWAYS_VECTORIZE
+
 #endif // _v4_portable_h_
