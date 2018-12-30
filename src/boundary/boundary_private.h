@@ -14,6 +14,23 @@
    of these handlers update rhob according to net charge added and
    removed from the simulation by these functions. */
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef int /* Number of particles injected */
+(*particle_bc_func_t)(                   /* The boundary whose ... */
+  void                * RESTRICT b,      /* parameters are b was hit by ...  */
+  species_t           * RESTRICT sp,     /* a particle from this species ... */
+  particle_new_t      * RESTRICT p,      /* this particle in fact
+                                            (position is hit location, momentum
+                                            is at time of the hit) ... */
+  particle_mover_t    * RESTRICT pm,     /* who had this much displacement
+                                            remaining when it hit */
+  particle_injector_t * RESTRICT pi,     /* Injectors for particles created by
+                                            the interaction */
+  int                            max_pi, /* Max number injections allowed */
+  int                            face ); /* CONVENIENCE: Which face of the
+                                            the voxel containing the above
+                                            particle was hit */
+#else
 typedef int /* Number of particles injected */
 (*particle_bc_func_t)(                   /* The boundary whose ... */
   void                * RESTRICT b,      /* parameters are b was hit by ...  */
@@ -29,6 +46,7 @@ typedef int /* Number of particles injected */
   int                            face ); /* CONVENIENCE: Which face of the
                                             the voxel containing the above
                                             particle was hit */
+#endif
 
 typedef void
 (*delete_particle_bc_func_t)( particle_bc_t * RESTRICT pbc );

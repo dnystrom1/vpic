@@ -53,6 +53,21 @@ typedef struct maxwellian_reflux {
 #define M_SQRT2 (1.4142135623730950488016887242096981)
 #endif
 
+#if defined(VPIC_USE_AOSOA_P)
+int
+interact_maxwellian_reflux( maxwellian_reflux_t * RESTRICT mr,
+                            species_t           * RESTRICT sp,
+                            particle_new_t      * RESTRICT p, 
+                            particle_mover_t    * RESTRICT pm,
+                            particle_injector_t * RESTRICT pi,
+                            int                            max_pi,
+                            int                            face )
+{
+  ERROR(("Need AoSoA implementation."));
+  return 1;
+}
+
+#else
 /* FIXME: DON'T IGNORE MAX_PI */
 int
 interact_maxwellian_reflux( maxwellian_reflux_t * RESTRICT mr,
@@ -175,6 +190,7 @@ interact_maxwellian_reflux( maxwellian_reflux_t * RESTRICT mr,
   pi->sp_id = sp_id;
   return 1;
 }
+#endif
 
 void
 checkpt_maxwellian_reflux( const particle_bc_t * RESTRICT pbc ) {

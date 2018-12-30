@@ -88,10 +88,17 @@ langevin( float                 kT,
        return vi sigma(vi) n_background;
      } */
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef float
+(*unary_rate_constant_func_t)( /**/  void       * RESTRICT params,
+                               const species_t  * RESTRICT sp,
+                               const particle_new_t * RESTRICT ALIGNED(32) p );
+#else
 typedef float
 (*unary_rate_constant_func_t)( /**/  void       * RESTRICT params,
                                const species_t  * RESTRICT sp,
                                const particle_t * RESTRICT ALIGNED(32) p );
+#endif
 
 /* A unary_collision_func_t implements the microscopic physics of a
    collision between a particle and some background whose properties
@@ -109,11 +116,19 @@ typedef float
                     pi->u{xyz}
      } */
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef void
+(*unary_collision_func_t)( /**/  void       * RESTRICT params,
+                           const species_t  * RESTRICT sp,
+                           /**/  particle_new_t * RESTRICT ALIGNED(32) p,
+                           /**/  rng_t      * RESTRICT rng );
+#else
 typedef void
 (*unary_collision_func_t)( /**/  void       * RESTRICT params,
                            const species_t  * RESTRICT sp,
                            /**/  particle_t * RESTRICT ALIGNED(32) p,
                            /**/  rng_t      * RESTRICT rng );
+#endif
 
 /* Declare a unary collision model with the given microscopic physics. 
    params must be a registered object or NULL.  Every particle is
@@ -191,12 +206,21 @@ unary_collision_model( const char       * RESTRICT name,
        return vr sigma(vr);
      } */
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef float
+(*binary_rate_constant_func_t)( /**/  void       * RESTRICT params,
+                                const species_t  * RESTRICT spi,
+                                const species_t  * RESTRICT spj,
+                                const particle_new_t * RESTRICT ALIGNED(32) pi,
+                                const particle_new_t * RESTRICT ALIGNED(32) pj );
+#else
 typedef float
 (*binary_rate_constant_func_t)( /**/  void       * RESTRICT params,
                                 const species_t  * RESTRICT spi,
                                 const species_t  * RESTRICT spj,
                                 const particle_t * RESTRICT ALIGNED(32) pi,
                                 const particle_t * RESTRICT ALIGNED(32) pj );
+#endif
 
 /* A binary_collision_func_t implements the microscopic physics of a
    collision between two particles, pi and pj.  The basic control
@@ -220,6 +244,16 @@ typedef float
        if( type & 2 ) pj->u{xyz} = uj{xyz};
      } */
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef void
+(*binary_collision_func_t)( /**/  void       * RESTRICT params,
+                            const species_t  * RESTRICT spi,
+                            const species_t  * RESTRICT spj,
+                            /**/  particle_new_t * RESTRICT ALIGNED(32) pi,
+                            /**/  particle_new_t * RESTRICT ALIGNED(32) pj,
+                            /**/  rng_t      * RESTRICT rng,
+                            int type );
+#else
 typedef void
 (*binary_collision_func_t)( /**/  void       * RESTRICT params,
                             const species_t  * RESTRICT spi,
@@ -228,6 +262,7 @@ typedef void
                             /**/  particle_t * RESTRICT ALIGNED(32) pj,
                             /**/  rng_t      * RESTRICT rng,
                             int type );
+#endif
 
 /* Declare a binary collision model with the given microscopic physics. 
    params must be a registered object or NULL.  A particle in a species

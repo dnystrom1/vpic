@@ -21,6 +21,31 @@ typedef struct particle_mover_seg
 
 } particle_mover_seg_t;
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef struct advance_p_pipeline_args
+{
+  MEM_PTR( particle_block_t,     128 ) pb0;      // Particle block array
+  MEM_PTR( particle_mover_t,     128 ) pm;       // Particle mover array
+  MEM_PTR( accumulator_t,        128 ) a0;       // Accumulator arrays
+  MEM_PTR( const interpolator_t, 128 ) f0;       // Interpolator array
+  MEM_PTR( particle_mover_seg_t, 128 ) seg;      // Dest for return values
+  MEM_PTR( const grid_t,         1   ) g;        // Local domain grid params
+
+  float                                qdt_2mc;  // Particle/field coupling
+  float                                cdt_dx;   // x-space/time coupling
+  float                                cdt_dy;   // y-space/time coupling
+  float                                cdt_dz;   // z-space/time coupling
+  float                                qsp;      // Species particle charge
+
+  int                                  np;       // Number of particles
+  int                                  max_nm;   // Number of movers
+  int                                  nx;       // x-mesh resolution
+  int                                  ny;       // y-mesh resolution
+  int                                  nz;       // z-mesh resolution
+ 
+  PAD_STRUCT( 6*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
+} advance_p_pipeline_args_t;
+#else
 typedef struct advance_p_pipeline_args
 {
   MEM_PTR( particle_t,           128 ) p0;       // Particle array
@@ -43,8 +68,8 @@ typedef struct advance_p_pipeline_args
   int                                  nz;       // z-mesh resolution
  
   PAD_STRUCT( 6*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
-
 } advance_p_pipeline_args_t;
+#endif
 
 // PROTOTYPE_PIPELINE( advance_p, advance_p_pipeline_args_t );
 
@@ -71,6 +96,17 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
 ///////////////////////////////////////////////////////////////////////////////
 // center_p_pipeline and uncenter_p_pipeline interface
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef struct center_p_pipeline_args
+{
+  MEM_PTR( particle_block_t,     128 ) pb0;     // Particle block array
+  MEM_PTR( const interpolator_t, 128 ) f0;      // Interpolator array
+  float                                qdt_2mc; // Particle/field coupling
+  int                                  np;      // Number of particles
+
+  PAD_STRUCT( 2*SIZEOF_MEM_PTR + sizeof(float) + sizeof(int) )
+} center_p_pipeline_args_t;
+#else
 typedef struct center_p_pipeline_args
 {
   MEM_PTR( particle_t,           128 ) p0;      // Particle array
@@ -79,8 +115,8 @@ typedef struct center_p_pipeline_args
   int                                  np;      // Number of particles
 
   PAD_STRUCT( 2*SIZEOF_MEM_PTR + sizeof(float) + sizeof(int) )
-
 } center_p_pipeline_args_t;
+#endif
 
 // PROTOTYPE_PIPELINE( center_p,   center_p_pipeline_args_t );
 
@@ -128,6 +164,19 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
 ///////////////////////////////////////////////////////////////////////////////
 // energy_p_pipeline interface
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef struct energy_p_pipeline_args
+{
+  MEM_PTR( const particle_block_t, 128 ) pb;      // Particle block array
+  MEM_PTR( const interpolator_t,   128 ) f;       // Interpolator array
+  MEM_PTR( double,                 128 ) en;      // Return values
+  float                                  qdt_2mc; // Particle/field coupling
+  float                                  msp;     // Species particle rest mass
+  int                                    np;      // Number of particles
+
+  PAD_STRUCT( 3*SIZEOF_MEM_PTR + 2*sizeof(float) + sizeof(int) )
+} energy_p_pipeline_args_t;
+#else
 typedef struct energy_p_pipeline_args
 {
   MEM_PTR( const particle_t,     128 ) p;       // Particle array
@@ -138,8 +187,8 @@ typedef struct energy_p_pipeline_args
   int                                  np;      // Number of particles
 
   PAD_STRUCT( 3*SIZEOF_MEM_PTR + 2*sizeof(float) + sizeof(int) )
-
 } energy_p_pipeline_args_t;
+#endif
 
 // PROTOTYPE_PIPELINE( energy_p, energy_p_pipeline_args_t );
 
@@ -192,6 +241,23 @@ energy_p_pipeline_v16( energy_p_pipeline_args_t * args,
 
 // FIXME: safe to remove? enum { max_subsort_voxel = 26624 };
 
+#if defined(VPIC_USE_AOSOA_P)
+typedef struct sort_p_pipeline_args
+{
+  MEM_PTR( particle_block_t, 128 ) pb;               // Particles (0:n-1)
+  MEM_PTR( particle_block_t, 128 ) aux_pb;           // Aux particle atorage (0:n-1)
+  MEM_PTR( int,              128 ) coarse_partition; // Coarse partition storage
+  /**/ // (0:max_subsort-1,0:MAX_PIPELINE-1)
+  MEM_PTR( int,              128 ) partition;        // Partitioning (0:n_voxel)
+  MEM_PTR( int,              128 ) next;             // Aux partitioning (0:n_voxel)
+  int n;         // Number of particles
+  int n_subsort; // Number of pipelines to be used for subsorts
+  int vl, vh;    // Particles may be contained in voxels [vl,vh].
+  int n_voxel;   // Number of voxels total (including ghosts)
+
+  PAD_STRUCT( 5*SIZEOF_MEM_PTR + 5*sizeof(int) )
+} sort_p_pipeline_args_t;
+#else
 typedef struct sort_p_pipeline_args
 {
   MEM_PTR( particle_t, 128 ) p;                // Particles (0:n-1)
@@ -206,8 +272,8 @@ typedef struct sort_p_pipeline_args
   int n_voxel;   // Number of voxels total (including ghosts)
 
   PAD_STRUCT( 5*SIZEOF_MEM_PTR + 5*sizeof(int) )
-
 } sort_p_pipeline_args_t;
+#endif
 
 // PROTOTYPE_PIPELINE( coarse_count, sort_p_pipeline_args_t );
 // PROTOTYPE_PIPELINE( coarse_sort,  sort_p_pipeline_args_t );

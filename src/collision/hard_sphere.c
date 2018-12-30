@@ -96,10 +96,21 @@ typedef struct hard_sphere {
    higher order terms (we can basically get to floating point single
    precision with a two extra terms in the above.) */
 
+#if defined(VPIC_USE_AOSOA_P)
 float
 hard_sphere_fluid_rate_constant( const hard_sphere_t * RESTRICT hs,
                                  const species_t     * RESTRICT spi,
-                                 const particle_t    * RESTRICT pi ) {
+                                 const particle_new_t    * RESTRICT pi )
+{
+  ERROR(("Need AoSoA implementation."));
+  return 1.0f;
+}
+#else
+float
+hard_sphere_fluid_rate_constant( const hard_sphere_t * RESTRICT hs,
+                                 const species_t     * RESTRICT spi,
+                                 const particle_t    * RESTRICT pi )
+{
   static const float gamma = (3.*M_PI-8.)/(24.-6*M_PI);
   float urx = pi->ux - hs->udx;
   float ury = pi->uy - hs->udy;
@@ -108,20 +119,35 @@ hard_sphere_fluid_rate_constant( const hard_sphere_t * RESTRICT hs,
   return sqrtf((hs->alpha_Kt2ut4+ur2*(hs->beta_Kt2ut2+ur2*hs->gamma_Kt2))/
                (hs->ut2+ur2*gamma));
 }
+#endif
 
 /* The particle-particle case is much easier theoretically. */
 
+#if defined(VPIC_USE_AOSOA_P)
+float
+hard_sphere_rate_constant( const hard_sphere_t * RESTRICT hs,
+                           const species_t     * RESTRICT spi,
+                           const species_t     * RESTRICT spj,
+                           const particle_new_t    * RESTRICT pi,
+                           const particle_new_t    * RESTRICT pj )
+{
+  ERROR(("Need AoSoA implementation."));
+  return 1.0f;
+}
+#else
 float
 hard_sphere_rate_constant( const hard_sphere_t * RESTRICT hs,
                            const species_t     * RESTRICT spi,
                            const species_t     * RESTRICT spj,
                            const particle_t    * RESTRICT pi,
-                           const particle_t    * RESTRICT pj ) {
+                           const particle_t    * RESTRICT pj )
+{
   float urx = pi->ux - pj->ux;
   float ury = pi->uy - pj->uy;
   float urz = pi->uz - pj->uz;
   return hs->Kc*sqrtf( urx*urx + ury*ury + urz*urz );
 }
+#endif
 
 /* Conservation of momentum, pi0+pj0 = pi1+pj1, implies that the
    center of mass velocity vcm = (pi+pj)/(mi+mj) is unchanged by the
@@ -280,11 +306,22 @@ hard_sphere_rate_constant( const hard_sphere_t * RESTRICT hs,
 /* It would be nice to preserve redundant rate constant
    computations */
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+hard_sphere_fluid_collision( const hard_sphere_t * RESTRICT hs,
+                             const species_t     * RESTRICT spi,
+                             /**/  particle_new_t    * RESTRICT pi,
+                             /**/  rng_t         * RESTRICT rng )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 hard_sphere_fluid_collision( const hard_sphere_t * RESTRICT hs,
                              const species_t     * RESTRICT spi,
                              /**/  particle_t    * RESTRICT pi,
-                             /**/  rng_t         * RESTRICT rng ) {
+                             /**/  rng_t         * RESTRICT rng )
+{
   float urx, ury, urz, ax, ay, az, w;
 
   urx = pi->ux - hs->udx;
@@ -305,7 +342,21 @@ hard_sphere_fluid_collision( const hard_sphere_t * RESTRICT hs,
   pi->uy -= w*ay;
   pi->uz -= w*az;
 }
+#endif
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+hard_sphere_collision( const hard_sphere_t * RESTRICT hs,
+                       const species_t     * RESTRICT spi,
+                       const species_t     * RESTRICT spj,
+                       /**/  particle_new_t    * RESTRICT pi,
+                       /**/  particle_new_t    * RESTRICT pj,
+                       /**/  rng_t         * RESTRICT rng,
+                       const int                      type )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 hard_sphere_collision( const hard_sphere_t * RESTRICT hs,
                        const species_t     * RESTRICT spi,
@@ -313,7 +364,8 @@ hard_sphere_collision( const hard_sphere_t * RESTRICT hs,
                        /**/  particle_t    * RESTRICT pi,
                        /**/  particle_t    * RESTRICT pj,
                        /**/  rng_t         * RESTRICT rng,
-                       const int                      type ) {
+                       const int                      type )
+{
   float urx, ury, urz, ax, ay, az, w;
 
   urx = pi->ux - pj->ux;
@@ -336,6 +388,7 @@ hard_sphere_collision( const hard_sphere_t * RESTRICT hs,
     pj->uz += w*az;
   }
 }
+#endif
 
 #undef CMOV
 
@@ -419,4 +472,3 @@ hard_sphere( const char * RESTRICT name, /* Model name */
                         (binary_collision_func_t)    hard_sphere_collision,
                                  hs, spi, spj, rp, sample, interval );
 }
-

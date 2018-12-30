@@ -254,11 +254,21 @@ vpic_simulation::dump_hydro( const char *sp_name,
   fileIO.write( hydro_array->h, dim[0]*dim[1]*dim[2] );
   if( fileIO.close() ) ERROR(( "File close failed on dump hydro!!!" ));
 }
- 
+
+#if defined(VPIC_USE_AOSOA_P)
 void
 vpic_simulation::dump_particles( const char *sp_name,
                                  const char *fbase,
-                                 int ftag ) {
+                                 int ftag )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
+void
+vpic_simulation::dump_particles( const char *sp_name,
+                                 const char *fbase,
+                                 int ftag )
+{
   species_t *sp;
   char fname[256];
   FileIO fileIO;
@@ -317,7 +327,8 @@ vpic_simulation::dump_particles( const char *sp_name,
  
   if( fileIO.close() ) ERROR(("File close failed on dump particles!!!"));
 }
- 
+#endif
+
 /*------------------------------------------------------------------------------
  * New dump logic
  *---------------------------------------------------------------------------*/

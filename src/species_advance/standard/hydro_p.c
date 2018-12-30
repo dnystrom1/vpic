@@ -23,10 +23,20 @@
 // hydro jx,jy,jz are for diagnostic purposes only; they are not
 // accumulated with a charge conserving algorithm.
 
+#if defined(VPIC_USE_AOSOA_P)
 void
 accumulate_hydro_p( hydro_array_t              * RESTRICT ha,
                     const species_t            * RESTRICT sp,
-                    const interpolator_array_t * RESTRICT ia ) {
+                    const interpolator_array_t * RESTRICT ia )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
+void
+accumulate_hydro_p( hydro_array_t              * RESTRICT ha,
+                    const species_t            * RESTRICT sp,
+                    const interpolator_array_t * RESTRICT ia )
+{
   /**/  hydro_t        * RESTRICT ALIGNED(128) h;
   const particle_t     * RESTRICT ALIGNED(128) p;
   const interpolator_t * RESTRICT ALIGNED(128) f;
@@ -165,3 +175,4 @@ accumulate_hydro_p( hydro_array_t              * RESTRICT ha,
 #   undef ACCUM_HYDRO
   }
 }
+#endif

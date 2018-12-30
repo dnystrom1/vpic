@@ -1,6 +1,9 @@
 #define IN_emitter
 #include "emitter_private.h"
 
+#if defined(VPIC_USE_AOSOA_P)
+
+#else
 /* Private interface *********************************************************/
 
 // FIXME: IN CCUBE SHOULD J_norm BE PROP TO E^(3/2) or (E-THRESH)^(3/2)??
@@ -208,4 +211,4 @@ child_langmuir( /**/  species_t            * RESTRICT sp,
                                (restore_func_t)restore_child_langmuir,
                                NULL );
 }
-
+#endif

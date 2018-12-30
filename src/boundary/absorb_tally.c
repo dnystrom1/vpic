@@ -15,6 +15,20 @@ typedef struct absorb_tally {
   /**/  int           * tally;
 } absorb_tally_t;
 
+#if defined(VPIC_USE_AOSOA_P)
+int
+interact_absorb_tally( absorb_tally_t      * RESTRICT at,
+                       species_t           * RESTRICT sp,
+                       particle_new_t      * RESTRICT p,
+                       particle_mover_t    * RESTRICT pm,
+                       particle_injector_t * RESTRICT pi,
+                       int                            max_pi,
+                       int                            face )
+{
+  ERROR(("Need AoSoA implementation."));
+  return 0;
+}
+#else
 int
 interact_absorb_tally( absorb_tally_t      * RESTRICT at,
                        species_t           * RESTRICT sp,
@@ -27,6 +41,7 @@ interact_absorb_tally( absorb_tally_t      * RESTRICT at,
   accumulate_rhob( at->fa->f, p, at->fa->g, sp->q );
   return 0;
 }
+#endif
 
 void
 checkpt_absorb_tally( const particle_bc_t * RESTRICT pbc ) {

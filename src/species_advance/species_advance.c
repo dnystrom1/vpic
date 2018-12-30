@@ -12,8 +12,16 @@
 
 /* Private interface *********************************************************/
 
+#if defined(VPIC_USE_AOSOA_P)
 void
-checkpt_species( const species_t * sp ) {
+checkpt_species( const species_t * sp )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
+void
+checkpt_species( const species_t * sp )
+{
   CHECKPT( sp, 1 );
   CHECKPT_STR( sp->name );
   checkpt_data( sp->p,
@@ -26,9 +34,20 @@ checkpt_species( const species_t * sp ) {
   CHECKPT_PTR( sp->g );
   CHECKPT_PTR( sp->next );
 }
+#endif
 
+#if defined(VPIC_USE_AOSOA_P)
 species_t *
-restore_species( void ) {
+restore_species( void )
+{
+  species_t * sp;
+  ERROR(("Need AoSoA implementation."));
+  return sp;
+}
+#else
+species_t *
+restore_species( void )
+{
   species_t * sp;
   RESTORE( sp );
   RESTORE_STR( sp->name );
@@ -39,9 +58,18 @@ restore_species( void ) {
   RESTORE_PTR( sp->next );
   return sp;
 }
+#endif
 
+#if defined(VPIC_USE_AOSOA_P)
 void
-delete_species( species_t * sp ) {
+delete_species( species_t * sp )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
+void
+delete_species( species_t * sp )
+{
   UNREGISTER_OBJECT( sp );
   FREE_ALIGNED( sp->partition );
   FREE_ALIGNED( sp->pm );
@@ -49,6 +77,7 @@ delete_species( species_t * sp ) {
   FREE( sp->name );
   FREE( sp );
 }
+#endif
 
 /* Public interface **********************************************************/
 
@@ -99,6 +128,22 @@ append_species( species_t * sp,
   return sp;
 }
 
+#if defined(VPIC_USE_AOSOA_P)
+// species_t *
+// species( const char * name,
+//          float q,
+//          float m,
+//          size_t max_local_np,
+//          size_t max_local_nm,
+//          int sort_interval,
+//          int sort_out_of_place,
+//          grid_t * g )
+// {
+//   species_t * sp;
+//   ERROR(("Need AoSoA implementation."));
+//   return sp;
+// }
+
 species_t *
 species( const char * name,
          float q,
@@ -107,7 +152,73 @@ species( const char * name,
          size_t max_local_nm,
          int sort_interval,
          int sort_out_of_place,
-         grid_t * g ) {
+         grid_t * g )
+{
+  species_t * sp;
+
+  int len = name ? strlen(name) : 0;
+
+  if ( ! len )
+  {
+    ERROR( ( "Cannot create a nameless species." ) );
+  }
+  if ( ! g )
+  {
+    ERROR( ( "NULL grid." ) );
+  }
+  if ( g->nv == 0 )
+  {
+    ERROR( ( "Allocate grid before defining species." ) );
+  }
+  if ( max_local_np < 1 )
+  {
+    max_local_np = 1;
+  }
+  if ( max_local_nm < 1 )
+  {
+    max_local_nm = 1;
+  }
+
+  MALLOC( sp, 1 );
+  CLEAR( sp, 1 );
+
+  MALLOC( sp->name, len + 1 );
+  strcpy( sp->name, name );
+
+  sp->q = q;
+  sp->m = m;
+
+  MALLOC_ALIGNED( sp->pb, max_local_np / PARTICLE_BLOCK_SIZE + 1, 128 );
+  sp->max_np = max_local_np;
+
+  MALLOC_ALIGNED( sp->pm, max_local_nm, 128 );
+  sp->max_nm = max_local_nm;
+
+  sp->last_sorted       = INT64_MIN;
+  sp->sort_interval     = sort_interval;
+  sp->sort_out_of_place = sort_out_of_place;
+
+  MALLOC_ALIGNED( sp->partition, g->nv+1, 128 );
+
+  sp->g = g;   
+
+  /* id, next are set by append species */
+
+  REGISTER_OBJECT( sp, checkpt_species, restore_species, NULL );
+
+  return sp;
+}
+#else
+species_t *
+species( const char * name,
+         float q,
+         float m,
+         size_t max_local_np,
+         size_t max_local_nm,
+         int sort_interval,
+         int sort_out_of_place,
+         grid_t * g )
+{
   species_t * sp;
   int len = name ? strlen(name) : 0;
 
@@ -144,3 +255,4 @@ species( const char * name,
   REGISTER_OBJECT( sp, checkpt_species, restore_species, NULL );
   return sp;
 }
+#endif

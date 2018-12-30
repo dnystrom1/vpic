@@ -12,6 +12,15 @@
 
 /* Private interface *********************************************************/
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+binary_pipeline_scalar( binary_collision_model_t * RESTRICT cm,
+                        int pipeline_rank,
+                        int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 binary_pipeline_scalar( binary_collision_model_t * RESTRICT cm,
                         int pipeline_rank,
@@ -155,6 +164,7 @@ binary_pipeline_scalar( binary_collision_model_t * RESTRICT cm,
 
   cm->n_large_pr[pipeline_rank] = n_large_pr;
 }
+#endif
 
 void
 apply_binary_collision_model_pipeline( binary_collision_model_t * cm )

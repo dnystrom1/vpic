@@ -14,6 +14,23 @@
 // 
 // Written by: Brian J. Albright, X-1, LANL January, 2006
 
+#if defined(VPIC_USE_AOSOA_P)
+int
+link_boundary( link_boundary_t     * lb,
+               particle_new_t          * r, 
+               particle_mover_t    * pm,
+               field_t             * f,
+               accumulator_t       * a, 
+               const grid_t        * g,
+               species_t           * sp, 
+               particle_injector_t * pi,
+               rng_t               * rng,
+               int                   face )
+{
+  ERROR(("Need AoSoA implementation."));
+  return 0;
+}
+#else
 int
 link_boundary( link_boundary_t     * lb,
                particle_t          * r, 
@@ -24,7 +41,8 @@ link_boundary( link_boundary_t     * lb,
                species_t           * sp, 
                particle_injector_t * pi,
                rng_t               * rng,
-               int                   face ) {
+               int                   face )
+{
   static FILE *fp = NULL; 
   int ix, iy, iz;
   double x, y, z;
@@ -72,3 +90,4 @@ link_boundary( link_boundary_t     * lb,
 
   return 0;
 }
+#endif

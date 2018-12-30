@@ -137,11 +137,19 @@ void
 accumulate_rho_p( field_array_t * RESTRICT fa,
                   const species_t * RESTRICT sp );
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
+                 const particle_new_t * RESTRICT ALIGNED(32)  p,
+                 const grid_t * RESTRICT g,
+                 const float qsp );
+#else
 void
 accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
                  const particle_t * RESTRICT ALIGNED(32)  p,
                  const grid_t * RESTRICT g,
                  const float qsp );
+#endif
 
 // In hydro_p.c
 
@@ -152,12 +160,21 @@ accumulate_hydro_p( hydro_array_t * RESTRICT ha,
 
 // In move_p.cxx
 
+#if defined(VPIC_USE_AOSOA_P)
+int
+move_p( particle_block_t * ALIGNED(128) p0,    // Particle block pointer
+        particle_mover_t * ALIGNED(16)  m,     // Particle mover to apply
+        accumulator_t    * ALIGNED(128) a0,    // Accumulator to use
+        const grid_t     *              g,     // Grid parameters
+        const float                     qsp ); // Species particle charge
+#else
 int
 move_p( particle_t       * ALIGNED(128) p0,    // Particle array
         particle_mover_t * ALIGNED(16)  m,     // Particle mover to apply
         accumulator_t    * ALIGNED(128) a0,    // Accumulator to use
         const grid_t     *              g,     // Grid parameters
         const float                     qsp ); // Species particle charge
+#endif
 
 END_C_DECLS
 

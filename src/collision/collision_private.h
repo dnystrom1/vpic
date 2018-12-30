@@ -44,7 +44,19 @@ END_C_DECLS
 ///////////////////////////////////////////////////////////////////////////////
 // Langevin pipeline interface
 
-typedef struct langevin_pipeline_args {
+#if defined(VPIC_USE_AOSOA_P)
+typedef struct langevin_pipeline_args
+{
+  MEM_PTR( particle_new_t, 128 ) p;
+  MEM_PTR( rng_t,      128 ) rng[ MAX_PIPELINE ];
+  float decay; 
+  float drive;
+  int np;
+  PAD_STRUCT( (1+MAX_PIPELINE)*SIZEOF_MEM_PTR+2*sizeof(float)+sizeof(int) )
+} langevin_pipeline_args_t;
+#else
+typedef struct langevin_pipeline_args
+{
   MEM_PTR( particle_t, 128 ) p;
   MEM_PTR( rng_t,      128 ) rng[ MAX_PIPELINE ];
   float decay; 
@@ -52,6 +64,7 @@ typedef struct langevin_pipeline_args {
   int np;
   PAD_STRUCT( (1+MAX_PIPELINE)*SIZEOF_MEM_PTR+2*sizeof(float)+sizeof(int) )
 } langevin_pipeline_args_t;
+#endif
 
 // PROTOTYPE_PIPELINE( langevin, langevin_pipeline_args_t );
 

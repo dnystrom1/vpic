@@ -27,6 +27,15 @@
 // 
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
+                              int pipeline_rank,
+                              int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
                               int pipeline_rank,
@@ -73,11 +82,21 @@ coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
 	count,
 	n_subsort );
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
+                             int pipeline_rank,
+                             int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
                              int pipeline_rank,
@@ -134,11 +153,21 @@ coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
 #   endif
   }
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
+                         int pipeline_rank,
+                         int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
                          int pipeline_rank,
@@ -212,11 +241,19 @@ subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
     }
   }
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // 
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+sort_p_pipeline( species_t * sp )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 sort_p_pipeline( species_t * sp )
 {
@@ -369,3 +406,4 @@ sort_p_pipeline( species_t * sp )
     COPY( p, aux_p, n_particle );
   }
 }
+#endif

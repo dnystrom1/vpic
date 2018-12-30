@@ -536,24 +536,47 @@ private:
   // - Injection with displacment may use up movers (i.e. don't use
   //   injection with displacement during initialization).
   // This injection is _ultra_ _fast_.
- 
+
+  #if defined(VPIC_USE_AOSOA_P)
   inline void
   inject_particle_raw( species_t * RESTRICT sp,
                        float dx, float dy, float dz, int32_t i,
-                       float ux, float uy, float uz, float w ) {
+                       float ux, float uy, float uz, float w )
+  {
+    ERROR(("Need AoSoA implementation."));
+  }
+  #else
+  inline void
+  inject_particle_raw( species_t * RESTRICT sp,
+                       float dx, float dy, float dz, int32_t i,
+                       float ux, float uy, float uz, float w )
+  {
     particle_t * RESTRICT p = sp->p + (sp->np++);
     p->dx = dx; p->dy = dy; p->dz = dz; p->i = i;
     p->ux = ux; p->uy = uy; p->uz = uz; p->w = w;
   }
- 
+  #endif
+
   // This variant does a raw inject and moves the particles
 
+  #if defined(VPIC_USE_AOSOA_P)
   inline void
   inject_particle_raw( species_t * RESTRICT sp,
                        float dx, float dy, float dz, int32_t i,
                        float ux, float uy, float uz, float w,
                        float dispx, float dispy, float dispz,
-                       int update_rhob ) {
+                       int update_rhob )
+  {
+    ERROR(("Need AoSoA implementation."));
+  }
+  #else
+  inline void
+  inject_particle_raw( species_t * RESTRICT sp,
+                       float dx, float dy, float dz, int32_t i,
+                       float ux, float uy, float uz, float w,
+                       float dispx, float dispy, float dispz,
+                       int update_rhob )
+  {
     particle_t       * RESTRICT p  = sp->p  + (sp->np++);
     particle_mover_t * RESTRICT pm = sp->pm + sp->nm;
     p->dx = dx; p->dy = dy; p->dz = dz; p->i = i;
@@ -562,7 +585,8 @@ private:
     if( update_rhob ) accumulate_rhob( field_array->f, p, grid, -sp->q );
     sp->nm += move_p( sp->p, pm, accumulator_array->a, grid, sp->q );
   }
- 
+  #endif
+
   //////////////////////////////////
   // Random number generator helpers
  

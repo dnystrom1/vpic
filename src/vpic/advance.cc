@@ -75,6 +75,63 @@ int vpic_simulation::advance(void) {
       boundary_p( particle_bc_list, species_list,
                   field_array, accumulator_array );
   TOC( boundary_p, num_comm_round );
+
+  #if defined(VPIC_USE_AOSOA_P)
+
+  LIST_FOR_EACH( sp, species_list )
+  {
+    if ( sp->nm && verbose )
+    {
+      WARNING( ( "Removing %i particles associated with unprocessed %s movers (increase num_comm_round)",
+                 sp->nm,
+		 sp->name ) );
+    }
+
+    // Drop the particles that have unprocessed movers due to a user defined
+    // boundary condition. Particles of this type with unprocessed movers are
+    // in the list of particles and move_p has set the voxel in the particle to
+    // 8*voxel + face. This is an incorrect voxel index and in many cases can
+    // in fact go out of bounds of the voxel indexing space. Removal is in
+    // reverse order for back filling. Particle charge is accumulated to the
+    // mesh before removing the particle.
+
+    int nm = sp->nm;
+
+    particle_mover_t * RESTRICT ALIGNED(16)  pm = sp->pm + sp->nm - 1;
+    particle_block_t * RESTRICT ALIGNED(128) pb0 = sp->pb;
+
+    for( ; nm; nm--, pm-- )
+    {
+      int i  = pm->i;                        // Index of particle we are removing.
+      int ib = i / PARTICLE_BLOCK_SIZE;      // Index of particle block.
+      int ip = i - PARTICLE_BLOCK_SIZE * ib; // Index of next particle in block.
+
+      pb0[ib].i[ip] >>= 3; // shift particle voxel down
+
+      // Accumulate the particle's charge to the mesh.
+      ERROR( ( "Need AoSoA implementation for accumulate_rhob." ) );
+      // accumulate_rhob( field_array->f, p0 + i, sp->g, sp->q ); // Need to fix this to work with AoSoA.
+
+      int ib_last = ( sp->np - 1 ) / PARTICLE_BLOCK_SIZE;           // Index of particle block.
+      int ip_last = ( sp->np - 1 ) - PARTICLE_BLOCK_SIZE * ib_last; // Index of next particle in block.
+
+      pb0[ib].dx[ip] = pb0[ib_last].dx[ip_last]; // put the last particle into position i
+      pb0[ib].dy[ip] = pb0[ib_last].dy[ip_last];
+      pb0[ib].dz[ip] = pb0[ib_last].dz[ip_last];
+      pb0[ib].i [ip] = pb0[ib_last].i [ip_last];
+
+      pb0[ib].ux[ip] = pb0[ib_last].ux[ip_last];
+      pb0[ib].uy[ip] = pb0[ib_last].uy[ip_last];
+      pb0[ib].uz[ip] = pb0[ib_last].uz[ip_last];
+      pb0[ib].w [ip] = pb0[ib_last].w [ip_last];
+
+      sp->np--; // decrement the number of particles
+    }
+    sp->nm = 0;
+  }
+
+  #else // #if defined(VPIC_USE_AOSOA_P)
+
   LIST_FOR_EACH( sp, species_list ) {
     if( sp->nm && verbose )
       WARNING(( "Removing %i particles associated with unprocessed %s movers (increase num_comm_round)",
@@ -99,6 +156,8 @@ int vpic_simulation::advance(void) {
     }
     sp->nm = 0;
   }
+
+  #endif // #if defined(VPIC_USE_AOSOA_P)
 
   // At this point, all particle positions are at r_1 and u_{1/2}, the
   // guard lists are empty and the accumulators on each processor are current.

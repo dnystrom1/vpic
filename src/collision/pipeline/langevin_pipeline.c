@@ -8,6 +8,15 @@
 
 /* Private interface *********************************************************/
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+langevin_pipeline_scalar( langevin_pipeline_args_t * RESTRICT args,
+                          int pipeline_rank,
+                          int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 langevin_pipeline_scalar( langevin_pipeline_args_t * RESTRICT args,
                           int pipeline_rank,
@@ -35,6 +44,7 @@ langevin_pipeline_scalar( langevin_pipeline_args_t * RESTRICT args,
     p[i].uz = decay * p[i].uz + drive * frandn(rng);
   }
 }
+#endif
 
 #if defined(V4_ACCELERATION) && defined(HAS_V4_PIPELINE)
 
@@ -42,6 +52,13 @@ langevin_pipeline_scalar( langevin_pipeline_args_t * RESTRICT args,
 
 #endif
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+apply_langevin_pipeline( langevin_t * l )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 apply_langevin_pipeline( langevin_t * l )
 {
@@ -110,3 +127,4 @@ apply_langevin_pipeline( langevin_t * l )
 
   WAIT_PIPELINES();
 }
+#endif

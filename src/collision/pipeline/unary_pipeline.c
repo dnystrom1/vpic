@@ -10,6 +10,15 @@
 
 /* Private interface *********************************************************/
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+unary_pipeline_scalar( unary_collision_model_t * RESTRICT cm,
+                       int pipeline_rank,
+                       int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 unary_pipeline_scalar( unary_collision_model_t * RESTRICT cm,
                        int pipeline_rank,
@@ -63,6 +72,7 @@ unary_pipeline_scalar( unary_collision_model_t * RESTRICT cm,
 
   cm->n_large_pr[ pipeline_rank ] = n_large_pr;
 }
+#endif
 
 void
 apply_unary_collision_model_pipeline( unary_collision_model_t * cm )

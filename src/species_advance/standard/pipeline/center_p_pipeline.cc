@@ -13,6 +13,15 @@
 // make use of explicit calls to vector intrinsic functions.
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+center_p_pipeline_scalar( center_p_pipeline_args_t * args,
+                          int pipeline_rank,
+                          int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 center_p_pipeline_scalar( center_p_pipeline_args_t * args,
                           int pipeline_rank,
@@ -96,12 +105,21 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
     p->uz = uz;
   }
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // Top level function to select and call the proper center_p pipeline
 // function.
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+center_p_pipeline( species_t * RESTRICT sp,
+                   const interpolator_array_t * RESTRICT ia )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 center_p_pipeline( species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia )
@@ -126,3 +144,4 @@ center_p_pipeline( species_t * RESTRICT sp,
   EXEC_PIPELINES( center_p, args, 0 );
   WAIT_PIPELINES();
 }
+#endif

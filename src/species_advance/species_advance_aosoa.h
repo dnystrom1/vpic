@@ -1,15 +1,15 @@
 #ifndef _species_advance_aosoa_h_
 #define _species_advance_aosoa_h_
 
-enum { PARTICLE_BLOCK_SIZE = 16 };
+// enum { PARTICLE_BLOCK_SIZE = 16 };
+
+#define PARTICLE_BLOCK_SIZE 16
 
 typedef int32_t species_id; // Must be 32-bit wide for particle_injector_t
 
-// FIXME: Eventually particle_t (definitely) and their other formats
-// (maybe) should be opaque and specific to a particular
-// species_advance implementation
+// For AoSoA particle storage format, we create a new particle block struct.
 
-typedef struct particle
+typedef struct particle_block
 {
   float  dx[PARTICLE_BLOCK_SIZE];  // Particle position in cell coordinates (on [-1,1])
   float  dy[PARTICLE_BLOCK_SIZE];
@@ -25,7 +25,20 @@ typedef struct particle
   float uy[PARTICLE_BLOCK_SIZE];
   float uz[PARTICLE_BLOCK_SIZE];
   float  w[PARTICLE_BLOCK_SIZE];   // Particle weight (number of physical particles)
-} particle_t;
+} particle_block_t;
+
+// FIXME: Eventually particle_t (definitely) and their other formats
+// (maybe) should be opaque and specific to a particular
+// species_advance implementation
+
+// For AoSoA particle storage format, we modify the particle struct to contain
+// a pointer to a particle_block and a particle index.
+
+typedef struct particle_new
+{
+  particle_block_t * pb; // Pointer to particle_block containing particle
+  int32_t            pi; // Index of particle in particle_block
+} particle_new_t;
 
 // WARNING: FUNCTIONS THAT USE A PARTICLE_MOVER ASSUME THAT EVERYBODY
 // WHO USES THAT PARTICLE MOVER WILL HAVE ACCESS TO PARTICLE ARRAY
@@ -39,6 +52,7 @@ typedef struct particle_mover
 // NOTE: THE LAYOUT OF A PARTICLE_INJECTOR _MUST_ BE COMPATIBLE WITH
 // THE CONCATENATION OF A PARTICLE_T AND A PARTICLE_MOVER!
 
+#if 0
 typedef struct particle_injector
 {
   float  dx[PARTICLE_BLOCK_SIZE]; // Particle position in cell coords (on [-1,1])
@@ -46,10 +60,27 @@ typedef struct particle_injector
   float  dz[PARTICLE_BLOCK_SIZE];
   int32_t i[PARTICLE_BLOCK_SIZE]; // Index of cell containing the particle
   /**/
-  float ux[PARTICLE_BLOCK_SIZE];  // Particle normalized momentum
-  float uy[PARTICLE_BLOCK_SIZE];
-  float uz[PARTICLE_BLOCK_SIZE];
-  float  w[PARTICLE_BLOCK_SIZE];  // Particle weight (number of physical particles)
+  float  ux[PARTICLE_BLOCK_SIZE]; // Particle normalized momentum
+  float  uy[PARTICLE_BLOCK_SIZE];
+  float  uz[PARTICLE_BLOCK_SIZE];
+  float   w[PARTICLE_BLOCK_SIZE]; // Particle weight (number of physical particles)
+  /**/
+  float dispx, dispy, dispz;      // Displacement of particle
+  species_id sp_id;               // Species of particle
+} particle_injector_t;
+#endif
+
+typedef struct particle_injector
+{
+  float  dx; // Particle position in cell coords (on [-1,1])
+  float  dy;
+  float  dz;
+  int32_t i; // Index of cell containing the particle
+  /**/
+  float  ux; // Particle normalized momentum
+  float  uy;
+  float  uz;
+  float   w; // Particle weight (number of physical particles)
   /**/
   float dispx, dispy, dispz;      // Displacement of particle
   species_id sp_id;               // Species of particle
@@ -62,7 +93,7 @@ typedef struct species
   float m;                            // Species particle rest mass
 
   int np, max_np;                     // Number and max local particles
-  particle_t * ALIGNED(128) p;        // Array of particles for the species
+  particle_block_t * ALIGNED(128) pb; // Array of particle blocks for the species
 
   int nm, max_nm;                     // Number and max local movers in use
   particle_mover_t * ALIGNED(128) pm; // Particle movers

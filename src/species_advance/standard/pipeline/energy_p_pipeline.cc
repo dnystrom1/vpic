@@ -14,6 +14,15 @@
 // calculates kinetic energy, normalized by c^2.
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+energy_p_pipeline_scalar( energy_p_pipeline_args_t * RESTRICT args,
+                          int pipeline_rank,
+                          int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 energy_p_pipeline_scalar( energy_p_pipeline_args_t * RESTRICT args,
                           int pipeline_rank,
@@ -66,12 +75,31 @@ energy_p_pipeline_scalar( energy_p_pipeline_args_t * RESTRICT args,
 
   args->en[pipeline_rank] = en;
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // Top level function to select and call the proper energy_p pipeline
 // function.
 //----------------------------------------------------------------------------//
 
+#if defined(VPIC_USE_AOSOA_P)
+double
+energy_p_pipeline( const species_t * RESTRICT sp,
+                   const interpolator_array_t * RESTRICT ia )
+{
+  DECLARE_ALIGNED_ARRAY( energy_p_pipeline_args_t, 128, args, 1 );
+
+  DECLARE_ALIGNED_ARRAY( double, 128, en, MAX_PIPELINE+1 );
+
+  double local, global;
+  int rank;
+
+  ERROR(("Need AoSoA implementation."));
+
+  return global * ( ( double ) sp->g->cvac *
+		    ( double ) sp->g->cvac );
+}
+#else
 double
 energy_p_pipeline( const species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia )
@@ -113,3 +141,4 @@ energy_p_pipeline( const species_t * RESTRICT sp,
   return global * ( ( double ) sp->g->cvac *
 		    ( double ) sp->g->cvac );
 }
+#endif
