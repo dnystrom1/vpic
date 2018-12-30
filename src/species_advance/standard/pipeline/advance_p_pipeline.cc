@@ -572,9 +572,9 @@ advance_p_pipeline( species_t * RESTRICT sp,
 
   int rank;
 
-  if ( ! sp ||
-       ! aa ||
-       ! ia ||
+  if ( ! sp           ||
+       ! aa           ||
+       ! ia           ||
        sp->g != aa->g ||
        sp->g != ia->g )
   {
