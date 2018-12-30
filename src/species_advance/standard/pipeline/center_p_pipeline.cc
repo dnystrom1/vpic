@@ -54,7 +54,9 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
 
   // Process particles for this pipeline.
 
-  for( ; n; n--, p++ )
+//for( ; n; n--, p++ )
+  #pragma omp simd simdlen(VPIC_SIMD_LEN)
+  for( int i = 0 ; i < n; i++, p++ )
   {
     dx   = p->dx;                            // Load position
     dy   = p->dy;
