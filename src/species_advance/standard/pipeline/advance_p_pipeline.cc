@@ -477,14 +477,6 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
-// void
-// advance_p_pipeline( species_t * RESTRICT sp,
-//                     accumulator_array_t * RESTRICT aa,
-//                     const interpolator_array_t * RESTRICT ia )
-// {
-//   ERROR(("Need AoSoA implementation."));
-// }
-
 void
 advance_p_pipeline( species_t * RESTRICT sp,
                     accumulator_array_t * RESTRICT aa,
@@ -496,9 +488,9 @@ advance_p_pipeline( species_t * RESTRICT sp,
 
   int rank;
 
-  if ( ! sp ||
-       ! aa ||
-       ! ia ||
+  if ( ! sp           ||
+       ! aa           ||
+       ! ia           ||
        sp->g != aa->g ||
        sp->g != ia->g )
   {
@@ -572,9 +564,9 @@ advance_p_pipeline( species_t * RESTRICT sp,
 
   int rank;
 
-  if ( ! sp ||
-       ! aa ||
-       ! ia ||
+  if ( ! sp           ||
+       ! aa           ||
+       ! ia           ||
        sp->g != aa->g ||
        sp->g != ia->g )
   {
