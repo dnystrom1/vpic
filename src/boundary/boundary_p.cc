@@ -18,15 +18,6 @@ using namespace v4;
 enum { MAX_PBC = 32, MAX_SP = 32 };
 
 #if defined(VPIC_USE_AOSOA_P)
-// void
-// boundary_p( particle_bc_t       * RESTRICT pbc_list,
-//             species_t           * RESTRICT sp_list,
-//             field_array_t       * RESTRICT fa,
-//             accumulator_array_t * RESTRICT aa )
-// {
-//   ERROR(("Need AoSoA implementation."));
-// }
-
 void
 boundary_p( particle_bc_t       * RESTRICT pbc_list,
             species_t           * RESTRICT sp_list,
