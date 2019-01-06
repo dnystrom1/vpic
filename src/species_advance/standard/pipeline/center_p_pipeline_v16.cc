@@ -6,6 +6,15 @@
 
 using namespace v16;
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+center_p_pipeline_v16( center_p_pipeline_args_t * args,
+                       int pipeline_rank,
+                       int n_pipeline )
+{
+  ERROR( ( "Need AoSoA implementation." ) );
+}
+#else
 void
 center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,
@@ -145,6 +154,7 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
                      &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx );
   }
 }
+#endif
 
 #else
 

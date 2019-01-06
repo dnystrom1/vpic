@@ -6,6 +6,15 @@
 
 using namespace v4;
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+energy_p_pipeline_v4( energy_p_pipeline_args_t * args,
+                      int pipeline_rank,
+                      int n_pipeline )
+{
+  ERROR( ( "Need AoSoA implementation." ) );
+}
+#else
 void
 energy_p_pipeline_v4( energy_p_pipeline_args_t * args,
                       int pipeline_rank,
@@ -117,6 +126,7 @@ energy_p_pipeline_v4( energy_p_pipeline_args_t * args,
   //--------------------------------------------------------------------------
   args->en[pipeline_rank] = en00 + en01 + en02 + en03;
 }
+#endif
 
 #else
 

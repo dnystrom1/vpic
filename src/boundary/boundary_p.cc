@@ -270,13 +270,13 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	  // and velocity for a single particle.  Thus, I do't think it is a
 	  // candidate for longer SIMD vector lengths without further study.
 
-          #ifdef V4_ACCELERATION
+          // #ifdef V4_ACCELERATION
 
-          copy_4x1( &pi->dx,    &p0[i].dx  );
-          copy_4x1( &pi->ux,    &p0[i].ux  );
-          copy_4x1( &pi->dispx, &pm->dispx );
+          // copy_4x1( &pi->dx,    &p0[i].dx  );
+          // copy_4x1( &pi->ux,    &p0[i].ux  );
+          // copy_4x1( &pi->dispx, &pm->dispx );
 
-          #else
+          // #else
           pi->dx    = pb0[ib].dx[ip];
 	  pi->dy    = pb0[ib].dy[ip];
 	  pi->dz    = pb0[ib].dz[ip];
@@ -292,7 +292,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	  pi->dispz = pm->dispz;
           pi->sp_id = sp_id;
 
-          #endif
+          // #endif
 
           ( &pi->dx )[ axis[ face ] ] = dir[ face ];
           pi->i                       = nn - range[face];
@@ -351,12 +351,12 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	// and velocity for a single particle.  Thus, I do't think it is a
 	// candidate for longer SIMD vector lengths without further study.
 
-        #ifdef V4_ACCELERATION
+        // #ifdef V4_ACCELERATION
 
-        copy_4x1( &p0[i].dx, &p0[np].dx );
-        copy_4x1( &p0[i].ux, &p0[np].ux );
+        // copy_4x1( &p0[i].dx, &p0[np].dx );
+        // copy_4x1( &p0[i].ux, &p0[np].ux );
 
-        #else
+        // #else
 
         int jb = np / PARTICLE_BLOCK_SIZE;      // Index of particle block.
         int jp = np - PARTICLE_BLOCK_SIZE * jb; // Index of next particle in block.
@@ -371,7 +371,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         pb0[ib].uz[ip] = pb0[jb].uz[jp];
         pb0[ib].w [ip] = pb0[jb].w [jp];
 
-        #endif
+        // #endif
       }
 
       sp->np = np;
@@ -637,12 +637,12 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	// and velocity for a single particle.  Thus, I do't think it is a
 	// candidate for longer SIMD vector lengths without further study.
 
-        #ifdef V4_ACCELERATION
+        // #ifdef V4_ACCELERATION
 
-        copy_4x1( &p[np].dx, &pi->dx );
-        copy_4x1( &p[np].ux, &pi->ux );
+        // copy_4x1( &p[np].dx, &pi->dx );
+        // copy_4x1( &p[np].ux, &pi->ux );
 
-        #else
+        // #else
 
         int ib_np = np / PARTICLE_BLOCK_SIZE;         // Index of particle block.
         int ip_np = np - PARTICLE_BLOCK_SIZE * ib_np; // Index of next particle in block.
@@ -657,7 +657,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	pb[ib_np].uz[ip_np] = pi->uz;
 	pb[ib_np].w [ip_np] = pi->w;
 
-        #endif
+        // #endif
 
         sp_np[id] = np + 1;
 

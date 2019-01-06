@@ -27,6 +27,19 @@
 
 using namespace v4;
 
+#if defined(VPIC_USE_AOSOA_P)
+int
+move_p( particle_block_t * ALIGNED(128) pb,
+        particle_mover_t * ALIGNED(16)  pm,
+        accumulator_t    * ALIGNED(128) a0,
+        const grid_t     *              g,
+        const float                     qsp )
+{
+  ERROR( ( "Need AoSoA implementation." ) );
+
+  return 0; // Return "mover not in use"
+}
+#else // #if defined(VPIC_USE_AOSOA_P)
 int
 move_p( particle_t       * RESTRICT ALIGNED(128) p,
         particle_mover_t * RESTRICT ALIGNED(16)  pm,
@@ -209,22 +222,11 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
 
   return 0; // Mover not in use
 }
+#endif // #if defined(VPIC_USE_AOSOA_P)
 
 #else // #if defined(V4_ACCELERATION)
 
 #if defined(VPIC_USE_AOSOA_P)
-// int
-// move_p( particle_new_t       * ALIGNED(128) p0,
-//         particle_mover_t * ALIGNED(16)  pm,
-//         accumulator_t    * ALIGNED(128) a0,
-//         const grid_t     *              g,
-//         const float                     qsp )
-// {
-//   ERROR(("Need AoSoA implementation."));
-// 
-//   return 0; // Return "mover not in use"
-// }
-
 int
 move_p( particle_block_t * ALIGNED(128) pb,
         particle_mover_t * ALIGNED(16)  pm,
