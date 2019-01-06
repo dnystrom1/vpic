@@ -552,7 +552,7 @@ namespace v16
   inline void store_16x1( const v16 &a,
                           void * ALIGNED(64) p )
   {
-    _mm512_store_ps( (float *) p, a );
+    _mm512_store_ps( (float *) p, a.v );
   }
 
   inline void stream_16x1( const v16 &a,
