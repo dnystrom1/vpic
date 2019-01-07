@@ -275,6 +275,8 @@ namespace v8
 
   // v8 memory manipulation functions
 
+  #if 0
+  // Portable version.
   inline void load_8x1( const void * ALIGNED(16) p,
 			v8 &a )
   {
@@ -287,7 +289,16 @@ namespace v8
     a.i[6] = ((const int * ALIGNED(16))p)[6];
     a.i[7] = ((const int * ALIGNED(16))p)[7];
   }
+  #endif
 
+  inline void load_8x1( const void * ALIGNED(16) p,
+			v8 &a )
+  {
+    a.v = _mm256_load_ps( ( float * ) p );
+  }
+
+  #if 0
+  // Portable version.
   inline void store_8x1( const v8 &a,
 			 void * ALIGNED(16) p )
   {
@@ -299,6 +310,13 @@ namespace v8
     ((int * ALIGNED(16))p)[5] = a.i[5];
     ((int * ALIGNED(16))p)[6] = a.i[6];
     ((int * ALIGNED(16))p)[7] = a.i[7];
+  }
+  #endif
+
+  inline void store_8x1( const v8 &a,
+			 void * ALIGNED(16) p )
+  {
+    _mm256_store_ps( ( float * ) p, a.v );
   }
 
   inline void stream_8x1( const v8 &a,

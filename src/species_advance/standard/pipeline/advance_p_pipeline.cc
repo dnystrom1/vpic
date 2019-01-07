@@ -46,17 +46,17 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   float v0, v1, v2, v3, v4, v5;
   int   ii;
 
-  int itmp, n, nm, max_nm;
+  int itmp, n, nm, max_nm, ipart;
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
   // Determine which blocks of particles this pipeline processes.
 
-  // DISTRIBUTE( args->np, 16, pipeline_rank, n_pipeline, itmp, n );
-
   DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, itmp, n );
 
   pb = args->pb0 + itmp / PARTICLE_BLOCK_SIZE;
+
+  ipart = itmp;
 
   // Determine which movers are reserved for this pipeline.
   // Movers (16 bytes) should be reserved for pipelines in at least
@@ -77,7 +77,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   nm   = 0;
   itmp = 0;
 
-  // Determine which accumulator array to use
+  // Determine which accumulator array to use.
   // The host gets the first accumulator array.
 
   if ( pipeline_rank != n_pipeline )
@@ -90,7 +90,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int ip = 0;
 
   // for( ; n; n--, p++ )
-  for( int i = 0 ; i < n; i++ )
+  for( int i = 0 ; i < n; i++, ipart++ )
   {
     ib   = i / PARTICLE_BLOCK_SIZE;           // Index of particle block.
     ip   = i - PARTICLE_BLOCK_SIZE * ib;      // Index of next particle in block.
@@ -190,7 +190,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
       a  = (float *)( a0 + ii );              // Get accumulator
 
-#     define ACCUMULATE_J(X,Y,Z,offset)                                 \
+      #define ACCUMULATE_J(X,Y,Z,offset)                                \
       v4  = q*u##X;   /* v2 = q ux                            */        \
       v1  = v4*d##Y;  /* v1 = q ux dy                         */        \
       v0  = v4-v1;    /* v0 = q ux (1-dy)                     */        \
@@ -214,7 +214,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       ACCUMULATE_J( y, z, x, 4 );
       ACCUMULATE_J( z, x, y, 8 );
 
-#     undef ACCUMULATE_J
+      #undef ACCUMULATE_J
     }
 
     else                                         // Unlikely
@@ -223,9 +223,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       local_pm->dispy = uy;
       local_pm->dispz = uz;
 
-      local_pm->i     = i;
-
-      // local_pm->i     = p - p0;
+      local_pm->i     = ipart;
 
       if ( move_p( pb0, local_pm, a0, g, qsp ) ) // Unlikely
       {

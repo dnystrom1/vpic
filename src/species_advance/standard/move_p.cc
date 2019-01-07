@@ -27,6 +27,216 @@
 
 using namespace v4;
 
+#if defined(VPIC_USE_AOSOA_P)
+// int
+// move_p( particle_block_t * ALIGNED(128) pb,
+//         particle_mover_t * ALIGNED(16)  pm,
+//         accumulator_t    * ALIGNED(128) a0,
+//         const grid_t     *              g,
+//         const float                     qsp )
+// {
+//   ERROR( ( "Need AoSoA implementation." ) );
+// 
+//   return 0; // Return "mover not in use"
+// }
+
+// For now, just use the non-v4 version.  When convenient, convert the v4 version
+// to use the particle_block data format.  Or, use the approach of Doug to vectorize
+// over particles.
+int
+move_p( particle_block_t * ALIGNED(128) pb,
+        particle_mover_t * ALIGNED(16)  pm,
+        accumulator_t    * ALIGNED(128) a0,
+        const grid_t     *              g,
+        const float                     qsp )
+{
+  float   s_midx, s_midy, s_midz;
+  float   s_dispx, s_dispy, s_dispz;
+  float   s_dir[3];
+  float   v0, v1, v2, v3, v4, v5, q;
+  int     axis, face;
+  int64_t neighbor;
+  float  *a;
+  int     ib = pm->i / PARTICLE_BLOCK_SIZE;
+  int     ip = pm->i - PARTICLE_BLOCK_SIZE * ib;
+  // particle_t * ALIGNED(32) p = p0 + pm->i;
+
+  q = qsp*pb[ib].w[ip];
+
+  for(;;)
+  {
+    s_midx = pb[ib].dx[ip];
+    s_midy = pb[ib].dy[ip];
+    s_midz = pb[ib].dz[ip];
+
+    s_dispx = pm->dispx;
+    s_dispy = pm->dispy;
+    s_dispz = pm->dispz;
+
+    s_dir[0] = (s_dispx>0) ? 1 : -1;
+    s_dir[1] = (s_dispy>0) ? 1 : -1;
+    s_dir[2] = (s_dispz>0) ? 1 : -1;
+    
+    // Compute the twice the fractional distance to each potential
+    // streak/cell face intersection.
+    v0 = (s_dispx==0) ? 3.4e38 : (s_dir[0]-s_midx)/s_dispx;
+    v1 = (s_dispy==0) ? 3.4e38 : (s_dir[1]-s_midy)/s_dispy;
+    v2 = (s_dispz==0) ? 3.4e38 : (s_dir[2]-s_midz)/s_dispz;
+
+    // Determine the fractional length and axis of current streak. The
+    // streak ends on either the first face intersected by the
+    // particle track or at the end of the particle track.
+    // 
+    //   axis 0,1 or 2 ... streak ends on a x,y or z-face respectively
+    //   axis 3        ... streak ends at end of the particle track
+    /**/      v3=2,  axis=3;
+    if(v0<v3) v3=v0, axis=0;
+    if(v1<v3) v3=v1, axis=1;
+    if(v2<v3) v3=v2, axis=2;
+    v3 *= 0.5;
+
+    // Compute the midpoint and the normalized displacement of the streak
+    s_dispx *= v3;
+    s_dispy *= v3;
+    s_dispz *= v3;
+    s_midx += s_dispx;
+    s_midy += s_dispy;
+    s_midz += s_dispz;
+
+    // Accumulate the streak.  Note: accumulator values are 4 times
+    // the total physical charge that passed through the appropriate
+    // current quadrant in a time-step
+    v5 = q*s_dispx*s_dispy*s_dispz*(1.0/3.0);
+    a  = (float *) ( a0 + pb[ib].i[ip] );
+
+    #define accumulate_j(X,Y,Z)					      \
+    v4  = q*s_disp##X;    /* v2 = q ux                            */  \
+    v1  = v4*s_mid##Y;    /* v1 = q ux dy                         */  \
+    v0  = v4-v1;          /* v0 = q ux (1-dy)                     */  \
+    v1 += v4;             /* v1 = q ux (1+dy)                     */  \
+    v4  = 1+s_mid##Z;     /* v4 = 1+dz                            */  \
+    v2  = v0*v4;          /* v2 = q ux (1-dy)(1+dz)               */  \
+    v3  = v1*v4;          /* v3 = q ux (1+dy)(1+dz)               */  \
+    v4  = 1-s_mid##Z;     /* v4 = 1-dz                            */  \
+    v0 *= v4;             /* v0 = q ux (1-dy)(1-dz)               */  \
+    v1 *= v4;             /* v1 = q ux (1+dy)(1-dz)               */  \
+    v0 += v5;             /* v0 = q ux [ (1-dy)(1-dz) + uy*uz/3 ] */  \
+    v1 -= v5;             /* v1 = q ux [ (1+dy)(1-dz) - uy*uz/3 ] */  \
+    v2 -= v5;             /* v2 = q ux [ (1-dy)(1+dz) - uy*uz/3 ] */  \
+    v3 += v5;             /* v3 = q ux [ (1+dy)(1+dz) + uy*uz/3 ] */  \
+    a[0] += v0;                                                       \
+    a[1] += v1;                                                       \
+    a[2] += v2;                                                       \
+    a[3] += v3
+    accumulate_j(x,y,z); a += 4;
+    accumulate_j(y,z,x); a += 4;
+    accumulate_j(z,x,y);
+
+    #undef accumulate_j
+
+    // Compute the remaining particle displacment
+    pm->dispx -= s_dispx;
+    pm->dispy -= s_dispy;
+    pm->dispz -= s_dispz;
+
+    // Compute the new particle offset
+    pb[ib].dx[ip] += s_dispx+s_dispx;
+    pb[ib].dy[ip] += s_dispy+s_dispy;
+    pb[ib].dz[ip] += s_dispz+s_dispz;
+
+    // If an end streak, return success (should be ~50% of the time)
+
+    if ( axis == 3 ) break;
+
+    // Determine if the particle crossed into a local cell or if it
+    // hit a boundary and convert the coordinate system accordingly.
+    // Note: Crossing into a local cell should happen ~50% of the
+    // time; hitting a boundary is usually a rare event.  Note: the
+    // entry / exit coordinate for the particle is guaranteed to be
+    // +/-1 _exactly_ for the particle.
+
+    v0 = s_dir[axis];
+
+    // (&(p->dx))[axis] = v0; // Avoid roundoff fiascos--put the particle
+    //                        // _exactly_ on the boundary.
+
+    if ( axis == 0 )       // Avoid roundoff fiascos--put the particle
+    {                      // _exactly_ on the boundary.
+      pb[ib].dx[ip] = v0;
+    }
+    else if ( axis == 1 )
+    {
+      pb[ib].dy[ip] = v0;
+    }
+    else if ( axis == 2 )
+    {
+      pb[ib].dz[ip] = v0;
+    }
+
+    face = axis; if( v0>0 ) face += 3;
+
+    neighbor = g->neighbor[ 6*pb[ib].i[ip] + face ];
+    
+    if ( UNLIKELY( neighbor == reflect_particles ) )
+    {
+      // Hit a reflecting boundary condition.  Reflect the particle
+      // momentum and remaining displacement and keep moving the particle.
+      if ( axis == 0 )
+      {
+        pb[ib].ux[ip] = - pb[ib].ux[ip];
+      }
+      else if ( axis == 1 )
+      {
+        pb[ib].uy[ip] = - pb[ib].uy[ip];
+      }
+      else if ( axis == 2 )
+      {
+        pb[ib].uz[ip] = - pb[ib].uz[ip];
+      }
+
+      // (&(p->ux    ))[axis] = -(&(p->ux    ))[axis];
+
+      ( &( pm->dispx ) )[axis] = - ( &( pm->dispx ) )[axis];
+
+      continue;
+    }
+
+    if ( UNLIKELY( neighbor < g->rangel ||
+		   neighbor > g->rangeh ) )
+    {
+      // Cannot handle the boundary condition here.  Save the updated
+      // particle position, face it hit and update the remaining
+      // displacement in the particle mover.
+      pb[ib].i[ip] = 8 * pb[ib].i[ip] + face;
+
+      return 1; // Return "mover still in use"
+    }
+
+    // Crossed into a normal voxel.  Update the voxel index, convert the
+    // particle coordinate system and keep moving the particle.
+
+    pb[ib].i[ip] = neighbor - g->rangel; // Compute local index of neighbor
+    /**/                                 // Note: neighbor - g->rangel < 2^31 / 6
+
+    // (&(p->dx))[axis] = -v0;              // Convert coordinate system
+
+    if ( axis == 0 )                     // Convert coordinate system
+    {
+      pb[ib].dx[ip] = - v0;
+    }
+    else if ( axis == 1 )
+    {
+      pb[ib].dy[ip] = - v0;
+    }
+    else if ( axis == 2 )
+    {
+      pb[ib].dz[ip] = - v0;
+    }
+  }
+
+  return 0; // Return "mover not in use"
+}
+#else // #if defined(VPIC_USE_AOSOA_P)
 int
 move_p( particle_t       * RESTRICT ALIGNED(128) p,
         particle_mover_t * RESTRICT ALIGNED(16)  pm,
@@ -209,22 +419,11 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
 
   return 0; // Mover not in use
 }
+#endif // #if defined(VPIC_USE_AOSOA_P)
 
 #else // #if defined(V4_ACCELERATION)
 
 #if defined(VPIC_USE_AOSOA_P)
-// int
-// move_p( particle_new_t       * ALIGNED(128) p0,
-//         particle_mover_t * ALIGNED(16)  pm,
-//         accumulator_t    * ALIGNED(128) a0,
-//         const grid_t     *              g,
-//         const float                     qsp )
-// {
-//   ERROR(("Need AoSoA implementation."));
-// 
-//   return 0; // Return "mover not in use"
-// }
-
 int
 move_p( particle_block_t * ALIGNED(128) pb,
         particle_mover_t * ALIGNED(16)  pm,

@@ -3,7 +3,9 @@
 
 // enum { PARTICLE_BLOCK_SIZE = 16 };
 
+#ifndef PARTICLE_BLOCK_SIZE
 #define PARTICLE_BLOCK_SIZE 16
+#endif
 
 typedef int32_t species_id; // Must be 32-bit wide for particle_injector_t
 
