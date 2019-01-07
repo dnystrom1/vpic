@@ -16,7 +16,26 @@
 void
 checkpt_species( const species_t * sp )
 {
-  ERROR(("Need AoSoA implementation."));
+  ERROR( ( "Need AoSoA implementation." ) );
+
+  // Need to figure out how to do this.  Issues include:
+  // 1. Figure out what all this does.
+  // 2. Can or must we support reading in a restart file with a different
+  //    value of PARTICLE_BLOCK_SIZE?
+  // 3. Should we write out and read in particle_t data i.e. construct a
+  //    buffer of particle_t data to write out. Then read it in as buffers
+  //    of particle_t data and load it into the particle_block_t array.
+  CHECKPT( sp, 1 );
+  CHECKPT_STR( sp->name );
+  checkpt_data( sp->p,
+                sp->np    *sizeof(particle_block_t),
+                sp->max_np*sizeof(particle_block_t), 1, 1, 128 );
+  checkpt_data( sp->pm,
+                sp->nm    *sizeof(particle_mover_t),
+                sp->max_nm*sizeof(particle_mover_t), 1, 1, 128 );
+  CHECKPT_ALIGNED( sp->partition, sp->g->nv+1, 128 );
+  CHECKPT_PTR( sp->g );
+  CHECKPT_PTR( sp->next );
 }
 #else
 void
@@ -41,7 +60,8 @@ species_t *
 restore_species( void )
 {
   species_t * sp;
-  ERROR(("Need AoSoA implementation."));
+  ERROR( ( "Need AoSoA implementation." ) );
+  // Need to figure out how to do this.  See above.
   return sp;
 }
 #else
@@ -64,7 +84,12 @@ restore_species( void )
 void
 delete_species( species_t * sp )
 {
-  ERROR(("Need AoSoA implementation."));
+  UNREGISTER_OBJECT( sp );
+  FREE_ALIGNED( sp->partition );
+  FREE_ALIGNED( sp->pm );
+  FREE_ALIGNED( sp->pb );
+  FREE( sp->name );
+  FREE( sp );
 }
 #else
 void
@@ -129,21 +154,6 @@ append_species( species_t * sp,
 }
 
 #if defined(VPIC_USE_AOSOA_P)
-// species_t *
-// species( const char * name,
-//          float q,
-//          float m,
-//          size_t max_local_np,
-//          size_t max_local_nm,
-//          int sort_interval,
-//          int sort_out_of_place,
-//          grid_t * g )
-// {
-//   species_t * sp;
-//   ERROR(("Need AoSoA implementation."));
-//   return sp;
-// }
-
 species_t *
 species( const char * name,
          float q,
