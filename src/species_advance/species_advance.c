@@ -18,6 +18,7 @@ checkpt_species( const species_t * sp )
 {
   ERROR( ( "Need AoSoA implementation." ) );
 
+  #if 0
   // Need to figure out how to do this.  Issues include:
   // 1. Figure out what all this does.
   // 2. Can or must we support reading in a restart file with a different
@@ -36,6 +37,7 @@ checkpt_species( const species_t * sp )
   CHECKPT_ALIGNED( sp->partition, sp->g->nv+1, 128 );
   CHECKPT_PTR( sp->g );
   CHECKPT_PTR( sp->next );
+  #endif
 }
 #else
 void
