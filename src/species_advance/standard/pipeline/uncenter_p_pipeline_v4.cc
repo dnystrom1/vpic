@@ -34,7 +34,7 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
 
   int first, nq;
 
-  // Determine which particle quads this pipeline processes.
+  // Determine which particle blocks this pipeline processes.
 
   DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, first, nq );
 
@@ -110,7 +110,7 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
     cbz = fma( v05, dz, cbz );
 
     //--------------------------------------------------------------------------
-    // Load particle momentum data.  Could use load_4x3.
+    // Load particle momentum data.
     //--------------------------------------------------------------------------
     load_4x1( &pb[0].ux[0], ux );
     load_4x1( &pb[0].uy[0], uy );
@@ -142,7 +142,7 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
     uz  += haz;
 
     //--------------------------------------------------------------------------
-    // Store particle data.  Could use store_4x3.
+    // Store particle momentum data.
     //--------------------------------------------------------------------------
     store_4x1( ux, &pb[0].ux[0] );
     store_4x1( uy, &pb[0].uy[0] );

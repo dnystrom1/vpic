@@ -38,7 +38,7 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
 
   int first, nq;
 
-  // Determine which particle quads this pipeline processes.
+  // Determine which particle blocks this pipeline processes.
 
   DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, first, nq );
 
@@ -54,7 +54,7 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
   for( ; nq; nq--, pb++ )
   {
     //--------------------------------------------------------------------------
-    // Load particle data.
+    // Load particle position data.
     //--------------------------------------------------------------------------
     load_8x1( &pb[0].dx[0], dx );
     load_8x1( &pb[0].dy[0], dy );
@@ -124,7 +124,7 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     cbz = fma( v05, dz, cbz );
 
     //--------------------------------------------------------------------------
-    // Load particle data.  Could use load_8x3.
+    // Load particle momentum data.
     //--------------------------------------------------------------------------
     load_8x1( &pb[0].ux[0], ux );
     load_8x1( &pb[0].uy[0], uy );
@@ -143,18 +143,21 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     v03  = v00 * fma( v02, fma( v02, two_fifteenths, one_third ), one );
     v04  = v03 * rcp( fma( v03 * v03, v01, one ) );
     v04 += v04;
+
     v00  = fma( fms(  uy, cbz,  uz * cby ), v03, ux );
     v01  = fma( fms(  uz, cbx,  ux * cbz ), v03, uy );
     v02  = fma( fms(  ux, cby,  uy * cbx ), v03, uz );
+
     ux   = fma( fms( v01, cbz, v02 * cby ), v04, ux );
     uy   = fma( fms( v02, cbx, v00 * cbz ), v04, uy );
     uz   = fma( fms( v00, cby, v01 * cbx ), v04, uz );
+
     ux  += hax;
     uy  += hay;
     uz  += haz;
 
     //--------------------------------------------------------------------------
-    // Store particle data.  Could use store_8x3.
+    // Store particle momentum data.
     //--------------------------------------------------------------------------
     store_8x1( ux, &pb[0].ux[0] );
     store_8x1( uy, &pb[0].uy[0] );

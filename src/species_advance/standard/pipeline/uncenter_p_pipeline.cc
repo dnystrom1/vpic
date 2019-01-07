@@ -44,8 +44,6 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
 
   DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, first, n );
 
-  // p = args->p0 + first;
-
   pb = args->pb0 + first / PARTICLE_BLOCK_SIZE;
 
   // int pb_size = PARTICLE_BLOCK_SIZE;
