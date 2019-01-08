@@ -42,7 +42,7 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
 
   DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, itmp, nq );
 
-  pB = args->pB0 + itmp / PARTICLE_BLOCK_SIZE;
+  pb = args->pb0 + itmp / PARTICLE_BLOCK_SIZE;
 
   nq >>= 3;
 
