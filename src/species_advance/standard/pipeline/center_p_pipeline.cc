@@ -207,7 +207,26 @@ void
 center_p_pipeline( species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia )
 {
-  ERROR(("Need AoSoA implementation."));
+  DECLARE_ALIGNED_ARRAY( center_p_pipeline_args_t, 128, args, 1 );
+
+  if ( !sp ||
+       !ia ||
+       sp->g != ia->g )
+  {
+    ERROR( ( "Bad args." ) );
+  }
+
+  // Have the pipelines do the bulk of particles in blocks and have the
+  // host do the final incomplete block.
+
+  args->pb0     = sp->pb;
+  args->f0      = ia->i;
+  args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
+  args->np      = sp->np;
+
+  EXEC_PIPELINES( center_p, args, 0 );
+
+  WAIT_PIPELINES();
 }
 #else
 void
@@ -220,7 +239,7 @@ center_p_pipeline( species_t * RESTRICT sp,
        !ia ||
        sp->g != ia->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Have the pipelines do the bulk of particles in blocks and have the
@@ -228,10 +247,11 @@ center_p_pipeline( species_t * RESTRICT sp,
 
   args->p0      = sp->p;
   args->f0      = ia->i;
-  args->qdt_2mc = (sp->q*sp->g->dt)/(2*sp->m*sp->g->cvac);
+  args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
   args->np      = sp->np;
 
   EXEC_PIPELINES( center_p, args, 0 );
+
   WAIT_PIPELINES();
 }
 #endif
