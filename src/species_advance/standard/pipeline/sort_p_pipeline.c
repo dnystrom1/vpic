@@ -28,6 +28,15 @@
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
+#if 1
+void
+coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
+                              int pipeline_rank,
+                              int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
                               int pipeline_rank,
@@ -74,6 +83,7 @@ coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
 	count,
 	n_subsort );
 }
+#endif
 #else
 void
 coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
@@ -128,6 +138,15 @@ coarse_count_pipeline_scalar( sort_p_pipeline_args_t * args,
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
+#if 1
+void
+coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
+                             int pipeline_rank,
+                             int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
                              int pipeline_rank,
@@ -184,6 +203,7 @@ coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
     #endif
   }
 }
+#endif
 #else
 void
 coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
@@ -248,6 +268,15 @@ coarse_sort_pipeline_scalar( sort_p_pipeline_args_t * args,
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
+#if 1
+void
+subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
+                         int pipeline_rank,
+                         int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
                          int pipeline_rank,
@@ -321,6 +350,7 @@ subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
     }
   }
 }
+#endif
 #else
 void
 subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
@@ -402,6 +432,13 @@ subsort_pipeline_scalar( sort_p_pipeline_args_t * args,
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
+#if 1
+void
+sort_p_pipeline( species_t * sp )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 sort_p_pipeline( species_t * sp )
 {
@@ -554,6 +591,7 @@ sort_p_pipeline( species_t * sp )
     COPY( p, aux_p, n_particle );
   }
 }
+#endif
 #else
 void
 sort_p_pipeline( species_t * sp )
