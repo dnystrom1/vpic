@@ -81,10 +81,10 @@ vpic_simulation::inject_particle( species_t * sp,
 
   // This node should inject the particle.
 
-  if ( sp->np >= sp->max_np )
-  {
-    ERROR( ( "No room to inject particle." ) );
-  }
+  // if ( sp->np >= sp->max_np )
+  // {
+  //   ERROR( ( "No room to inject particle." ) );
+  // }
 
   // Compute the injection cell and coordinate in cell coordinate system
   // BJA:  Note the use of double precision here for accurate particle 
@@ -116,6 +116,16 @@ vpic_simulation::inject_particle( species_t * sp,
   if ( iz == nz ) z = 1;                               // On far wall ... conditional move
   if ( iz == nz ) iz = nz - 1;                         // On far wall ... conditional move
   iz++;                                                // Adjust for mesh indexing
+
+  int vox = VOXEL( ix, iy, iz, nx, ny, nz );
+
+  if ( sp->counts[vox] >= sp->maxes[vox] )
+  {
+    ERROR( ( "No room to inject particle (%i, %i, %i)",
+             vox,
+             sp->counts[vox],
+             sp->maxes[vox] ) );
+  }
 
   // Create particle indicies.
   int ib = sp->np / PARTICLE_BLOCK_SIZE;      // Index of particle block.
@@ -217,7 +227,7 @@ vpic_simulation::inject_particle( species_t * sp,
 
   // This node should inject the particle
     
-  if( sp->np>=sp->max_np ) ERROR(( "No room to inject particle" ));
+  // if( sp->np>=sp->max_np ) ERROR(( "No room to inject particle" ));
 
   // Compute the injection cell and coordinate in cell coordinate system
   // BJA:  Note the use of double precision here for accurate particle 
@@ -250,11 +260,33 @@ vpic_simulation::inject_particle( species_t * sp,
   if( iz==nz ) iz = nz-1;             // On far wall ... conditional move
   iz++;                               // Adjust for mesh indexing
 
-  particle_t * p = sp->p + (sp->np++);
+  int vox = VOXEL( ix, iy, iz, nx, ny, nz );
+
+  if ( sp->counts[vox] >= sp->maxes[vox] )
+  {
+    ERROR( ( "No room to inject particle (%i, %i, %i)",
+             vox,
+             sp->counts[vox],
+             sp->maxes[vox] ) );
+  }
+
+  int p_loc = sp->partition[vox] + sp->counts[vox];
+
+  sp->counts[vox]++;
+  sp->np++;
+
+  // particle_t * p = sp->p + (sp->np++);
+
+  particle_t * p = &sp->p[p_loc];
+
   p->dx = (float)x; // Note: Might be rounded to be on [-1,1]
   p->dy = (float)y; // Note: Might be rounded to be on [-1,1]
   p->dz = (float)z; // Note: Might be rounded to be on [-1,1]
-  p->i  = VOXEL(ix,iy,iz, nx,ny,nz);
+
+  // p->i  = VOXEL(ix,iy,iz, nx,ny,nz);
+
+  p->i  = vox;
+
   p->ux = (float)ux;
   p->uy = (float)uy;
   p->uz = (float)uz;
@@ -262,6 +294,7 @@ vpic_simulation::inject_particle( species_t * sp,
 
   if( update_rhob ) accumulate_rhob( field_array->f, p, grid, -sp->q );
 
+  // Use this if we do have a global pm array.
   if( age!=0 ) {
     if( sp->nm>=sp->max_nm )
       WARNING(( "No movers available to age injected  particle" ));

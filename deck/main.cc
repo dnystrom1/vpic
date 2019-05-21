@@ -112,6 +112,7 @@ int main(int argc, char** argv)
         simulation->modify( fbase );
     }
 
+    #ifdef VPIC_NORMAL_RUN
     // Perform the main simulation
     if( world_rank==0 ) log_printf( "*** Advancing\n" );
     double elapsed = wallclock();
@@ -135,6 +136,7 @@ int main(int argc, char** argv)
         log_printf( "*** Done (%gs / %iw:%id:%ih:%im:%is elapsed)\n",
                 elapsed, w, d, h, m, s );
     }
+    #endif
 
     if( world_rank==0 ) log_printf( "*** Cleaning up\n" );
 

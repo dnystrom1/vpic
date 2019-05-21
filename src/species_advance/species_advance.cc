@@ -200,8 +200,10 @@ species( const char * name,
   sp->q = q;
   sp->m = m;
 
-  MALLOC_ALIGNED( sp->pb, max_local_np / PARTICLE_BLOCK_SIZE + 1, 128 );
-  sp->max_np = max_local_np;
+  int max_local_nblocks = max_local_np / PARTICLE_BLOCK_SIZE + 1;
+  MALLOC_ALIGNED( sp->pb, max_local_nblocks, 128 );
+  sp->max_np = max_local_nblocks * PARTICLE_BLOCK_SIZE;
+  // sp->max_np = max_local_np;
 
   MALLOC_ALIGNED( sp->pm, max_local_nm, 128 );
   sp->max_nm = max_local_nm;
@@ -211,8 +213,66 @@ species( const char * name,
   sp->sort_out_of_place = sort_out_of_place;
 
   MALLOC_ALIGNED( sp->partition, g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->counts,    g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->maxes,     g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->copies,    g->nv+1, 128 );
 
   sp->g = g;   
+
+  // Configure cell statistics arrays.
+  // Declarations.
+  int ix, iy, iz, n_voxel;
+
+  int part_sum = 0;
+
+  // Initialize arrays to zero.
+  for( int i = 0; i < sp->g->nv + 1; i++ )
+  {
+      sp->partition[i] = 0;
+      sp->counts[i]    = 0;
+      sp->maxes[i]     = 0;
+      sp->copies[i]    = 0;
+  }
+
+  // May want to move this up so we can compute a value for max_local_blocks that
+  // is integrably divisible by n_voxel.
+  DISTRIBUTE_VOXELS( 1, sp->g->nx,
+		     1, sp->g->ny,
+		     1, sp->g->nz,
+		     1,
+                     0,
+		     1,
+                     ix, iy, iz, n_voxel );
+
+  int vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
+
+  int vox_block_start  = 0;
+  int vox_block_number = 0;
+  for( int i = 0; i < n_voxel; i++ )
+  {
+      // DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
+      DISTRIBUTE( max_local_blocks, 1, i, n_voxel, vox_block_start, vox_block_number );
+
+      sp->partition[vox] = PARTICLE_BLOCK_SIZE * vox_block_start;
+      sp->maxes    [vox] = PARTICLE_BLOCK_SIZE * vox_block_number;
+
+      part_sum += sp->maxes[vox];
+
+      NEXT_VOXEL( vox, ix, iy, iz,
+		  1, sp->g->nx,
+		  1, sp->g->ny,
+		  1, sp->g->nz,
+		  sp->g->nx,
+		  sp->g->ny,
+		  sp->g->nz );
+  }
+
+  if ( part_sum != sp->max_np )
+  {
+    WARNING( ( "Number of particles per voxel does not sum to max particles. (%i, %i)",
+	       part_sum,
+	       sp->max_np ) );
+  }
 
   /* id, next are set by append species */
 
@@ -258,9 +318,60 @@ species( const char * name,
   sp->last_sorted       = INT64_MIN;
   sp->sort_interval     = sort_interval;
   sp->sort_out_of_place = sort_out_of_place;
+
   MALLOC_ALIGNED( sp->partition, g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->counts,    g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->maxes,     g->nv+1, 128 );
+  MALLOC_ALIGNED( sp->copies,    g->nv+1, 128 );
 
   sp->g = g;   
+
+  // Configure cell statistics arrays.
+  // Declarations.
+  int ix, iy, iz, n_voxel;
+
+  int part_sum = 0;
+
+  // Initialize arrays to zero.
+  for( int i = 0; i < sp->g->nv + 1; i++ )
+  {
+      sp->partition[i] = 0;
+      sp->counts[i]    = 0;
+      sp->maxes[i]     = 0;
+      sp->copies[i]    = 0;
+  }
+
+  DISTRIBUTE_VOXELS( 1, sp->g->nx,
+		     1, sp->g->ny,
+		     1, sp->g->nz,
+		     1,
+                     0,
+		     1,
+                     ix, iy, iz, n_voxel );
+
+  int vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
+
+  for( int i = 0; i < n_voxel; i++ )
+  {
+      DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
+
+      part_sum += sp->maxes[vox];
+
+      NEXT_VOXEL( vox, ix, iy, iz,
+		  1, sp->g->nx,
+		  1, sp->g->ny,
+		  1, sp->g->nz,
+		  sp->g->nx,
+		  sp->g->ny,
+		  sp->g->nz );
+  }
+
+  if ( part_sum != sp->max_np )
+  {
+    WARNING( ( "Number of particles per voxel does not sum to max particles. (%i, %i)",
+	       part_sum,
+	       sp->max_np ) );
+  }
 
   /* id, next are set by append species */
 

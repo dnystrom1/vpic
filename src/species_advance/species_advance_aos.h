@@ -66,6 +66,9 @@ typedef struct species {
                                       // sorted.
   int sort_interval;                  // How often to sort the species
   int sort_out_of_place;              // Sort method
+  int * ALIGNED(128) copies;          // Number of particles to copy locally from each voxel
+  int * ALIGNED(128) counts;          // Number of particles in each voxel
+  int * ALIGNED(128) maxes;           // Maximum number of particles in each voxel
   int * ALIGNED(128) partition;       // Static array indexed 0:
   /**/                                // (nx+2)*(ny+2)*(nz+2).  Each value
   /**/                                // corresponds to the associated particle
