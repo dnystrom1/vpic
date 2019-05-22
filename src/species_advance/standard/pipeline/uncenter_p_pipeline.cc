@@ -191,6 +191,10 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
       int ip = 0;
 
       // Process the particles in a cell.
+      #define VPIC_SIMD_LEN 16
+      #ifdef VPIC_SIMD_LEN
+      #pragma omp simd simdlen(VPIC_SIMD_LEN)
+      #endif
       for( int i = 0; i < part_count; i++ )
       {
         ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
