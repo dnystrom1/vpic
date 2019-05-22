@@ -228,10 +228,10 @@ species( const char * name,
   // Initialize arrays to zero.
   for( int i = 0; i < sp->g->nv + 1; i++ )
   {
-      sp->partition[i] = 0;
-      sp->counts[i]    = 0;
-      sp->maxes[i]     = 0;
-      sp->copies[i]    = 0;
+    sp->partition[i] = 0;
+    sp->counts[i]    = 0;
+    sp->maxes[i]     = 0;
+    sp->copies[i]    = 0;
   }
 
   // May want to move this up so we can compute a value for max_local_blocks that
@@ -250,21 +250,21 @@ species( const char * name,
   int vox_block_number = 0;
   for( int i = 0; i < n_voxel; i++ )
   {
-      // DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
-      DISTRIBUTE( max_local_nblocks, 1, i, n_voxel, vox_block_start, vox_block_number );
+    // DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
+    DISTRIBUTE( max_local_nblocks, 1, i, n_voxel, vox_block_start, vox_block_number );
 
-      sp->partition[vox] = PARTICLE_BLOCK_SIZE * vox_block_start;
-      sp->maxes    [vox] = PARTICLE_BLOCK_SIZE * vox_block_number;
+    sp->partition[vox] = PARTICLE_BLOCK_SIZE * vox_block_start;
+    sp->maxes    [vox] = PARTICLE_BLOCK_SIZE * vox_block_number;
 
-      part_sum += sp->maxes[vox];
+    part_sum += sp->maxes[vox];
 
-      NEXT_VOXEL( vox, ix, iy, iz,
-		  1, sp->g->nx,
-		  1, sp->g->ny,
-		  1, sp->g->nz,
-		  sp->g->nx,
-		  sp->g->ny,
-		  sp->g->nz );
+    NEXT_VOXEL( vox, ix, iy, iz,
+                1, sp->g->nx,
+                1, sp->g->ny,
+                1, sp->g->nz,
+                sp->g->nx,
+                sp->g->ny,
+                sp->g->nz );
   }
 
   if ( part_sum != sp->max_np )
@@ -335,10 +335,10 @@ species( const char * name,
   // Initialize arrays to zero.
   for( int i = 0; i < sp->g->nv + 1; i++ )
   {
-      sp->partition[i] = 0;
-      sp->counts[i]    = 0;
-      sp->maxes[i]     = 0;
-      sp->copies[i]    = 0;
+    sp->partition[i] = 0;
+    sp->counts[i]    = 0;
+    sp->maxes[i]     = 0;
+    sp->copies[i]    = 0;
   }
 
   DISTRIBUTE_VOXELS( 1, sp->g->nx,
@@ -353,17 +353,17 @@ species( const char * name,
 
   for( int i = 0; i < n_voxel; i++ )
   {
-      DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
+    DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
 
-      part_sum += sp->maxes[vox];
+    part_sum += sp->maxes[vox];
 
-      NEXT_VOXEL( vox, ix, iy, iz,
-		  1, sp->g->nx,
-		  1, sp->g->ny,
-		  1, sp->g->nz,
-		  sp->g->nx,
-		  sp->g->ny,
-		  sp->g->nz );
+    NEXT_VOXEL( vox, ix, iy, iz,
+                1, sp->g->nx,
+                1, sp->g->ny,
+                1, sp->g->nz,
+                sp->g->nx,
+                sp->g->ny,
+                sp->g->nz );
   }
 
   if ( part_sum != sp->max_np )
