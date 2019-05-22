@@ -251,7 +251,7 @@ species( const char * name,
   for( int i = 0; i < n_voxel; i++ )
   {
       // DISTRIBUTE( sp->max_np, 1, i, n_voxel, sp->partition[vox], sp->maxes[vox] );
-      DISTRIBUTE( max_local_blocks, 1, i, n_voxel, vox_block_start, vox_block_number );
+      DISTRIBUTE( max_local_nblocks, 1, i, n_voxel, vox_block_start, vox_block_number );
 
       sp->partition[vox] = PARTICLE_BLOCK_SIZE * vox_block_start;
       sp->maxes    [vox] = PARTICLE_BLOCK_SIZE * vox_block_number;
