@@ -131,8 +131,6 @@ vpic_simulation::inject_particle( species_t * sp,
   int p_loc = sp->partition[vox] + sp->counts[vox];
 
   // Create particle indicies.
-  // int ib = sp->np / PARTICLE_BLOCK_SIZE;      // Index of particle block.
-  // int ip = sp->np - PARTICLE_BLOCK_SIZE * ib; // Index of next particle in block.
   int ib = p_loc / PARTICLE_BLOCK_SIZE;       // Index of particle block.
   int ip = p_loc - PARTICLE_BLOCK_SIZE * ib;  // Index of next particle in block.
   sp->counts[vox]++;                          // Increment number of particles in voxel.
