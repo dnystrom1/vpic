@@ -526,6 +526,7 @@ uncenter_p_pipeline( species_t * RESTRICT sp,
   args->f0      = ia->i;
   args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
   args->np      = sp->np;
+  args->sp      = sp;
 
   EXEC_PIPELINES( uncenter_p, args, 0 );
 
