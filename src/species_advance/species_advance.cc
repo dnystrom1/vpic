@@ -200,7 +200,10 @@ species( const char * name,
   sp->q = q;
   sp->m = m;
 
-  int max_local_nblocks = max_local_np / PARTICLE_BLOCK_SIZE + 1;
+  // Temporarily assume max_local_np divides evenly by PARTICLE_BLOCK_SIZE for
+  // debug and verification purposes.
+  // int max_local_nblocks = max_local_np / PARTICLE_BLOCK_SIZE + 1;
+  int max_local_nblocks = max_local_np / PARTICLE_BLOCK_SIZE;
   MALLOC_ALIGNED( sp->pb, max_local_nblocks, 128 );
   sp->max_np = max_local_nblocks * PARTICLE_BLOCK_SIZE;
   // sp->max_np = max_local_np;
