@@ -16,10 +16,7 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
 
   particle_block_t     * ALIGNED(128) pb;
 
-  const float          * ALIGNED(16)  vp00;
-  const float          * ALIGNED(16)  vp01;
-  const float          * ALIGNED(16)  vp02;
-  const float          * ALIGNED(16)  vp03;
+  const species_t      * sp = args->sp;
 
   const v4float qdt_2mc(    -args->qdt_2mc); // For backward half advance.
   const v4float qdt_4mc(-0.5*args->qdt_2mc); // For backward half Boris rotate.
@@ -27,129 +24,252 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
   const v4float one_third(1.0/3.0);
   const v4float two_fifteenths(2.0/15.0);
 
-  v4float dx, dy, dz, ux, uy, uz, q;
-  v4float hax, hay, haz, cbx, cby, cbz;
-  v4float v00, v01, v02, v03, v04, v05;
-  v4int   ii;
+  v4float ex, dexdy, dexdz, d2exdydz;
+  v4float ey, deydz, deydx, d2eydzdx;
+  v4float ez, dezdx, dezdy, d2ezdxdy;
 
-  int first, nq;
+  v4float cbx, dcbxdx;
+  v4float cby, dcbydy;
+  v4float cbz, dcbzdz;
 
-  // Determine which particle quads this pipeline processes.
+  v4float dx, dy, dz;
+  v4float ux, uy, uz, q;
+  v4float hax, hay, haz;
+  v4float cbxp, cbyp, cbzp;
+  v4float v00, v01, v02, v03, v04;
+  // v4int   ii;
 
-  DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, first, nq );
+  int first_part; // Index of first particle for this thread.
+  int  last_part; // Index of last  particle for this thread.
+  int     n_part; // Number of particles for this thread.
 
-  pb = args->pb0 + first / PARTICLE_BLOCK_SIZE;
+  int previous_vox; // Index of previous voxel.
+  int    first_vox; // Index of first voxel for this thread.
+  int     last_vox; // Index of last  voxel for this thread.
+  int        n_vox; // Number of voxels for this thread.
+  int          vox; // Index of current voxel.
 
-  nq >>= 2;
+  int sum_part = 0;
 
-  // Process the particle blocks for this pipeline.  For the initial AoSoA version,
-  // assume that PARTICLE_BLOCK_SIZE is the same as the vector length.  A future
-  // version might allow PARTICLE_BLOCK_SIZE to be an integral multiple of the vector
-  // length.
+  //--------------------------------------------------------------------------//
+  // Compute an equal division of particles across pipeline processes.
+  //--------------------------------------------------------------------------//
 
-  for( ; nq; nq--, pb++ )
+  DISTRIBUTE( args->np, 1, pipeline_rank, n_pipeline, first_part, n_part );
+
+  last_part = first_part + n_part - 1;
+
+  //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  int ix = 0;
+  int iy = 0;
+  int iz = 0;
+
+  int n_voxel = 0; // Number of voxels in this MPI domain.
+
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
+
+  first_vox = 0;
+  last_vox  = 0;
+  n_vox     = 0;
+
+  if ( n_part > 0 )
   {
-    //--------------------------------------------------------------------------
-    // Load particle position data.
-    //--------------------------------------------------------------------------
-    load_4x1( &pb[0].dx[0], dx );
-    load_4x1( &pb[0].dy[0], dy );
-    load_4x1( &pb[0].dz[0], dz );
-    load_4x1( &pb[0].i [0], ii );
+    first_vox = 2*sp->g->nv; // Initialize with invalid values.
+    last_vox  = 2*sp->g->nv;
 
-    // load_4x4( &pb[0].dx[0], &pb[0].dy[0], &pb[0].dz[0], &pb[0].i[0],
-    //           dx, dy, dz, ii );
+    DISTRIBUTE_VOXELS( 1, sp->g->nx,
+                       1, sp->g->ny,
+                       1, sp->g->nz,
+                       1,
+                       0,
+                       1,
+                       ix, iy, iz, n_voxel );
 
-    //--------------------------------------------------------------------------
-    // Set field interpolation pointers.
-    //--------------------------------------------------------------------------
-    vp00 = ( const float * ALIGNED(16) ) ( f0 + ii(0) );
-    vp01 = ( const float * ALIGNED(16) ) ( f0 + ii(1) );
-    vp02 = ( const float * ALIGNED(16) ) ( f0 + ii(2) );
-    vp03 = ( const float * ALIGNED(16) ) ( f0 + ii(3) );
+    vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
 
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles.
-    //--------------------------------------------------------------------------
-    load_4x4_tr( vp00, vp01, vp02, vp03,
-		 hax, v00, v01, v02 );
+    for( int i = 0; i < n_voxel; i++ )
+    {
+      sum_part += sp->counts[vox];
 
-    hax = qdt_2mc*fma( fma( dy, v02, v01 ), dz, fma( dy, v00, hax ) );
+      if ( sum_part >= last_part )
+      {
+        if ( pipeline_rank == n_pipeline - 1 )
+        {
+          last_vox = vox;
 
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles.
-    //--------------------------------------------------------------------------
-    load_4x4_tr( vp00+4, vp01+4, vp02+4, vp03+4,
-		 hay, v03, v04, v05 );
+          n_vox++;
+        }
+        else
+        {
+          last_vox = previous_vox;
+        }
 
-    hay = qdt_2mc*fma( fma( dz, v05, v04 ), dx, fma( dz, v03, hay ) );
+        break;
+      }
+      else if ( sum_part >= first_part   &&
+                first_vox == 2*sp->g->nv )
+      {
+        first_vox = vox;
+        first_ix  = ix;
+        first_iy  = iy;
+        first_iz  = iz;
+      }
 
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles.
-    //--------------------------------------------------------------------------
-    load_4x4_tr( vp00+8, vp01+8, vp02+8, vp03+8,
-		 haz, v00, v01, v02 );
+      if ( vox >= first_vox )
+      {
+        n_vox++;
+      }
 
-    haz = qdt_2mc*fma( fma( dx, v02, v01 ), dy, fma( dx, v00, haz ) );
+      previous_vox = vox;
 
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles.
-    //--------------------------------------------------------------------------
-    load_4x4_tr( vp00+12, vp01+12, vp02+12, vp03+12,
-		 cbx, v03, cby, v04 );
+      NEXT_VOXEL( vox, ix, iy, iz,
+                  1, sp->g->nx,
+                  1, sp->g->ny,
+                  1, sp->g->nz,
+                  sp->g->nx,
+                  sp->g->ny,
+                  sp->g->nz );
+    }
+  }
 
-    cbx = fma( v03, dx, cbx );
-    cby = fma( v04, dy, cby );
+  //--------------------------------------------------------------------------//
+  // Loop over voxels.
+  //--------------------------------------------------------------------------//
 
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles, final.
-    //--------------------------------------------------------------------------
-    load_4x2_tr( vp00+16, vp01+16, vp02+16, vp03+16,
-		 cbz, v05 );
+  vox = VOXEL( first_ix, first_iy, first_iz,
+	       sp->g->nx, sp->g->ny, sp->g->nz );
 
-    cbz = fma( v05, dz, cbz );
+  for( int j = 0; j < n_vox; j++ )
+  {
+    const int part_start = sp->partition[vox];
+    const int part_count = sp->counts[vox];
 
-    //--------------------------------------------------------------------------
-    // Load particle momentum data.  Could use load_4x3.
-    //--------------------------------------------------------------------------
-    load_4x1( &pb[0].ux[0], ux );
-    load_4x1( &pb[0].uy[0], uy );
-    load_4x1( &pb[0].uz[0], uz );
+    // Only do work if there are particles to process in this voxel.
+    if ( part_count > 0 )
+    {
+      // Define the field data.
+      ex       = f0[vox].ex;
+      dexdy    = f0[vox].dexdy;
+      dexdz    = f0[vox].dexdz;
+      d2exdydz = f0[vox].d2exdydz;
 
-    // load_4x4( &pb[0].ux[0], &pb[0].uy[0], &pb[0].uz[0], &pb[0].w[0],
-    //           ux, uy, uz, q );
+      ey       = f0[vox].ey;
+      deydz    = f0[vox].deydz;
+      deydx    = f0[vox].deydx;
+      d2eydzdx = f0[vox].d2eydzdx;
 
-    //--------------------------------------------------------------------------
-    // Update momentum.
-    //--------------------------------------------------------------------------
-    v00  = qdt_4mc * rsqrt( one + fma( ux, ux, fma( uy, uy, uz * uz ) ) );
-    v01  = fma( cbx, cbx, fma( cby, cby, cbz * cbz ) );
-    v02  = ( v00 * v00 ) * v01;
-    v03  = v00 * fma( v02, fma( v02, two_fifteenths, one_third ), one );
-    v04  = v03 * rcp( fma( v03 * v03, v01, one ) );
-    v04 += v04;
+      ez       = f0[vox].ez;
+      dezdx    = f0[vox].dezdx;
+      dezdy    = f0[vox].dezdy;
+      d2ezdxdy = f0[vox].d2ezdxdy;
 
-    v00  = fma( fms( uy, cbz, uz * cby ), v03, ux );
-    v01  = fma( fms( uz, cbx, ux * cbz ), v03, uy );
-    v02  = fma( fms( ux, cby, uy * cbx ), v03, uz );
+      cbx      = f0[vox].cbx;
+      dcbxdx   = f0[vox].dcbxdx;
 
-    ux   = fma( fms( v01, cbz, v02 * cby ), v04, ux );
-    uy   = fma( fms( v02, cbx, v00 * cbz ), v04, uy );
-    uz   = fma( fms( v00, cby, v01 * cbx ), v04, uz );
+      cby      = f0[vox].cby;
+      dcbydy   = f0[vox].dcbydy;
 
-    ux  += hax;
-    uy  += hay;
-    uz  += haz;
+      cbz      = f0[vox].cbz;
+      dcbzdz   = f0[vox].dcbzdz;
 
-    //--------------------------------------------------------------------------
-    // Store particle data.  Could use store_4x3.
-    //--------------------------------------------------------------------------
-    store_4x1( ux, &pb[0].ux[0] );
-    store_4x1( uy, &pb[0].uy[0] );
-    store_4x1( uz, &pb[0].uz[0] );
+      // Initialize particle pointer to first particle in cell.
+      pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
 
-    // store_4x4( ux, uy, uz, q,
-    //            &pb[0].ux[0], &pb[0].uy[0], &pb[0].uz[0], &pb[0].w[0] );
+      int ib = 0;
+      // int ip = 0;
+
+      for( int i = 0; i < part_count; i += PARTICLE_BLOCK_SIZE )
+      {
+        ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
+        // ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
+
+        //--------------------------------------------------------------------------
+        // Load particle position and momentum.
+        //--------------------------------------------------------------------------
+
+        load_4x1( &pb[ib].dx[0], dx );
+        load_4x1( &pb[ib].dy[0], dy );
+        load_4x1( &pb[ib].dz[0], dz );
+        // load_4x1( &pb[ib].i [0], ii );
+        load_4x1( &pb[ib].ux[0], ux );
+        load_4x1( &pb[ib].uy[0], uy );
+        load_4x1( &pb[ib].uz[0], uz );
+
+        //--------------------------------------------------------------------------
+        // Interpolate E.
+        //--------------------------------------------------------------------------
+
+        hax = qdt_2mc*fma( fma( dy, d2exdydz, dexdz ), dz, fma( dy, dexdy, ex ) );
+        hay = qdt_2mc*fma( fma( dz, d2eydzdx, deydx ), dx, fma( dz, deydz, ey ) );
+        haz = qdt_2mc*fma( fma( dx, d2ezdxdy, dezdy ), dy, fma( dx, dezdx, ez ) );
+
+        //--------------------------------------------------------------------------
+        // Interpolate B.
+        //--------------------------------------------------------------------------
+
+        cbxp = fma( dcbxdx, dx, cbx );
+        cbyp = fma( dcbydy, dy, cby );
+        cbzp = fma( dcbzdz, dz, cbz );
+
+        //--------------------------------------------------------------------------
+        // Boris - scalars.
+        //--------------------------------------------------------------------------
+
+        v00  = qdt_4mc * rsqrt( one + fma( ux, ux, fma( uy, uy, uz * uz ) ) );
+        v01  = fma( cbxp, cbxp, fma( cbyp, cbyp, cbzp * cbzp ) );
+        v02  = ( v00 * v00 ) * v01;
+        v03  = v00 * fma( v02, fma( v02, two_fifteenths, one_third ), one );
+        v04  = v03 * rcp( fma( v03 * v03, v01, one ) );
+        v04 += v04;
+
+        //--------------------------------------------------------------------------
+        // Boris - uprime.
+        //--------------------------------------------------------------------------
+
+        v00  = fma( fms( uy, cbzp, uz * cbyp ), v03, ux );
+        v01  = fma( fms( uz, cbxp, ux * cbzp ), v03, uy );
+        v02  = fma( fms( ux, cbyp, uy * cbxp ), v03, uz );
+
+        //--------------------------------------------------------------------------
+        // Boris - rotation.
+        //--------------------------------------------------------------------------
+
+        ux   = fma( fms( v01, cbzp, v02 * cbyp ), v04, ux );
+        uy   = fma( fms( v02, cbxp, v00 * cbzp ), v04, uy );
+        uz   = fma( fms( v00, cbyp, v01 * cbxp ), v04, uz );
+
+        //--------------------------------------------------------------------------
+        // Half advance E.
+        //--------------------------------------------------------------------------
+
+        ux  += hax;
+        uy  += hay;
+        uz  += haz;
+
+        //--------------------------------------------------------------------------
+        // Store particle momentum.  Could use store_16x4_tr_p or store_16x3_tr_p.
+        //--------------------------------------------------------------------------
+
+        store_4x1( ux, &pb[ib].ux[0] );
+        store_4x1( uy, &pb[ib].uy[0] );
+        store_4x1( uz, &pb[ib].uz[0] );
+      }
+    }
+
+    // Compute next voxel index and its grid indicies.
+    NEXT_VOXEL( vox, ix, iy, iz,
+                1, sp->g->nx,
+                1, sp->g->ny,
+                1, sp->g->nz,
+                sp->g->nx,
+                sp->g->ny,
+                sp->g->nz );
   }
 }
 #else // VPIC_USE_AOSOA_P is not defined i.e. VPIC_USE_AOS_P case.

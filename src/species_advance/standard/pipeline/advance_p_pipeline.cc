@@ -25,7 +25,8 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   particle_block_t     * ALIGNED(128) pb0 = args->pb0;
   accumulator_t        * ALIGNED(128) a0  = args->a0;
   const interpolator_t * ALIGNED(128) f0  = args->f0;
-  const grid_t *                      g   = args->g;
+  const grid_t         *              g   = args->g;
+  const species_t      *              sp  = args->sp;
 
   particle_block_t     * ALIGNED(32)  pb;
   particle_mover_t     * ALIGNED(16)  pm;
@@ -247,7 +248,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   args->seg[pipeline_rank].nm        = nm;
   args->seg[pipeline_rank].n_ignored = itmp;
 }
-#else
+#else // VPIC_USE_AOSOA_P is not defined i.e. VPIC_USE_AOS_P case.
 void
 advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                            int pipeline_rank,
@@ -256,7 +257,8 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   particle_t           * ALIGNED(128) p0 = args->p0;
   accumulator_t        * ALIGNED(128) a0 = args->a0;
   const interpolator_t * ALIGNED(128) f0 = args->f0;
-  const grid_t *                      g  = args->g;
+  const grid_t         *              g  = args->g;
+  const species_t      *              sp = args->sp;
 
   particle_t           * ALIGNED(32)  p;
   particle_mover_t     * ALIGNED(16)  pm;
@@ -272,6 +274,366 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   const float one_third      = 1.0/3.0;
   const float two_fifteenths = 2.0/15.0;
 
+  float ex, dexdy, dexdz, d2exdydz;
+  float ey, deydz, deydx, d2eydzdx;
+  float ez, dezdx, dezdy, d2ezdxdy;
+
+  float cbx, dcbxdx;
+  float cby, dcbydy;
+  float cbz, dcbzdz;
+
+  float dx, dy, dz;
+  float ux, uy, uz;
+  float hax, hay, haz;
+  float cbxp, cbyp, cbzp;
+  float v0, v1, v2, v3, v4, v5;
+
+  int itmp, nm, max_nm;
+
+  int first_part; // Index of first particle for this thread.
+  int  last_part; // Index of last  particle for this thread.
+  int     n_part; // Number of particles for this thread.
+
+  int previous_vox; // Index of previous voxel.
+  int    first_vox; // Index of first voxel for this thread.
+  int     last_vox; // Index of last  voxel for this thread.
+  int        n_vox; // Number of voxels for this thread.
+  int          vox; // Index of current voxel.
+
+  int sum_part = 0;
+
+  DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
+
+  //--------------------------------------------------------------------------//
+  // Compute an equal division of particles across pipeline processes.
+  //--------------------------------------------------------------------------//
+
+  DISTRIBUTE( args->np, 1, pipeline_rank, n_pipeline, first_part, n_part );
+
+  last_part = first_part + n_part - 1;
+
+  //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  int ix = 0;
+  int iy = 0;
+  int iz = 0;
+
+  int n_voxel = 0; // Number of voxels in this MPI domain.
+
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
+
+  first_vox = 0;
+  last_vox  = 0;
+  n_vox     = 0;
+
+  if ( n_part > 0 )
+  {
+    first_vox = 2*sp->g->nv; // Initialize with invalid values.
+    last_vox  = 2*sp->g->nv;
+
+    DISTRIBUTE_VOXELS( 1, sp->g->nx,
+                       1, sp->g->ny,
+                       1, sp->g->nz,
+                       1,
+                       0,
+                       1,
+                       ix, iy, iz, n_voxel );
+
+    vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
+
+    for( int i = 0; i < n_voxel; i++ )
+    {
+      sum_part += sp->counts[vox];
+
+      if ( sum_part >= last_part )
+      {
+        if ( pipeline_rank == n_pipeline - 1 )
+        {
+          last_vox = vox;
+
+          n_vox++;
+        }
+        else
+        {
+          last_vox = previous_vox;
+        }
+
+        break;
+      }
+      else if ( sum_part >= first_part   &&
+                first_vox == 2*sp->g->nv )
+      {
+        first_vox = vox;
+        first_ix  = ix;
+        first_iy  = iy;
+        first_iz  = iz;
+      }
+
+      if ( vox >= first_vox )
+      {
+        n_vox++;
+      }
+
+      previous_vox = vox;
+
+      NEXT_VOXEL( vox, ix, iy, iz,
+                  1, sp->g->nx,
+                  1, sp->g->ny,
+                  1, sp->g->nz,
+                  sp->g->nx,
+                  sp->g->ny,
+                  sp->g->nz );
+    }
+  }
+
+  // Determine which movers are reserved for this pipeline.
+  // Movers (16 bytes) should be reserved for pipelines in at least
+  // multiples of 8 such that the set of particle movers reserved for
+  // a pipeline is 128-byte aligned and a multiple of 128-byte in
+  // size.  The host is guaranteed to get enough movers to process its
+  // particles with this allocation.
+
+  max_nm = args->max_nm - ( args->np&15 );
+
+  if ( max_nm < 0 ) max_nm = 0;
+
+  DISTRIBUTE( max_nm, 8, pipeline_rank, n_pipeline, itmp, max_nm );
+
+  if ( pipeline_rank == n_pipeline ) max_nm = args->max_nm - itmp;
+
+  pm   = args->pm + itmp;
+  nm   = 0;
+  itmp = 0;
+
+  // Determine which accumulator array to use
+  // The host gets the first accumulator array.
+
+  if ( pipeline_rank != n_pipeline )
+  {
+    a0 += ( 1 + pipeline_rank ) * POW2_CEIL( ( args->nx + 2 ) *
+                                             ( args->ny + 2 ) *
+                                             ( args->nz + 2 ), 2 );
+  }
+
+  //--------------------------------------------------------------------------//
+  // Loop over voxels.
+  //--------------------------------------------------------------------------//
+
+  vox = VOXEL( first_ix, first_iy, first_iz,
+	       sp->g->nx, sp->g->ny, sp->g->nz );
+
+  for( int j = 0; j < n_vox; j++ )
+  {
+    const int part_start = sp->partition[vox];
+    const int part_count = sp->counts[vox];
+
+    // Only do work if there are particles to process in this voxel.
+    if ( part_count > 0 )
+    {
+      // Define the field data.
+      ex       = f0[vox].ex;
+      dexdy    = f0[vox].dexdy;
+      dexdz    = f0[vox].dexdz;
+      d2exdydz = f0[vox].d2exdydz;
+
+      ey       = f0[vox].ey;
+      deydz    = f0[vox].deydz;
+      deydx    = f0[vox].deydx;
+      d2eydzdx = f0[vox].d2eydzdx;
+
+      ez       = f0[vox].ez;
+      dezdx    = f0[vox].dezdx;
+      dezdy    = f0[vox].dezdy;
+      d2ezdxdy = f0[vox].d2ezdxdy;
+
+      cbx      = f0[vox].cbx;
+      dcbxdx   = f0[vox].dcbxdx;
+
+      cby      = f0[vox].cby;
+      dcbydy   = f0[vox].dcbydy;
+
+      cbz      = f0[vox].cbz;
+      dcbzdz   = f0[vox].dcbzdz;
+
+      // Initialize particle pointer to first particle in cell.
+      p = args->p0 + part_start;
+
+      // Process the particles in a cell.
+      for( int i = 0; i < part_count; i++, p++ )
+      {
+        // Load position.
+        dx   = p->dx;
+        dy   = p->dy;
+        dz   = p->dz;
+        ii   = p->i;
+
+        // f    = f0 + ii;
+
+        // Interpolate E.
+        hax  = qdt_2mc*( ( ex + dy * dexdy ) + dz * ( dexdz + dy * d2exdydz ) );
+        hay  = qdt_2mc*( ( ey + dz * deydz ) + dx * ( deydx + dz * d2eydzdx ) );
+        haz  = qdt_2mc*( ( ez + dx * dezdx ) + dy * ( dezdy + dx * d2ezdxdy ) );
+
+        // Interpolate B.
+        cbxp = cbx + dx * dcbxdx;
+        cbyp = cby + dy * dcbydy;
+        cbzp = cbz + dz * dcbzdz;
+
+        // Load momentum.
+        ux   = p->ux;
+        uy   = p->uy;
+        uz   = p->uz;
+        q    = p->w;
+
+        // Half advance E.
+        ux  += hax;
+        uy  += hay;
+        uz  += haz;
+
+        // Boris - scalars.
+        v0   = qdt_2mc / sqrtf( one + ( ux * ux + ( uy * uy + uz * uz ) ) );
+        v1   = cbxp * cbxp + ( cbyp * cbyp + cbzp * cbzp );
+        v2   = ( v0 * v0 ) * v1;
+        v3   = v0 * ( one + v2 * ( one_third + v2 * two_fifteenths ) );
+        v4   = v3 / ( one + v1 * ( v3 * v3 ) );
+        v4  += v4;
+
+        // Boris - uprime.
+        v0   = ux + v3 * ( uy * cbzp - uz * cbyp );
+        v1   = uy + v3 * ( uz * cbxp - ux * cbzp );
+        v2   = uz + v3 * ( ux * cbyp - uy * cbxp );
+
+        // Boris - rotation.
+        ux  += v4 * ( v1 * cbzp - v2 * cbyp );
+        uy  += v4 * ( v2 * cbxp - v0 * cbzp );
+        uz  += v4 * ( v0 * cbyp - v1 * cbxp );
+
+        // Half advance E.
+        ux  += hax;
+        uy  += hay;
+        uz  += haz;
+
+        // Store momentum.
+        p->ux = ux;
+        p->uy = uy;
+        p->uz = uz;
+
+        // Get norm displacement.
+        v0   = one / sqrtf( one + ( ux * ux+ ( uy * uy + uz * uz ) ) );
+
+        ux  *= cdt_dx;
+        uy  *= cdt_dy;
+        uz  *= cdt_dz;
+
+        ux  *= v0;
+        uy  *= v0;
+        uz  *= v0;
+
+        // Streak midpoint (inbnds).
+        v0   = dx + ux;
+        v1   = dy + uy;
+        v2   = dz + uz;
+
+        // New position.
+        v3   = v0 + ux;
+        v4   = v1 + uy;
+        v5   = v2 + uz;
+
+        // FIXME-KJB: COULD SHORT CIRCUIT ACCUMULATION IN THE CASE WHERE QSP==0!
+        // Check if inbnds.
+        if (  v3 <= one &&  v4 <= one &&  v5 <= one &&
+             -v3 <= one && -v4 <= one && -v5 <= one )
+        {
+          // Common case (inbnds).  Note: accumulator values are 4 times
+          // the total physical charge that passed through the appropriate
+          // current quadrant in a time-step.
+
+          q *= qsp;
+
+          // Store new position.
+          p->dx = v3;
+          p->dy = v4;
+          p->dz = v5;
+
+          // Streak midpoint.
+          dx = v0;
+          dy = v1;
+          dz = v2;
+
+          // Compute correction.
+          v5 = q * ux * uy * uz * one_third;
+
+          // Get accumulator.
+          a  = ( float * ) ( a0 + vox );
+          // a  = ( float * ) ( a0 + ii );
+
+          #define ACCUMULATE_J(X,Y,Z,offset)                                \
+          v4  = q*u##X;   /* v2 = q ux                            */        \
+          v1  = v4*d##Y;  /* v1 = q ux dy                         */        \
+          v0  = v4-v1;    /* v0 = q ux (1-dy)                     */        \
+          v1 += v4;       /* v1 = q ux (1+dy)                     */        \
+          v4  = one+d##Z; /* v4 = 1+dz                            */        \
+          v2  = v0*v4;    /* v2 = q ux (1-dy)(1+dz)               */        \
+          v3  = v1*v4;    /* v3 = q ux (1+dy)(1+dz)               */        \
+          v4  = one-d##Z; /* v4 = 1-dz                            */        \
+          v0 *= v4;       /* v0 = q ux (1-dy)(1-dz)               */        \
+          v1 *= v4;       /* v1 = q ux (1+dy)(1-dz)               */        \
+          v0 += v5;       /* v0 = q ux [ (1-dy)(1-dz) + uy*uz/3 ] */        \
+          v1 -= v5;       /* v1 = q ux [ (1+dy)(1-dz) - uy*uz/3 ] */        \
+          v2 -= v5;       /* v2 = q ux [ (1-dy)(1+dz) - uy*uz/3 ] */        \
+          v3 += v5;       /* v3 = q ux [ (1+dy)(1+dz) + uy*uz/3 ] */        \
+          a[offset+0] += v0;                                                \
+          a[offset+1] += v1;                                                \
+          a[offset+2] += v2;                                                \
+          a[offset+3] += v3
+
+          ACCUMULATE_J( x, y, z, 0 );
+          ACCUMULATE_J( y, z, x, 4 );
+          ACCUMULATE_J( z, x, y, 8 );
+
+          #undef ACCUMULATE_J
+        }
+
+        else                                        // Unlikely
+        {
+          local_pm->dispx = ux;
+          local_pm->dispy = uy;
+          local_pm->dispz = uz;
+
+          local_pm->i     = p - p0;
+
+          if ( move_p( p0, local_pm, a0, g, qsp ) ) // Unlikely
+          {
+            if ( nm < max_nm )
+            {
+              pm[nm++] = local_pm[0];
+            }
+
+            else
+            {
+              itmp++;                               // Unlikely
+            }
+          }
+        }
+      }
+    }
+
+    // Compute next voxel index and its grid indicies.
+    NEXT_VOXEL( vox, ix, iy, iz,
+                1, sp->g->nx,
+                1, sp->g->ny,
+                1, sp->g->nz,
+                sp->g->nx,
+                sp->g->ny,
+                sp->g->nz );
+  }
+
+  #if 0
   float dx, dy, dz, ux, uy, uz, q;
   float hax, hay, haz, cbx, cby, cbz;
   float v0, v1, v2, v3, v4, v5;
@@ -414,7 +776,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
       a  = (float *)( a0 + ii );              // Get accumulator
 
-#     define ACCUMULATE_J(X,Y,Z,offset)                                 \
+      #define ACCUMULATE_J(X,Y,Z,offset)                                \
       v4  = q*u##X;   /* v2 = q ux                            */        \
       v1  = v4*d##Y;  /* v1 = q ux dy                         */        \
       v0  = v4-v1;    /* v0 = q ux (1-dy)                     */        \
@@ -438,7 +800,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       ACCUMULATE_J( y, z, x, 4 );
       ACCUMULATE_J( z, x, y, 8 );
 
-#     undef ACCUMULATE_J
+      #undef ACCUMULATE_J
     }
 
     else                                        // Unlikely
@@ -463,13 +825,14 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       }
     }
   }
+  #endif
 
   args->seg[pipeline_rank].pm        = pm;
   args->seg[pipeline_rank].max_nm    = max_nm;
   args->seg[pipeline_rank].nm        = nm;
   args->seg[pipeline_rank].n_ignored = itmp;
 }
-#endif
+#endif // End of VPIC_USE_AOSOA_P vs VPIC_USE_AOS_P selection.
 
 //----------------------------------------------------------------------------//
 // Top level function to select and call the proper advance_p pipeline
@@ -503,6 +866,7 @@ advance_p_pipeline( species_t * RESTRICT sp,
   args->f0      = ia->i;
   args->seg     = seg;
   args->g       = sp->g;
+  args->sp      = sp;
 
   args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
   args->cdt_dx  = sp->g->cvac * sp->g->dt * sp->g->rdx;
@@ -579,6 +943,7 @@ advance_p_pipeline( species_t * RESTRICT sp,
   args->f0      = ia->i;
   args->seg     = seg;
   args->g       = sp->g;
+  args->sp      = sp;
 
   args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
   args->cdt_dx  = sp->g->cvac * sp->g->dt * sp->g->rdx;

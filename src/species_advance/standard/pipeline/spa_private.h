@@ -30,6 +30,7 @@ typedef struct advance_p_pipeline_args
   MEM_PTR( const interpolator_t, 128 ) f0;       // Interpolator array
   MEM_PTR( particle_mover_seg_t, 128 ) seg;      // Dest for return values
   MEM_PTR( const grid_t,         1   ) g;        // Local domain grid params
+  MEM_PTR( const species_t,      1   ) sp;      // Species pointer
 
   float                                qdt_2mc;  // Particle/field coupling
   float                                cdt_dx;   // x-space/time coupling
@@ -43,7 +44,7 @@ typedef struct advance_p_pipeline_args
   int                                  ny;       // y-mesh resolution
   int                                  nz;       // z-mesh resolution
  
-  PAD_STRUCT( 6*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
+  PAD_STRUCT( 7*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
 } advance_p_pipeline_args_t;
 #else
 typedef struct advance_p_pipeline_args
@@ -54,6 +55,7 @@ typedef struct advance_p_pipeline_args
   MEM_PTR( const interpolator_t, 128 ) f0;       // Interpolator array
   MEM_PTR( particle_mover_seg_t, 128 ) seg;      // Dest for return values
   MEM_PTR( const grid_t,         1   ) g;        // Local domain grid params
+  MEM_PTR( const species_t,      1   ) sp;      // Species pointer
 
   float                                qdt_2mc;  // Particle/field coupling
   float                                cdt_dx;   // x-space/time coupling
@@ -67,7 +69,7 @@ typedef struct advance_p_pipeline_args
   int                                  ny;       // y-mesh resolution
   int                                  nz;       // z-mesh resolution
  
-  PAD_STRUCT( 6*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
+  PAD_STRUCT( 7*SIZEOF_MEM_PTR + 5*sizeof(float) + 5*sizeof(int) )
 } advance_p_pipeline_args_t;
 #endif
 

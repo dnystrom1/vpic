@@ -37,7 +37,7 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
   v16float hax, hay, haz;
   v16float cbxp, cbyp, cbzp;
   v16float v00, v01, v02, v03, v04;
-  v16int   ii;
+  // v16int   ii;
 
   int first_part; // Index of first particle for this thread.
   int  last_part; // Index of last  particle for this thread.
@@ -182,28 +182,24 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
       pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
 
       int ib = 0;
-      int ip = 0;
+      // int ip = 0;
 
-      for( int i = 0; i < part_count; i+=16 )
+      for( int i = 0; i < part_count; i += PARTICLE_BLOCK_SIZE )
       {
         ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
-        ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
+        // ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
 
         //--------------------------------------------------------------------------
         // Load particle position and momentum.
         //--------------------------------------------------------------------------
 
-        load_16x1( &pb[0].dx[0], dx );
-        load_16x1( &pb[0].dy[0], dy );
-        load_16x1( &pb[0].dz[0], dz );
-        load_16x1( &pb[0].i [0], ii );
-        load_16x1( &pb[0].ux[0], ux );
-        load_16x1( &pb[0].uy[0], uy );
-        load_16x1( &pb[0].uz[0], uz );
-
-	//        load_16x8_tr_p( &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
-	//                        &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx,
-	//                        dx, dy, dz, ii, ux, uy, uz, q );
+        load_16x1( &pb[ib].dx[0], dx );
+        load_16x1( &pb[ib].dy[0], dy );
+        load_16x1( &pb[ib].dz[0], dz );
+        // load_16x1( &pb[ib].i [0], ii );
+        load_16x1( &pb[ib].ux[0], ux );
+        load_16x1( &pb[ib].uy[0], uy );
+        load_16x1( &pb[ib].uz[0], uz );
 
         //--------------------------------------------------------------------------
         // Interpolate E.
@@ -260,13 +256,9 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
         // Store particle momentum.  Could use store_16x4_tr_p or store_16x3_tr_p.
         //--------------------------------------------------------------------------
 
-        store_16x1( ux, &pb[0].ux[0] );
-        store_16x1( uy, &pb[0].uy[0] );
-        store_16x1( uz, &pb[0].uz[0] );
-
-	//        store_16x8_tr_p( dx, dy, dz, ii, ux, uy, uz, q,
-	//                         &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
-	//                         &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx );
+        store_16x1( ux, &pb[ib].ux[0] );
+        store_16x1( uy, &pb[ib].uy[0] );
+        store_16x1( uz, &pb[ib].uz[0] );
       }
     }
 
@@ -279,122 +271,6 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
                 sp->g->ny,
                 sp->g->nz );
   }
-
-  #if 0
-  v16float dx, dy, dz, ux, uy, uz, q;
-  v16float hax, hay, haz, cbx, cby, cbz;
-  v16float v00, v01, v02, v03, v04, v05, v06, v07, v08, v09, v10;
-  v16int   ii;
-
-  int first, nq;
-
-  // Determine which particle blocks this pipeline processes.
-
-  DISTRIBUTE( args->np, PARTICLE_BLOCK_SIZE, pipeline_rank, n_pipeline, first, nq );
-
-  pb = args->pb0 + first / PARTICLE_BLOCK_SIZE;
-
-  nq >>= 4;
-
-  // Process the particle blocks for this pipeline.  For the initial AoSoA version,
-  // assume that PARTICLE_BLOCK_SIZE is the same as the vector length.  A future
-  // version might allow PARTICLE_BLOCK_SIZE to be an integral multiple of the vector
-  // length.
-
-  for( ; nq; nq--, pb++ )
-  {
-    //--------------------------------------------------------------------------
-    // Load particle data.
-    //--------------------------------------------------------------------------
-    load_16x1( &pb[0].dx[0], dx );
-    load_16x1( &pb[0].dy[0], dy );
-    load_16x1( &pb[0].dz[0], dz );
-    load_16x1( &pb[0].i [0], ii );
-    load_16x1( &pb[0].ux[0], ux );
-    load_16x1( &pb[0].uy[0], uy );
-    load_16x1( &pb[0].uz[0], uz );
-
-    //--------------------------------------------------------------------------
-    // Set field interpolation pointers.
-    //--------------------------------------------------------------------------
-    vp00 = ( const float * ALIGNED(64) ) ( f0 + ii( 0) );
-    vp01 = ( const float * ALIGNED(64) ) ( f0 + ii( 1) );
-    vp02 = ( const float * ALIGNED(64) ) ( f0 + ii( 2) );
-    vp03 = ( const float * ALIGNED(64) ) ( f0 + ii( 3) );
-    vp04 = ( const float * ALIGNED(64) ) ( f0 + ii( 4) );
-    vp05 = ( const float * ALIGNED(64) ) ( f0 + ii( 5) );
-    vp06 = ( const float * ALIGNED(64) ) ( f0 + ii( 6) );
-    vp07 = ( const float * ALIGNED(64) ) ( f0 + ii( 7) );
-    vp08 = ( const float * ALIGNED(64) ) ( f0 + ii( 8) );
-    vp09 = ( const float * ALIGNED(64) ) ( f0 + ii( 9) );
-    vp10 = ( const float * ALIGNED(64) ) ( f0 + ii(10) );
-    vp11 = ( const float * ALIGNED(64) ) ( f0 + ii(11) );
-    vp12 = ( const float * ALIGNED(64) ) ( f0 + ii(12) );
-    vp13 = ( const float * ALIGNED(64) ) ( f0 + ii(13) );
-    vp14 = ( const float * ALIGNED(64) ) ( f0 + ii(14) );
-    vp15 = ( const float * ALIGNED(64) ) ( f0 + ii(15) );
-
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles.
-    //--------------------------------------------------------------------------
-    load_16x16_tr( vp00, vp01, vp02, vp03,
-                   vp04, vp05, vp06, vp07,
-                   vp08, vp09, vp10, vp11,
-                   vp12, vp13, vp14, vp15,
-                   hax, v00, v01, v02, hay, v03, v04, v05,
-                   haz, v06, v07, v08, cbx, v09, cby, v10 );
-
-    hax = qdt_2mc*fma( fma( dy, v02, v01 ), dz, fma( dy, v00, hax ) );
-
-    hay = qdt_2mc*fma( fma( dz, v05, v04 ), dx, fma( dz, v03, hay ) );
-
-    haz = qdt_2mc*fma( fma( dx, v08, v07 ), dy, fma( dx, v06, haz ) );
-
-    cbx = fma( v09, dx, cbx );
-
-    cby = fma( v10, dy, cby );
-
-    //--------------------------------------------------------------------------
-    // Load interpolation data for particles, final.
-    //--------------------------------------------------------------------------
-    load_16x2_tr( vp00+16, vp01+16, vp02+16, vp03+16,
-                  vp04+16, vp05+16, vp06+16, vp07+16,
-                  vp08+16, vp09+16, vp10+16, vp11+16,
-                  vp12+16, vp13+16, vp14+16, vp15+16,
-                  cbz, v05 );
-
-    cbz = fma( v05, dz, cbz );
-
-    //--------------------------------------------------------------------------
-    // Update momentum.
-    //--------------------------------------------------------------------------
-    v00  = qdt_4mc * rsqrt( one + fma( ux, ux, fma( uy, uy, uz * uz ) ) );
-    v01  = fma( cbx, cbx, fma( cby, cby, cbz * cbz ) );
-    v02  = ( v00 * v00 ) * v01;
-    v03  = v00 * fma( v02, fma( v02, two_fifteenths, one_third ), one );
-    v04  = v03 * rcp( fma( v03 * v03, v01, one ) );
-    v04 += v04;
-
-    v00  = fma( fms( uy, cbz, uz * cby ), v03, ux );
-    v01  = fma( fms( uz, cbx, ux * cbz ), v03, uy );
-    v02  = fma( fms( ux, cby, uy * cbx ), v03, uz );
-
-    ux   = fma( fms( v01, cbz, v02 * cby ), v04, ux );
-    uy   = fma( fms( v02, cbx, v00 * cbz ), v04, uy );
-    uz   = fma( fms( v00, cby, v01 * cbx ), v04, uz );
-
-    ux  += hax;
-    uy  += hay;
-    uz  += haz;
-
-    //--------------------------------------------------------------------------
-    // Store particle momentum data.  Could use store_16x4 or store_16x3.
-    //--------------------------------------------------------------------------
-    store_16x1( ux, &pb[0].ux[0] );
-    store_16x1( uy, &pb[0].uy[0] );
-    store_16x1( uz, &pb[0].uz[0] );
-  }
-  #endif
 }
 #else // VPIC_USE_AOSOA_P is not defined i.e. VPIC_USE_AOS_P case.
 void

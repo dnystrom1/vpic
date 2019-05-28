@@ -27,7 +27,7 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   const species_t      * sp = args->sp;
 
   const float qdt_2mc        =     args->qdt_2mc;
-  const float qdt_4mc        = 0.5*args->qdt_2mc; // For half Boris rotate
+  const float qdt_4mc        = 0.5*args->qdt_2mc; // For half Boris rotate.
   const float one            = 1.0;
   const float one_third      = 1.0/3.0;
   const float two_fifteenths = 2.0/15.0;
@@ -276,7 +276,7 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   const species_t      * sp = args->sp;
 
   const float qdt_2mc        =     args->qdt_2mc;
-  const float qdt_4mc        = 0.5*args->qdt_2mc; // For half Boris rotate
+  const float qdt_4mc        = 0.5*args->qdt_2mc; // For half Boris rotate.
   const float one            = 1.0;
   const float one_third      = 1.0/3.0;
   const float two_fifteenths = 2.0/15.0;
@@ -438,7 +438,7 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
       pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
 
       int ib = 0;
-      int ip = 0;
+      // int ip = 0;
 
       // Process the particles in a cell.
       #define VPIC_SIMD_LEN 16
