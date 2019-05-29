@@ -287,6 +287,8 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   float hax, hay, haz;
   float cbxp, cbyp, cbzp;
   float v0, v1, v2, v3, v4, v5;
+  float q;
+  int   ii;
 
   int itmp, nm, max_nm;
 
