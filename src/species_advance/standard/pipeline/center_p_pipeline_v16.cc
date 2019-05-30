@@ -447,7 +447,7 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
       // Initialize particle pointer to first particle in cell.
       p = args->p0 + part_start;
 
-      for( int i = 0; i < part_count; i+=16, p+=16 )
+      for( int i = 0; i < part_count; i += 16, p += 16 )
       {
         //--------------------------------------------------------------------------
         // Load particle position and momentum.
@@ -461,9 +461,9 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
         // Interpolate E.
         //--------------------------------------------------------------------------
 
-        hax = qdt_2mc*fma( fma( dy, d2exdydz, dexdz ), dz, fma( dy, dexdy, ex ) );
-        hay = qdt_2mc*fma( fma( dz, d2eydzdx, deydx ), dx, fma( dz, deydz, ey ) );
-        haz = qdt_2mc*fma( fma( dx, d2ezdxdy, dezdy ), dy, fma( dx, dezdx, ez ) );
+        hax = qdt_2mc * fma( fma( dy, d2exdydz, dexdz ), dz, fma( dy, dexdy, ex ) );
+        hay = qdt_2mc * fma( fma( dz, d2eydzdx, deydx ), dx, fma( dz, deydz, ey ) );
+        haz = qdt_2mc * fma( fma( dx, d2ezdxdy, dezdy ), dy, fma( dx, dezdx, ez ) );
 
         //--------------------------------------------------------------------------
         // Interpolate B.

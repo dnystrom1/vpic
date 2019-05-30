@@ -477,9 +477,9 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
         // f    = f0 + ii;
 
         // Interpolate E.
-        hax  = qdt_2mc*( ( ex + dy * dexdy ) + dz * ( dexdz + dy * d2exdydz ) );
-        hay  = qdt_2mc*( ( ey + dz * deydz ) + dx * ( deydx + dz * d2eydzdx ) );
-        haz  = qdt_2mc*( ( ez + dx * dezdx ) + dy * ( dezdy + dx * d2ezdxdy ) );
+        hax  = qdt_2mc * ( ( ex + dy * dexdy ) + dz * ( dexdz + dy * d2exdydz ) );
+        hay  = qdt_2mc * ( ( ey + dz * deydz ) + dx * ( deydx + dz * d2eydzdx ) );
+        haz  = qdt_2mc * ( ( ez + dx * dezdx ) + dy * ( dezdy + dx * d2ezdxdy ) );
 
         // Interpolate B.
         cbxp = cbx + dx * dcbxdx;

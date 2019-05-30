@@ -162,18 +162,19 @@ accumulate_hydro_p( hydro_array_t * RESTRICT ha,
 
 #if defined(VPIC_USE_AOSOA_P)
 int
-move_p( particle_block_t * ALIGNED(128) p0,    // Particle block pointer
-        particle_mover_t * ALIGNED(16)  m,     // Particle mover to apply
+move_p( particle_block_t * ALIGNED(128) pb0,   // Particle block pointer
+        particle_mover_t * ALIGNED(16)  pm,    // Particle mover to apply
         accumulator_t    * ALIGNED(128) a0,    // Accumulator to use
         const grid_t     *              g,     // Grid parameters
         const float                     qsp ); // Species particle charge
 #else
 int
 move_p( particle_t       * ALIGNED(128) p0,    // Particle array
-        particle_mover_t * ALIGNED(16)  m,     // Particle mover to apply
+        particle_mover_t * ALIGNED(16)  pm,    // Particle mover to apply
         accumulator_t    * ALIGNED(128) a0,    // Accumulator to use
         const grid_t     *              g,     // Grid parameters
-        const float                     qsp ); // Species particle charge
+        const float                     qsp,   // Species particle charge
+        species_t        *              sp );  // Species pointer
 #endif
 
 END_C_DECLS
