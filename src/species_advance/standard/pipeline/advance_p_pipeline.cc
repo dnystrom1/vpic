@@ -601,7 +601,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           #undef ACCUMULATE_J
         }
 
-        else                                        // Unlikely
+        else                                            // Unlikely
         {
           local_pm->dispx = ux;
           local_pm->dispy = uy;
@@ -609,7 +609,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
           local_pm->i     = p - p0;
 
-          if ( move_p( p0, local_pm, a0, g, qsp ) ) // Unlikely
+          if ( move_p( p0, local_pm, a0, g, qsp, sp ) ) // Unlikely
           {
             if ( nm < max_nm )
             {
@@ -618,7 +618,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
             else
             {
-              itmp++;                               // Unlikely
+              itmp++;                                   // Unlikely
             }
           }
         }
