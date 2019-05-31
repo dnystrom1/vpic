@@ -114,7 +114,7 @@ emit_child_langmuir( child_langmuir_t * RESTRICT              cl,
         local_pm->disp##Y = w*u##Y*rd##Y;                               \
         local_pm->disp##Z = w*u##Z*rd##Z;                               \
         local_pm->i       = np-1;                                       \
-        if (move_p( p, local_pm, a, g, qsp )) {                         \
+        if (move_p( p, local_pm, a, g, qsp, sp )) {			\
             pm[nm++] = local_pm[0];                                     \
         }                                                               \
       }                                                                 \

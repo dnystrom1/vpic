@@ -309,7 +309,7 @@ vpic_simulation::inject_particle( species_t * sp,
     pm->dispy = uy*age*grid->rdy;
     pm->dispz = uz*age*grid->rdz;
     pm->i     = sp->np-1;
-    sp->nm += move_p( sp->p, pm, accumulator_array->a, grid, sp->q );
+    sp->nm += move_p( sp->p, pm, accumulator_array->a, grid, sp->q, sp );
   }
 }
 #endif
