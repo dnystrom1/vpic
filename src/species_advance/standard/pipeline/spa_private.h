@@ -30,7 +30,7 @@ typedef struct advance_p_pipeline_args
   MEM_PTR( const interpolator_t, 128 ) f0;       // Interpolator array
   MEM_PTR( particle_mover_seg_t, 128 ) seg;      // Dest for return values
   MEM_PTR( const grid_t,         1   ) g;        // Local domain grid params
-  MEM_PTR( const species_t,      1   ) sp;      // Species pointer
+  MEM_PTR( species_t,            1   ) sp;       // Species pointer
 
   float                                qdt_2mc;  // Particle/field coupling
   float                                cdt_dx;   // x-space/time coupling
@@ -55,7 +55,7 @@ typedef struct advance_p_pipeline_args
   MEM_PTR( const interpolator_t, 128 ) f0;       // Interpolator array
   MEM_PTR( particle_mover_seg_t, 128 ) seg;      // Dest for return values
   MEM_PTR( const grid_t,         1   ) g;        // Local domain grid params
-  MEM_PTR( const species_t,      1   ) sp;      // Species pointer
+  MEM_PTR( species_t,            1   ) sp;       // Species pointer
 
   float                                qdt_2mc;  // Particle/field coupling
   float                                cdt_dx;   // x-space/time coupling
