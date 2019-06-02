@@ -780,6 +780,10 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
   int face;
 
+  particle_t * ALIGNED(32) p_src;
+  int s_vox;
+  int p_loc;
+
   // Check input args.
 
   if ( ! sp_list )
@@ -880,21 +884,21 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     // beam simulations, is one buffer gets all the movers).
     //
     // FIXME: We could be several times more efficient in our particle
-    // injector buffer sizing here.  Namely, we could create on local
-    // injector buffer of nm is size.  All injection for all
-    // boundaries would be done here.  The local buffer would then be
-    // counted to determine the size of each send buffer.  The local
-    // buffer would then move all injectors into the approate send
-    // buffers (leaving only the local injectors).  This would require
-    // some extra data motion though.  (But would give a more robust
-    // implementation against variations in MP implementation.)
+    // injector buffer sizing here.  Namely, we could create one local
+    // injector buffer of nm in size.  All injection for all boundaries
+    // would be done here.  The local buffer would then be counted to
+    // determine the size of each send buffer.  The local buffer would
+    // then move all injectors into the approate send buffers, leaving
+    // only the local injectors.  This would require some extra data
+    // motion though, but would give a more robust implementation against
+    // variations in MP implementation.
     //
     // FIXME: This presizing assumes that custom boundary conditions
     // inject at most one particle per incident particle.  Currently,
     // the invocation of pbc_interact[*] insures that assumption will
-    // be satisfied (if the handlers conform that it).  We should be
-    // more flexible though in the future (especially given above the
-    // above overalloc).
+    // be satisfied, if the handlers conform that it.  We should be
+    // more flexible though in the future, especially given the above
+    // overalloc.
 
     int nm = 0;
 
@@ -1055,16 +1059,46 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
       backfill:
 
+        s_vox = p0[i].i;
+
+        sp->counts[s_vox]--;
+
+        p_loc = sp->partition[s_vox] + sp->counts[s_vox];
+
+        p_src = &p0[p_loc];
+
         np--;
 
-        #ifdef V4_ACCELERATION
+        #if defined(V8_ACCELERATION)
 
-        copy_4x1( &p0[i].dx, &p0[np].dx );
-        copy_4x1( &p0[i].ux, &p0[np].ux );
+        copy_8x1( &p0[i].dx, &p0[p_loc].dx );
+
+        clear_8x1( &p0[p_loc].dx );
+
+        #elif defined(V4_ACCELERATION)
+
+        // #ifdef V4_ACCELERATION
+
+        // copy_4x1( &p0[i].dx, &p0[np].dx );
+        // copy_4x1( &p0[i].ux, &p0[np].ux );
+
+        copy_4x1( &p0[i].dx, &p0[p_loc].dx );
+        copy_4x1( &p0[i].ux, &p0[p_loc].ux );
+
+        clear_4x1( &p0[p_loc].dx );
+        clear_4x1( &p0[p_loc].ux );
 
         #else
 
-        p0[i] = p0[np];
+        // Is this the best way to do this?
+
+        // p0[i] = p0[np];
+
+        p0[i] = p0[p_loc];
+
+        // Clear the memory for the particle used to fill the hole. Is this the
+        // best way to do this?
+        CLEAR( p_src, 1 );
 
         #endif
       }
@@ -1370,14 +1404,24 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       // overall impact of removal + injection is to keep injected
       // particles in order.
       //
-      // WARNING: THIS TRUSTS THAT THE INJECTORS (INCLUDING THOSE
-      // RECEIVED FROM OTHER NODES) HAVE VALID PARTICLE IDS.
+      // WARNING: THIS TRUSTS THAT THE INJECTORS, INCLUDING THOSE
+      // RECEIVED FROM OTHER NODES, HAVE VALID PARTICLE IDS.
 
       pi += n - 1;
 
       for( ; n; pi--, n-- )
       {
         id = pi->sp_id;
+
+	// Get a species pointer for this injector.
+	sp = find_species_id( id, sp_list );
+
+	// Get the voxel for the particle in this injector.
+	s_vox = pi->i;
+
+	// Get the location in the particle array for the next particle
+	// location at the end of the target voxel particles.
+        p_loc = sp->partition[s_vox] + sp->counts[s_vox];
 
         p  = sp_p [id];
 	np = sp_np[id];
@@ -1386,6 +1430,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	nm = sp_nm[id];
 
         #ifdef DISABLE_DYNAMIC_RESIZING
+	// This needs to be changed to use the voxel specific max.
         if ( np >= sp_max_np[ id ] )
 	{
 	  n_dropped_particles[id]++;
@@ -1396,20 +1441,20 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         #ifdef V4_ACCELERATION
 
-        copy_4x1( &p[np].dx, &pi->dx );
-        copy_4x1( &p[np].ux, &pi->ux );
+        copy_4x1( &p[p_loc].dx, &pi->dx );
+        copy_4x1( &p[p_loc].ux, &pi->ux );
 
         #else
 
-        p[np].dx = pi->dx;
-	p[np].dy = pi->dy;
-	p[np].dz = pi->dz;
-	p[np].i  = pi->i;
+        p[p_loc].dx = pi->dx;
+	p[p_loc].dy = pi->dy;
+	p[p_loc].dz = pi->dz;
+	p[p_loc].i  = pi->i;
 
-        p[np].ux = pi->ux;
-	p[np].uy = pi->uy;
-	p[np].uz = pi->uz;
-	p[np].w  = pi->w;
+        p[p_loc].ux = pi->ux;
+	p[p_loc].uy = pi->uy;
+	p[p_loc].uz = pi->uz;
+	p[p_loc].w  = pi->w;
 
         #endif
 
@@ -1428,14 +1473,14 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         copy_4x1( &pm[nm].dispx, &pi->dispx );
 
-        pm[nm].i = np;
+        pm[nm].i = p_loc;
 
         #else
 
         pm[nm].dispx = pi->dispx;
 	pm[nm].dispy = pi->dispy;
 	pm[nm].dispz = pi->dispz;
-        pm[nm].i     = np;
+        pm[nm].i     = p_loc;
 
         #endif
 
