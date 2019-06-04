@@ -27,6 +27,10 @@
 using namespace v4;
 #endif
 
+#ifdef V8_ACCELERATION
+using namespace v8;
+#endif
+
 #ifndef MIN_NP
 #define MIN_NP 128 // Default to 4kb (~1 page worth of memory)
 //#define MIN_NP 32768 // 32768 particles is 1 MiB of memory.
