@@ -416,6 +416,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   accumulator_t        * ALIGNED(128) a0 = args->a0;
   const interpolator_t * ALIGNED(128) f0 = args->f0;
   const grid_t         *              g  = args->g;
+  /* */ species_t      *              sp = args->sp;
 
   particle_t           * ALIGNED(128) p;
   particle_mover_t     * ALIGNED(16)  pm;
@@ -748,19 +749,19 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
     //--------------------------------------------------------------------------
 
 #   define MOVE_OUTBND(N)                                               \
-    if ( outbnd(N) )                                /* Unlikely */      \
+    if ( outbnd(N) )                                 /* Unlikely */     \
     {                                                                   \
       local_pm->dispx = ux(N);                                          \
       local_pm->dispy = uy(N);                                          \
       local_pm->dispz = uz(N);                                          \
       local_pm->i     = ( p - p0 ) + N;                                 \
-      if ( move_p( p0, local_pm, a0, g, _qsp ) )    /* Unlikely */      \
+      if ( move_p( p0, local_pm, a0, g, _qsp, sp ) ) /* Unlikely */	\
       {                                                                 \
         if ( nm < max_nm )                                              \
         {                                                               \
           v4::copy_4x1( &pm[nm++], local_pm );                          \
         }                                                               \
-        else                                        /* Unlikely */      \
+        else                                         /* Unlikely */     \
         {                                                               \
           itmp++;                                                       \
         }                                                               \
