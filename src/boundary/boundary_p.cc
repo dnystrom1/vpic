@@ -1400,7 +1400,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       }
 
       // Reverse order injection is done to reduce thrashing of the
-      // particle list Particles are removed in reverse order so the
+      // particle list. Particles are removed in reverse order so the
       // overall impact of removal + injection is to keep injected
       // particles in order.
       //
