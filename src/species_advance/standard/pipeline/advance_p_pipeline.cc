@@ -11,12 +11,13 @@
 
 #include "../../../util/pipelines/pipelines_exec.h"
 
+#if defined(VPIC_USE_AOSOA_P)
 //----------------------------------------------------------------------------//
 // Reference implementation for an advance_p pipeline function which does not
-// make use of explicit calls to vector intrinsic functions.
+// make use of explicit calls to vector intrinsic functions. This is the AoSoA
+// version.
 //----------------------------------------------------------------------------//
 
-#if defined(VPIC_USE_AOSOA_P)
 void
 advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                            int pipeline_rank,
@@ -248,6 +249,12 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   args->seg[pipeline_rank].n_ignored = itmp;
 }
 #else
+//----------------------------------------------------------------------------//
+// Reference implementation for an advance_p pipeline function which does not
+// make use of explicit calls to vector intrinsic functions. This is the AoS
+// version.
+//----------------------------------------------------------------------------//
+
 void
 advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                            int pipeline_rank,

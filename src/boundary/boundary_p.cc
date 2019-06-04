@@ -1174,12 +1174,12 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       } else continue;
 
       // Reverse order injection is done to reduce thrashing of the
-      // particle list (particles are removed reverse order so the
+      // particle list. Particles are removed reverse order so the
       // overall impact of removal + injection is to keep injected
-      // particles in order).
+      // particles in order.
       //
-      // WARNING: THIS TRUSTS THAT THE INJECTORS (INCLUDING THOSE
-      // RECEIVED FROM OTHER NODES) HAVE VALID PARTICLE IDS.
+      // WARNING: THIS TRUSTS THAT THE INJECTORS, INCLUDING THOSE
+      // RECEIVED FROM OTHER NODES, HAVE VALID PARTICLE IDS.
 
       pi += n-1;
       for( ; n; pi--, n-- ) {
