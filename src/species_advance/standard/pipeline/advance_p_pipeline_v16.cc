@@ -440,7 +440,7 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
   accumulator_t        * ALIGNED(128) a0 = args->a0;
   const interpolator_t * ALIGNED(128) f0 = args->f0;
   const grid_t         *              g  = args->g;
-  const species_t      *              sp = args->sp;
+  /* */ species_t      *              sp = args->sp;
 
   particle_t           * ALIGNED(128) p;
   particle_mover_t     * ALIGNED(16)  pm;
