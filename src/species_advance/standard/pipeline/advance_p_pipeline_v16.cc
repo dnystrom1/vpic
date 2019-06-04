@@ -445,6 +445,23 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
   particle_t           * ALIGNED(128) p;
   particle_mover_t     * ALIGNED(16)  pm;
 
+  float                * ALIGNED(64)  vp00;
+  float                * ALIGNED(64)  vp01;
+  float                * ALIGNED(64)  vp02;
+  float                * ALIGNED(64)  vp03;
+  float                * ALIGNED(64)  vp04;
+  float                * ALIGNED(64)  vp05;
+  float                * ALIGNED(64)  vp06;
+  float                * ALIGNED(64)  vp07;
+  float                * ALIGNED(64)  vp08;
+  float                * ALIGNED(64)  vp09;
+  float                * ALIGNED(64)  vp10;
+  float                * ALIGNED(64)  vp11;
+  float                * ALIGNED(64)  vp12;
+  float                * ALIGNED(64)  vp13;
+  float                * ALIGNED(64)  vp14;
+  float                * ALIGNED(64)  vp15;
+
   // Basic constants.
   const v16float qdt_2mc(args->qdt_2mc);
   const v16float cdt_dx(args->cdt_dx);
@@ -897,19 +914,19 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         //--------------------------------------------------------------------------
 
         #define MOVE_OUTBND(N)                                              \
-        if ( outbnd(N) )                                /* Unlikely */      \
+        if ( outbnd(N) )                                 /* Unlikely */     \
         {                                                                   \
           local_pm->dispx = ux(N);                                          \
           local_pm->dispy = uy(N);                                          \
           local_pm->dispz = uz(N);                                          \
           local_pm->i     = ( p - p0 ) + N;                                 \
-          if ( move_p( p0, local_pm, a0, g, _qsp ) )    /* Unlikely */      \
+          if ( move_p( p0, local_pm, a0, g, _qsp, sp ) ) /* Unlikely */     \
           {                                                                 \
             if ( nm < max_nm )                                              \
             {                                                               \
               v4::copy_4x1( &pm[nm++], local_pm );                          \
             }                                                               \
-            else                                        /* Unlikely */      \
+            else                                         /* Unlikely */     \
             {                                                               \
               itmp++;                                                       \
             }                                                               \
