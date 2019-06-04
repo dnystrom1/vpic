@@ -142,8 +142,12 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  vox = VOXEL( first_ix, first_iy, first_iz,
-	       sp->g->nx, sp->g->ny, sp->g->nz );
+  ix = first_ix;
+  iy = first_iy;
+  iz = first_iz;
+
+  vox = VOXEL( ix, iy, iz,
+               sp->g->nx, sp->g->ny, sp->g->nz );
 
   for( int j = 0; j < n_vox; j++ )
   {
@@ -408,8 +412,12 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  vox = VOXEL( first_ix, first_iy, first_iz,
-	       sp->g->nx, sp->g->ny, sp->g->nz );
+  ix = first_ix;
+  iy = first_iy;
+  iz = first_iz;
+
+  vox = VOXEL( ix, iy, iz,
+               sp->g->nx, sp->g->ny, sp->g->nz );
 
   for( int j = 0; j < n_vox; j++ )
   {
