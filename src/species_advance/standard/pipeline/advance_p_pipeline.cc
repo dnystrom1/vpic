@@ -662,6 +662,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   {
     if ( move_p( p0, &pm[ nm_move_p - 1 ], a0, g, qsp, sp ) ) // Unlikely
     {
+      // Stash these movers at the top of the movers list.
       if ( nm < max_nm )
       {
         nm++;

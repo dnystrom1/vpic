@@ -1063,46 +1063,55 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
       backfill:
 
-        s_vox = p0[i].i;
+	// I do not know how to backfill yet with the voxel based scheme.
+	// For now, just leave a hole but clear it.
+        // s_vox = p0[i].i;
 
-        sp->counts[s_vox]--;
+        // sp->counts[s_vox]--;
 
-        p_loc = sp->partition[s_vox] + sp->counts[s_vox];
+        // p_loc = sp->partition[s_vox] + sp->counts[s_vox];
 
-        p_src = &p0[p_loc];
+        // p_src = &p0[p_loc];
 
-        np--;
+        // np--;
 
         #if defined(V8_ACCELERATION)
 
-        copy_8x1( &p0[i].dx, &p0[p_loc].dx );
+        // copy_8x1( &p0[i].dx, &p0[p_loc].dx );
 
-        clear_8x1( &p0[p_loc].dx );
+        // clear_8x1( &p0[p_loc].dx );
+
+        clear_8x1( &p0[i].dx );
 
         #elif defined(V4_ACCELERATION)
 
-        // #ifdef V4_ACCELERATION
+        // // #ifdef V4_ACCELERATION
 
-        // copy_4x1( &p0[i].dx, &p0[np].dx );
-        // copy_4x1( &p0[i].ux, &p0[np].ux );
+        // // copy_4x1( &p0[i].dx, &p0[np].dx );
+        // // copy_4x1( &p0[i].ux, &p0[np].ux );
 
-        copy_4x1( &p0[i].dx, &p0[p_loc].dx );
-        copy_4x1( &p0[i].ux, &p0[p_loc].ux );
+        // copy_4x1( &p0[i].dx, &p0[p_loc].dx );
+        // copy_4x1( &p0[i].ux, &p0[p_loc].ux );
 
-        clear_4x1( &p0[p_loc].dx );
-        clear_4x1( &p0[p_loc].ux );
+        // clear_4x1( &p0[p_loc].dx );
+        // clear_4x1( &p0[p_loc].ux );
+
+        clear_4x1( &p0[i].dx );
+        clear_4x1( &p0[i].ux );
 
         #else
 
-        // Is this the best way to do this?
+        // // Is this the best way to do this?
 
-        // p0[i] = p0[np];
+        // // p0[i] = p0[np];
 
-        p0[i] = p0[p_loc];
+        // p0[i] = p0[p_loc];
 
-        // Clear the memory for the particle used to fill the hole. Is this the
-        // best way to do this?
-        CLEAR( p_src, 1 );
+        // // Clear the memory for the particle used to fill the hole. Is this the
+        // // best way to do this?
+        // CLEAR( p_src, 1 );
+
+        CLEAR( &p0[i].dx, 1 );
 
         #endif
       }
