@@ -736,17 +736,18 @@ move_p( particle_t       * ALIGNED(128) p0,
       COPY( p_dest, p, 1 );
 
       // Fill the hole left from moving the particle to its new location.
-      sp->counts[s_vox]--;
+      // sp->counts[s_vox]--;
 
-      p_loc = sp->partition[s_vox] + sp->counts[s_vox];
+      // p_loc = sp->partition[s_vox] + sp->counts[s_vox];
 
       // p_src = &sp->p[p_loc];
-      p_src = &p0[p_loc];
+      // p_src = &p0[p_loc];
 
       // COPY( p, p_src, 1 ); // Defer filling hole now, an experiment.
 
       // Clear the memory for the particle used to fill the hole.
-      CLEAR( p_src, 1 );
+      // CLEAR( p_src, 1 );
+      CLEAR( p, 1 ); // Instead, clear memory for hole.
 
       break;
     }
