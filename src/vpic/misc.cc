@@ -145,6 +145,10 @@ vpic_simulation::inject_particle( species_t * sp,
 
   pb->w [ip] = w;
 
+  #if 0
+  // Note that this is not doing what I expected. I am creating a particle_new_t
+  // for every particle which is consuming a lot of extra memory. Defer this for now
+  // since I do not have an AoSoA implementation for accumulate_rhob yet.
   // Create a work particle in species, or somewhere, to use here.
   particle_new_t *p = new particle_new_t;
 
@@ -160,6 +164,7 @@ vpic_simulation::inject_particle( species_t * sp,
   {
     accumulate_rhob( field_array->f, p, grid, -sp->q );
   }
+  #endif
 
   if ( age != 0 )
   {
