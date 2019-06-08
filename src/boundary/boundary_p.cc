@@ -1057,9 +1057,11 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         // Uh-oh: We fell through.
 
+        #if 0
         WARNING( ( "Unknown boundary interaction ... dropping particle "
                    "(species=%s)",
 		   sp->name ) );
+        #endif
 
       backfill:
 
