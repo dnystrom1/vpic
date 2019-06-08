@@ -112,7 +112,7 @@ int main(int argc, char** argv)
         simulation->modify( fbase );
     }
 
-    // #define VPIC_NORMAL_RUN
+    #define VPIC_NORMAL_RUN
     #ifdef VPIC_NORMAL_RUN
     // Perform the main simulation
     if( world_rank==0 ) log_printf( "*** Advancing\n" );

@@ -724,6 +724,7 @@ move_p( particle_t       * ALIGNED(128) p0,
 
     if ( axis == 3 )
     {
+      #if 0
       // Record the destination voxel which is the current value of p->i.
       d_vox = p->i;
 
@@ -751,6 +752,7 @@ move_p( particle_t       * ALIGNED(128) p0,
       // Clear the memory for the particle used to fill the hole.
       // CLEAR( p_src, 1 );
       CLEAR( p, 1 ); // Instead, clear memory for hole.
+      #endif
 
       break;
     }
