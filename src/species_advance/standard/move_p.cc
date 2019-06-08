@@ -36,7 +36,8 @@ move_p( particle_block_t * ALIGNED(128) pb,
         particle_mover_t * ALIGNED(16)  pm,
         accumulator_t    * ALIGNED(128) a0,
         const grid_t     *              g,
-        const float                     qsp )
+        const float                     qsp,
+	species_t        *              sp )
 {
   float   s_midx, s_midy, s_midz;
   float   s_dispx, s_dispy, s_dispz;
@@ -230,7 +231,8 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
         particle_mover_t * RESTRICT ALIGNED(16)  pm,
         accumulator_t    * RESTRICT ALIGNED(128) a,
         const grid_t     *                       g,
-        const float                              qsp ) {
+        const float                              qsp,
+	species_t        *                       sp ) {
 
   /*const*/ v4float one( 1.f );
   /*const*/ v4float tiny( 1e-37f );
@@ -417,7 +419,8 @@ move_p( particle_block_t * ALIGNED(128) pb,
         particle_mover_t * ALIGNED(16)  pm,
         accumulator_t    * ALIGNED(128) a0,
         const grid_t     *              g,
-        const float                     qsp )
+        const float                     qsp,
+	species_t        *              sp )
 {
   float   s_midx, s_midy, s_midz;
   float   s_dispx, s_dispy, s_dispz;
