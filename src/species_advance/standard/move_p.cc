@@ -28,6 +28,7 @@
 using namespace v4;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 // For now, just use the non-v4 version.  When convenient, convert the v4 version
 // to use the particle_block data format.  Or, use the approach of Doug to vectorize
 // over particles.
@@ -225,15 +226,17 @@ move_p( particle_block_t * ALIGNED(128) pb,
 
   return 0; // Return "mover not in use"
 }
+
 #else // V4_ACCELERATION defined, VPIC_USE_AOSOA_P not defined.
+
 int
 move_p( particle_t       * RESTRICT ALIGNED(128) p,
         particle_mover_t * RESTRICT ALIGNED(16)  pm,
         accumulator_t    * RESTRICT ALIGNED(128) a,
         const grid_t     *                       g,
         const float                              qsp,
-	species_t        *                       sp ) {
-
+	species_t        *                       sp )
+{
   /*const*/ v4float one( 1.f );
   /*const*/ v4float tiny( 1e-37f );
   /*const*/ v4int   sign_bits( 1<<31 );
@@ -409,11 +412,13 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
 
   return 0; // Mover not in use
 }
+
 #endif // End of VPIC_USE_AOSOA_P, VPIC_USE_AOS_P selection.
 
 #else // V4_ACCELERATION not defined, VPIC_USE_AOSOA_P defined.
 
 #if defined(VPIC_USE_AOSOA_P)
+
 int
 move_p( particle_block_t * ALIGNED(128) pb,
         particle_mover_t * ALIGNED(16)  pm,
@@ -608,7 +613,9 @@ move_p( particle_block_t * ALIGNED(128) pb,
 
   return 0; // Return "mover not in use"
 }
+
 #else // V4_ACCELERATION not defined, VPIC_USE_AOSOA_P not defined.
+
 int
 move_p( particle_t       * ALIGNED(128) p0,
         particle_mover_t * ALIGNED(16)  pm,
@@ -681,9 +688,9 @@ move_p( particle_t       * ALIGNED(128) p0,
     // current quadrant in a time-step
     v5 = q * s_dispx * s_dispy * s_dispz * ( 1.0 / 3.0 );
 
-    a = (float *) ( a0 + p->i );
+    a  = (float *) ( a0 + p->i );
 
-    #define accumulate_j(X,Y,Z)					      \
+    #define accumulate_j(X,Y,Z)                                       \
     v4  = q*s_disp##X;    /* v2 = q ux                            */  \
     v1  = v4*s_mid##Y;    /* v1 = q ux dy                         */  \
     v0  = v4-v1;          /* v0 = q ux (1-dy)                     */  \
@@ -702,6 +709,7 @@ move_p( particle_t       * ALIGNED(128) p0,
     a[1] += v1;                                                       \
     a[2] += v2;                                                       \
     a[3] += v3
+
     accumulate_j(x,y,z); a += 4;
     accumulate_j(y,z,x); a += 4;
     accumulate_j(z,x,y);
@@ -784,7 +792,8 @@ move_p( particle_t       * ALIGNED(128) p0,
       continue;
     }
 
-    if ( UNLIKELY( neighbor < g->rangel || neighbor > g->rangeh ) )
+    if ( UNLIKELY( neighbor < g->rangel ||
+		   neighbor > g->rangeh ) )
     {
       // Cannot handle the boundary condition here.  Save the updated
       // particle position, face it hit and update the remaining
@@ -804,6 +813,7 @@ move_p( particle_t       * ALIGNED(128) p0,
 
   return 0; // Return "mover not in use"
 }
+
 #endif // End of VPIC_USE_AOSOA_P, VPIC_USE_AOS_P selection.
 
 #endif // End of V4_ACCELERATION selection.

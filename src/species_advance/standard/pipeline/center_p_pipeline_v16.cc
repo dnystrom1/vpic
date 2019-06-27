@@ -7,6 +7,7 @@
 using namespace v16;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,
@@ -33,11 +34,10 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
   v16float cbz, dcbzdz;
 
   v16float dx, dy, dz;
-  v16float ux, uy, uz, q;
+  v16float ux, uy, uz;
   v16float hax, hay, haz;
   v16float cbxp, cbyp, cbzp;
   v16float v00, v01, v02, v03, v04;
-  // v16int   ii;
 
   int first_part; // Index of first particle for this thread.
   int  last_part; // Index of last  particle for this thread.
@@ -186,12 +186,10 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
       pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
 
       int ib = 0;
-      // int ip = 0;
 
       for( int i = 0; i < part_count; i += PARTICLE_BLOCK_SIZE )
       {
-        ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
-        // ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
+        ib = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
 
         //--------------------------------------------------------------------------
         // Load particle position and momentum.
@@ -200,7 +198,7 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
         load_16x1( &pb[ib].dx[0], dx );
         load_16x1( &pb[ib].dy[0], dy );
         load_16x1( &pb[ib].dz[0], dz );
-        // load_16x1( &pb[ib].i [0], ii );
+
         load_16x1( &pb[ib].ux[0], ux );
         load_16x1( &pb[ib].uy[0], uy );
         load_16x1( &pb[ib].uz[0], uz );
@@ -209,9 +207,9 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
         // Interpolate E.
         //--------------------------------------------------------------------------
 
-        hax = qdt_2mc*fma( fma( dy, d2exdydz, dexdz ), dz, fma( dy, dexdy, ex ) );
-        hay = qdt_2mc*fma( fma( dz, d2eydzdx, deydx ), dx, fma( dz, deydz, ey ) );
-        haz = qdt_2mc*fma( fma( dx, d2ezdxdy, dezdy ), dy, fma( dx, dezdx, ez ) );
+        hax = qdt_2mc * fma( fma( dy, d2exdydz, dexdz ), dz, fma( dy, dexdy, ex ) );
+        hay = qdt_2mc * fma( fma( dz, d2eydzdx, deydx ), dx, fma( dz, deydz, ey ) );
+        haz = qdt_2mc * fma( fma( dx, d2ezdxdy, dezdy ), dy, fma( dx, dezdx, ez ) );
 
         //--------------------------------------------------------------------------
         // Interpolate B.
@@ -257,7 +255,7 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
         uz   = fma( fms( v00, cbyp, v01 * cbxp ), v04, uz );
 
         //--------------------------------------------------------------------------
-        // Store particle momentum.  Could use store_16x4_tr_p or store_16x3_tr_p.
+        // Store particle momentum.
         //--------------------------------------------------------------------------
 
         store_16x1( ux, &pb[ib].ux[0] );
@@ -276,7 +274,9 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
                 sp->g->nz );
   }
 }
+
 #else // VPIC_USE_AOSOA_P is not defined i.e. VPIC_USE_AOS_P case.
+
 void
 center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,
@@ -536,6 +536,7 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
                 sp->g->nz );
   }
 }
+
 #endif // End of VPIC_USE_AOSOA_P vs VPIC_USE_AOS_P selection.
 
 #else // V16_ACCELERATION is not defined.

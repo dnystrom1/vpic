@@ -37,7 +37,6 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
   v4float hax, hay, haz;
   v4float cbxp, cbyp, cbzp;
   v4float v00, v01, v02, v03, v04;
-  // v4int   ii;
 
   int first_part; // Index of first particle for this thread.
   int  last_part; // Index of last  particle for this thread.
@@ -186,12 +185,10 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
       pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
 
       int ib = 0;
-      // int ip = 0;
 
       for( int i = 0; i < part_count; i += PARTICLE_BLOCK_SIZE )
       {
-        ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
-        // ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
+        ib = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
 
         //--------------------------------------------------------------------------
         // Load particle position and momentum.
@@ -200,7 +197,6 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
         load_4x1( &pb[ib].dx[0], dx );
         load_4x1( &pb[ib].dy[0], dy );
         load_4x1( &pb[ib].dz[0], dz );
-        // load_4x1( &pb[ib].i [0], ii );
         load_4x1( &pb[ib].ux[0], ux );
         load_4x1( &pb[ib].uy[0], uy );
         load_4x1( &pb[ib].uz[0], uz );

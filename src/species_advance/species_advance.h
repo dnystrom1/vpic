@@ -166,7 +166,8 @@ move_p( particle_block_t * ALIGNED(128) pb0,   // Particle block pointer
         particle_mover_t * ALIGNED(16)  pm,    // Particle mover to apply
         accumulator_t    * ALIGNED(128) a0,    // Accumulator to use
         const grid_t     *              g,     // Grid parameters
-        const float                     qsp ); // Species particle charge
+        const float                     qsp,   // Species particle charge
+        species_t        *              sp );  // Species pointer
 #else
 int
 move_p( particle_t       * ALIGNED(128) p0,    // Particle array

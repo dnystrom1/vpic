@@ -203,7 +203,8 @@ vpic_simulation::inject_particle( species_t * sp,
 		      pm,
 		      accumulator_array->a,
 		      grid,
-		      sp->q );
+		      sp->q,
+                      sp );
   }
 }
 #else

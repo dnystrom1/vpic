@@ -210,7 +210,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         pi_send[ face ] = (particle_injector_t *) ( ( (char *) mp_send_buffer( mp,
                                                                                f2b[ face ] )
-						    ) + 16 );
+                                                    ) + 16 );
 
         n_send[face] = 0;
       }
@@ -287,15 +287,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         if ( ( ( nn >= 0      ) & ( nn <  rangel ) ) |
 	     ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
 	{
-          pi = &pi_send[ face ] [ n_send[ face ]++ ];
-
-          // #ifdef V4_ACCELERATION
-
-          // copy_4x1( &pi->dx,    &p0[i].dx  );
-          // copy_4x1( &pi->ux,    &p0[i].ux  );
-          // copy_4x1( &pi->dispx, &pm->dispx );
-
-          // #else
+          pi        = &pi_send[ face ] [ n_send[ face ]++ ];
 
           pi->dx    = pb0[ib].dx[ip];
 	  pi->dy    = pb0[ib].dy[ip];
@@ -311,8 +303,6 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	  pi->dispy = pm->dispy;
 	  pi->dispz = pm->dispz;
           pi->sp_id = sp_id;
-
-          // #endif
 
           ( &pi->dx )[ axis[ face ] ] = dir[ face ];
           pi->i                       = nn - range[ face ];
@@ -367,13 +357,6 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         np--;
 
-        // #ifdef V4_ACCELERATION
-
-        // copy_4x1( &p0[i].dx, &p0[np].dx );
-        // copy_4x1( &p0[i].ux, &p0[np].ux );
-
-        // #else
-
         int jb = np / PARTICLE_BLOCK_SIZE;      // Index of particle block.
         int jp = np - PARTICLE_BLOCK_SIZE * jb; // Index of next particle in block.
 
@@ -386,8 +369,6 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         pb0[ib].uy[ip] = pb0[jb].uy[jp];
         pb0[ib].uz[ip] = pb0[jb].uz[jp];
         pb0[ib].w [ip] = pb0[jb].w [jp];
-
-        // #endif
       }
 
       sp->np = np;
@@ -465,8 +446,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
   #ifndef DISABLE_DYNAMIC_RESIZING
   ERROR( ( "Need AoSoA implementation for boundary_p w/ dynamic resizing." ) );
-  // Resize particle storage to accomodate worst case inject.
 
+  // Resize particle storage to accomodate worst case inject.
   do
   {
     int n;
@@ -635,6 +616,11 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       {
         id = pi->sp_id;
 
+	// Get a species pointer for this injector.
+	sp = find_species_id( id, sp_list );
+
+	// NOTE THAT THIS HAS NOT BEEN COMPLETED.
+
         pb = sp_pb[id];
 	np = sp_np[id];
 
@@ -650,13 +636,6 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	}
         #endif
 
-        // #ifdef V4_ACCELERATION
-
-        // copy_4x1( &p[np].dx, &pi->dx );
-        // copy_4x1( &p[np].ux, &pi->ux );
-
-        // #else
-
         int ib_np = np / PARTICLE_BLOCK_SIZE;         // Index of particle block.
         int ip_np = np - PARTICLE_BLOCK_SIZE * ib_np; // Index of next particle in block.
 
@@ -669,8 +648,6 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	pb[ib_np].uy[ip_np] = pi->uy;
 	pb[ib_np].uz[ip_np] = pi->uz;
 	pb[ib_np].w [ip_np] = pi->w;
-
-        // #endif
 
         sp_np[id] = np + 1;
 
@@ -702,7 +679,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 				   pm + nm,
 				   a0,
 				   g,
-				   sp_q[ id ] );
+				   sp_q[ id ],
+                                   sp );
       }
     } while( face != 5 );
 
@@ -743,7 +721,9 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     }
   }
 }
+
 #else // VPIC_USE_AOSOA_P not defined, VPIC_USE_AOS_P case.
+
 void
 boundary_p( particle_bc_t       * RESTRICT pbc_list,
             species_t           * RESTRICT sp_list,
@@ -892,7 +872,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     // injector buffer of nm in size.  All injection for all boundaries
     // would be done here.  The local buffer would then be counted to
     // determine the size of each send buffer.  The local buffer would
-    // then move all injectors into the approate send buffers, leaving
+    // then move all injectors into the appropriate send buffers, leaving
     // only the local injectors.  This would require some extra data
     // motion though, but would give a more robust implementation against
     // variations in MP implementation.
@@ -971,7 +951,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         face    = voxel & 7;
         voxel >>= 3;
         p0[i].i = voxel;
-        nn      = neighbor[ 6*voxel + face ];
+        nn      = neighbor[ 6 * voxel + face ];
 
         // Absorb.
 
@@ -989,7 +969,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         if ( ( ( nn >= 0      ) & ( nn <  rangel ) ) |
 	     ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
 	{
-          pi = &pi_send[ face ] [n_send[ face ]++ ];
+          pi = &pi_send[ face ] [ n_send[ face ]++ ];
 
           #ifdef V4_ACCELERATION
 
@@ -1042,8 +1022,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         nn = -nn - 3; // Assumes reflective/absorbing are -1, -2
 
         if ( ( nn >= 0  ) &
-	     ( nn <  nb ) )
-	{
+             ( nn <  nb ) )
+        {
           n_ci += pbc_interact[ nn ]( pbc_params[ nn ],
                                       sp,
                                       p0 + i,
@@ -1075,22 +1055,22 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         // p_src = &p0[p_loc];
 
-        // np--;
+        np--;
 
         #if defined(V8_ACCELERATION)
+
+        copy_8x1( &p0[i].dx, &p0[np].dx );
 
         // copy_8x1( &p0[i].dx, &p0[p_loc].dx );
 
         // clear_8x1( &p0[p_loc].dx );
 
-        clear_8x1( &p0[i].dx );
+        // clear_8x1( &p0[i].dx );
 
         #elif defined(V4_ACCELERATION)
 
-        // // #ifdef V4_ACCELERATION
-
-        // // copy_4x1( &p0[i].dx, &p0[np].dx );
-        // // copy_4x1( &p0[i].ux, &p0[np].ux );
+        copy_4x1( &p0[i].dx, &p0[np].dx );
+        copy_4x1( &p0[i].ux, &p0[np].ux );
 
         // copy_4x1( &p0[i].dx, &p0[p_loc].dx );
         // copy_4x1( &p0[i].ux, &p0[p_loc].ux );
@@ -1098,10 +1078,12 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // clear_4x1( &p0[p_loc].dx );
         // clear_4x1( &p0[p_loc].ux );
 
-        clear_4x1( &p0[i].dx );
-        clear_4x1( &p0[i].ux );
+        // clear_4x1( &p0[i].dx );
+        // clear_4x1( &p0[i].ux );
 
         #else
+
+        p0[i] = p0[np];
 
         // // Is this the best way to do this?
 
@@ -1113,7 +1095,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // // best way to do this?
         // CLEAR( p_src, 1 );
 
-        CLEAR( &p0[i].dx, 1 );
+        // CLEAR( &p0[i].dx, 1 );
 
         #endif
       }
@@ -1448,7 +1430,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 	// This needs to be changed to use the voxel specific max.
         if ( np >= sp_max_np[ id ] )
 	{
-	  n_dropped_particles[id]++;
+	  n_dropped_particles[ id ]++;
 
 	  continue;
 	}
@@ -1478,7 +1460,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         #ifdef DISABLE_DYNAMIC_RESIZING
         if ( nm >= sp_max_nm[ id ] )
 	{
-	  n_dropped_movers[id]++;
+	  n_dropped_movers[ id ]++;
 
 	  continue;
 	}
