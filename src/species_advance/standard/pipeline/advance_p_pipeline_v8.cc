@@ -1177,7 +1177,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
 
     float * ALIGNED(64) p_a0 = ( float * ALIGNED(64) ) ( a0 + vox );
 
-    for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
+    for( int j = 0; j < 8; j++ )
     {
       p_a0[ 0] += jx0[j];
       p_a0[ 1] += jx1[j];
