@@ -19,6 +19,7 @@ using namespace v16;
 //----------------------------------------------------------------------------//
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
                         int pipeline_rank,
