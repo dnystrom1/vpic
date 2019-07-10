@@ -756,7 +756,7 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
     v10 -= v15;        // v10 = q uz [ (1-dx)(1+dy) - ux*uy/3 ]
     v11 += v15;        // v11 = q uz [ (1+dx)(1+dy) + ux*uy/3 ]
 
-    // Zero the v12-v15 vectors prior to transposing the data.
+    // Zero the v12 - v15 vectors prior to transposing the data.
 
     v12 = 0.0;
     v13 = 0.0;

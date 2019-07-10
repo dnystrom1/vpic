@@ -8,8 +8,6 @@
 
 #include "../../../util/pipelines/pipelines_exec.h"
 
-#include <iostream>
-
 //----------------------------------------------------------------------------//
 // Reference implementation for an uncenter_p pipeline function which does not
 // make use of explicit calls to vector intrinsic functions.

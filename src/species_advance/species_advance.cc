@@ -109,12 +109,14 @@ delete_species( species_t * sp )
 /* Public interface **********************************************************/
 
 int
-num_species( const species_t * sp_list ) {
+num_species( const species_t * sp_list )
+{
   return sp_list ? sp_list->id+1 : 0;
 }
 
 void
-delete_species_list( species_t * sp_list ) {
+delete_species_list( species_t * sp_list )
+{
   species_t * sp;
   while( sp_list ) {
     sp = sp_list;
@@ -125,7 +127,8 @@ delete_species_list( species_t * sp_list ) {
 
 species_t *
 find_species_id( species_id id,
-                 species_t * sp_list ) {
+                 species_t * sp_list )
+{
   species_t * sp;
   LIST_FIND_FIRST( sp, sp_list, sp->id==id );
   return sp;
@@ -133,7 +136,8 @@ find_species_id( species_id id,
 
 species_t *
 find_species_name( const char * name,
-                   species_t * sp_list ) {
+                   species_t * sp_list )
+{
   species_t * sp;
   if( !name ) return NULL;
   LIST_FIND_FIRST( sp, sp_list, strcmp( sp->name, name )==0 );
@@ -142,7 +146,8 @@ find_species_name( const char * name,
 
 species_t *
 append_species( species_t * sp,
-                species_t ** sp_list ) {
+                species_t ** sp_list )
+{
   if( !sp || !sp_list ) ERROR(( "Bad args" ));
   if( sp->next ) ERROR(( "Species \"%s\" already in a list", sp->name ));
   if( find_species_name( sp->name, *sp_list ) )
