@@ -532,8 +532,8 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
   dr = shuffle<0,1,2,2>( dr );  // dr = p_ddx, p_ddy, p_ddz, D/C
   r  = shuffle<0,1,2,2>( r );  // r  = p_dx,  p_dy,  p_dz,  D/C
 
-  for(;;) {
-
+  for( ;; )
+  {
     // At this point:
     //   r     = current particle position in local voxel coordinates
     //           (note the current voxel is on [-1,1]^3.
@@ -622,7 +622,14 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
     // was succesfully processed.  Should be just under ~50% of the
     // time.
 
-    if( type==3 ) { store_4x1( r, &p[n].dx ); p[n].i = voxel; break; }
+    if ( type == 3 )
+    {
+      store_4x1( r, &p[n].dx );
+
+      p[n].i = voxel;
+
+      break;
+    }
 
     // Streak terminated on a voxel face.  Determine if the particle
     // crossed into a local voxel or if it hit a boundary.  Convert
@@ -650,26 +657,35 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
     store_4x1( sgn_dr, stack_vf ); if( stack_vf[type]>0 ) type += 3;
     neighbor = g->neighbor[ 6*voxel + type ];
 
-    if( UNLIKELY( neighbor==reflect_particles ) ) {
-
+    if ( UNLIKELY( neighbor == reflect_particles ) )
+    {
       // Hit a reflecting boundary condition.  Reflect the particle
       // momentum and remaining displacement and keep moving the
       // particle.
 
       dr = toggle_bits( bits, dr );
       u  = toggle_bits( bits, u  );
+
       store_4x1( u, &p[n].ux );
+
       continue;
     }
 
-    if( UNLIKELY( neighbor<g->rangel || neighbor>g->rangeh ) ) {
-
+    if ( UNLIKELY( neighbor < g->rangel ||
+		   neighbor > g->rangeh ) )
+    {
       // Cannot handle the boundary condition here.  Save the updated
       // particle position and update the remaining displacement in
       // the particle mover.
 
-      store_4x1( r, &p[n].dx );    p[n].i = 8*voxel + type;
-      store_4x1( dr, &pm->dispx ); pm->i  = n;
+      store_4x1( r, &p[n].dx );
+
+      p[n].i = 8*voxel + type;
+
+      store_4x1( dr, &pm->dispx );
+
+      pm->i  = n;
+
       return 1; // Mover still in use
     }
 
@@ -677,6 +693,7 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
     // particle coordinate system and keep moving the particle.
 
     voxel = (int32_t)( neighbor - g->rangel );
+
     r = toggle_bits( bits, r );
   }
 
