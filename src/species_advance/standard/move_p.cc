@@ -1029,7 +1029,7 @@ move_p( particle_t       * ALIGNED(128) p0,
 
       // Clear the memory for the particle used to fill the hole.
       // CLEAR( p_src, 1 );
-      CLEAR( p, 1 ); // Instead, clear memory for hole.
+      // CLEAR( p, 1 ); // Instead, clear memory for hole. Looks like cannot do this here.
       #endif
 
       break;
@@ -1063,7 +1063,7 @@ move_p( particle_t       * ALIGNED(128) p0,
     }
 
     if ( UNLIKELY( neighbor < g->rangel ||
-		   neighbor > g->rangeh ) )
+                   neighbor > g->rangeh ) )
     {
       // Cannot handle the boundary condition here.  Save the updated
       // particle position, face it hit and update the remaining

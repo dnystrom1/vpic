@@ -532,8 +532,8 @@ center_p_pipeline( species_t * RESTRICT sp,
 {
   DECLARE_ALIGNED_ARRAY( center_p_pipeline_args_t, 128, args, 1 );
 
-  if ( ! sp ||
-       ! ia ||
+  if ( ! sp           ||
+       ! ia           ||
        sp->g != ia->g )
   {
     ERROR( ( "Bad args." ) );
@@ -561,8 +561,8 @@ center_p_pipeline( species_t * RESTRICT sp,
 {
   DECLARE_ALIGNED_ARRAY( center_p_pipeline_args_t, 128, args, 1 );
 
-  if ( ! sp ||
-       ! ia ||
+  if ( ! sp           ||
+       ! ia           ||
        sp->g != ia->g )
   {
     ERROR( ( "Bad args." ) );

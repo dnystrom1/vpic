@@ -252,7 +252,7 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
           pb[ib].ux[j] = ux;
           pb[ib].uy[j] = uy;
           pb[ib].uz[j] = uz;
-	}
+        }
       }
     }
 
