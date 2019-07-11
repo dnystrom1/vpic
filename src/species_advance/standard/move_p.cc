@@ -280,7 +280,7 @@ move_p( particle_block_t * RESTRICT ALIGNED(128) pb,
 
       store_4x1( dr, &pm->dispx );
 
-      pm->i  = n;
+      pm->i = n;
 
       return 1; // Mover still in use
     }
