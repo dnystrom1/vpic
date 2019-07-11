@@ -403,7 +403,10 @@ move_p( particle_block_t * ALIGNED(128) pb,
 
     // If an end streak, return success (should be ~50% of the time)
 
-    if ( axis == 3 ) break;
+    if ( axis == 3 )
+    {
+      break;
+    }
 
     // Determine if the particle crossed into a local cell or if it
     // hit a boundary and convert the coordinate system accordingly.
@@ -789,7 +792,10 @@ move_p( particle_block_t * ALIGNED(128) pb,
 
     // If an end streak, return success (should be ~50% of the time)
 
-    if ( axis == 3 ) break;
+    if ( axis == 3 )
+    {
+      break;
+    }
 
     // Determine if the particle crossed into a local cell or if it
     // hit a boundary and convert the coordinate system accordingly.
