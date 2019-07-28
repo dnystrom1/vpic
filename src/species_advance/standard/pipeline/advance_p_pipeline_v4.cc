@@ -2,6 +2,8 @@
 
 #include "spa_private.h"
 
+#include <iostream>
+
 #if defined(V4_ACCELERATION)
 
 using namespace v4;
@@ -44,7 +46,29 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
 
   int itmp, nq, nm, max_nm;
 
+  int iwdn;
+  int cout_max_particles = VPIC_COUT_MAX_PARTICLES;
+  int iwdn_max           = cout_max_particles + 1;
+  int verbose_0          = 1;
+  int verbose_1          = 17;
+  int verbose_2          = 0;
+  int cout_world_rank    = 3;
+  int cout_pipeline_rank = 0;
+
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
+
+  if ( verbose_0 == 1 &&
+       world_rank == cout_world_rank &&
+       pipeline_rank == cout_pipeline_rank )
+  {
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "Entering advance_p_pipeline_v4."                                   << std::endl;
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "timestep number  = " << g->step                                    << std::endl;
+    std::cout << "cout_rank_mpi    = " << cout_world_rank                            << std::endl;
+    std::cout << "cout_rank_thread = " << cout_pipeline_rank                         << std::endl;
+    std::cout << "=================================================================" << std::endl;
+  }
 
   // Determine which quads of particle quads this pipeline processes.
 
@@ -82,10 +106,100 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
+  int fred = 0;
+  iwdn = 1;
+
+  if ( verbose_1 == 17                     &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop top."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 170                    &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop top."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 18                     &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop bot."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 180                    &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop bot."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
   // Process the particle blocks for this pipeline.
 
   for( ; nq; nq--, p+=4 )
   {
+    if ( verbose_1 == 17                     &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+	 iwdn < iwdn_max )
+    {
+      for( int j = 0; j < 4; j++ )
+      {
+        std::cout << "voxel: "    << p[j].i
+                  << " dx: "      << p[j].dx
+                  << " dy: "      << p[j].dy
+                  << " dz: "      << p[j].dz
+                  << " ux: "      << p[j].ux
+                  << " uy: "      << p[j].uy
+                  << " uz: "      << p[j].uz
+                  << " w: "       << p[j].w
+                  << std::flush
+                  << std::endl;
+      }
+
+      if ( g->step == 25 )
+	ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    if ( verbose_1 == 170                    &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+	 iwdn < iwdn_max )
+    {
+      for( int j = 0; j < 4; j++ )
+      {
+        std::cout << "voxel: "    << p[j].i
+                  << " dx: "      << p[j].dx
+                  << " dy: "      << p[j].dy
+                  << " dz: "      << p[j].dz
+                  << " ux: "      << p[j].ux
+                  << " uy: "      << p[j].uy
+                  << " uz: "      << p[j].uz
+                  << " w: "       << p[j].w
+                  << " p_index: " << p - p0 + j
+                  << std::flush
+                  << std::endl;
+      }
+
+      if ( g->step == 25 )
+	ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
     //--------------------------------------------------------------------------
     // Load particle data.
     //--------------------------------------------------------------------------
@@ -245,7 +359,7 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
     //--------------------------------------------------------------------------
     // Accumulate current density.
     //--------------------------------------------------------------------------
-#   define ACCUMULATE_J(X,Y,Z,offset)                                  \
+    #define ACCUMULATE_J(X,Y,Z,offset)                                 \
     v04  = q*u##X;    /* v04 = q ux                            */      \
     v01  = v04*d##Y;  /* v01 = q ux dy                         */      \
     v00  = v04-v01;   /* v00 = q ux (1-dy)                     */      \
@@ -270,14 +384,14 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
     ACCUMULATE_J( y, z, x, 4 );
     ACCUMULATE_J( z, x, y, 8 );
 
-#   undef ACCUMULATE_J
+    #undef ACCUMULATE_J
 
     //--------------------------------------------------------------------------
     // Update position and accumulate current density for out of bounds
     // particles.
     //--------------------------------------------------------------------------
 
-#   define MOVE_OUTBND(N)                                               \
+    #define MOVE_OUTBND(N)                                              \
     if ( outbnd(N) )                                /* Unlikely */      \
     {                                                                   \
       local_pm->dispx = ux(N);                                          \
@@ -302,7 +416,56 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
     MOVE_OUTBND( 2);
     MOVE_OUTBND( 3);
 
-#   undef MOVE_OUTBND
+    #undef MOVE_OUTBND
+
+    if ( verbose_1 == 18                     &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+	 iwdn < iwdn_max )
+    {
+      for( int j = 0; j < 4; j++ )
+      {
+        std::cout << "voxel: "    << p[j].i
+                  << " dx: "      << p[j].dx
+                  << " dy: "      << p[j].dy
+                  << " dz: "      << p[j].dz
+                  << " ux: "      << p[j].ux
+                  << " uy: "      << p[j].uy
+                  << " uz: "      << p[j].uz
+                  << " w: "       << p[j].w
+                  << std::flush
+                  << std::endl;
+      }
+
+      if ( g->step == 25 )
+	ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    if ( verbose_1 == 180                    &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+	 iwdn < iwdn_max )
+    {
+      for( int j = 0; j < 4; j++ )
+      {
+        std::cout << "voxel: "    << p[j].i
+                  << " dx: "      << p[j].dx
+                  << " dy: "      << p[j].dy
+                  << " dz: "      << p[j].dz
+                  << " ux: "      << p[j].ux
+                  << " uy: "      << p[j].uy
+                  << " uz: "      << p[j].uz
+                  << " w: "       << p[j].w
+                  << " p_index: " << p - p0 + j
+                  << std::flush
+                  << std::endl;
+      }
+
+      if ( g->step == 25 )
+	ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    iwdn++;
   }
 
   args->seg[pipeline_rank].pm        = pm;

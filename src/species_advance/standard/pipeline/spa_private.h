@@ -7,6 +7,9 @@
 
 #include "../../species_advance.h"
 
+// Specify in one place how much particle data to print out.
+#define VPIC_COUT_MAX_PARTICLES 2048
+
 ///////////////////////////////////////////////////////////////////////////////
 // advance_p_pipeline interface
 

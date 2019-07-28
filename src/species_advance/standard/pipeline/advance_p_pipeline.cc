@@ -11,6 +11,8 @@
 
 #include "../../../util/pipelines/pipelines_exec.h"
 
+#include <iostream>
+
 //----------------------------------------------------------------------------//
 // Reference implementation for an advance_p pipeline function which does not
 // make use of explicit calls to vector intrinsic functions. This is the AoS
@@ -48,7 +50,29 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   int itmp, n, nm, max_nm;
 
+  int iwdn;
+  int cout_max_particles = VPIC_COUT_MAX_PARTICLES;
+  int iwdn_max           = cout_max_particles + 1;
+  int verbose_0          = 1;
+  int verbose_1          = 17;
+  int verbose_2          = 0;
+  int cout_world_rank    = 3;
+  int cout_pipeline_rank = 0;
+
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
+
+  if ( verbose_0 == 1 &&
+       world_rank == cout_world_rank &&
+       pipeline_rank == cout_pipeline_rank )
+  {
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "Entering advance_p_pipeline_scalar, AoS version."                  << std::endl;
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "timestep number  = " << g->step                                    << std::endl;
+    std::cout << "cout_rank_mpi    = " << cout_world_rank                            << std::endl;
+    std::cout << "cout_rank_thread = " << cout_pipeline_rank                         << std::endl;
+    std::cout << "=================================================================" << std::endl;
+  }
 
   // Determine which quads of particles quads this pipeline processes.
 
@@ -84,10 +108,94 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
+  int fred = 0;
+  iwdn = 1;
+
+  if ( verbose_1 == 17                     &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop top."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 170                    &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop top."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 18                     &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop bot."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
+  if ( verbose_1 == 180                    &&
+       world_rank == cout_world_rank       &&
+       pipeline_rank == cout_pipeline_rank &&
+       g->step < 25 + 1 )
+  {
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+      std::cout << "Particle data, loop bot."                                          << std::endl;
+      std::cout << "-----------------------------------------------------------------" << std::endl;
+  }
+
   // Process particles for this pipeline.
 
   for( ; n; n--, p++ )
   {
+    if ( verbose_1 == 17                     &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+         iwdn < iwdn_max )
+    {
+      std::cout << "voxel: "    << p->i
+                << " dx: "      << p->dx
+                << " dy: "      << p->dy
+                << " dz: "      << p->dz
+                << " ux: "      << p->ux
+                << " uy: "      << p->uy
+                << " uz: "      << p->uz
+                << " w: "       << p->w
+                << std::flush
+                << std::endl;
+
+      if ( g->step == 25 )
+        ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    if ( verbose_1 == 170                    &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+         iwdn < iwdn_max )
+    {
+      std::cout << "voxel: "    << p->i
+                << " dx: "      << p->dx
+                << " dy: "      << p->dy
+                << " dz: "      << p->dz
+                << " ux: "      << p->ux
+                << " uy: "      << p->uy
+                << " uz: "      << p->uz
+                << " w: "       << p->w
+                << " p_index: " << p - p0
+                << std::flush
+                << std::endl;
+
+      if ( g->step == 25 )
+        ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
     dx   = p->dx;                             // Load position
     dy   = p->dy;
     dz   = p->dz;
@@ -183,7 +291,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
       a  = (float *)( a0 + ii );              // Get accumulator
 
-#     define ACCUMULATE_J(X,Y,Z,offset)                                 \
+      #define ACCUMULATE_J(X,Y,Z,offset)                                \
       v4  = q*u##X;   /* v2 = q ux                            */        \
       v1  = v4*d##Y;  /* v1 = q ux dy                         */        \
       v0  = v4-v1;    /* v0 = q ux (1-dy)                     */        \
@@ -207,7 +315,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       ACCUMULATE_J( y, z, x, 4 );
       ACCUMULATE_J( z, x, y, 8 );
 
-#     undef ACCUMULATE_J
+      #undef ACCUMULATE_J
     }
 
     else                                        // Unlikely
@@ -231,6 +339,49 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
         }
       }
     }
+
+    if ( verbose_1 == 18                     &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+         iwdn < iwdn_max )
+    {
+      std::cout << "voxel: "    << p->i
+                << " dx: "      << p->dx
+                << " dy: "      << p->dy
+                << " dz: "      << p->dz
+                << " ux: "      << p->ux
+                << " uy: "      << p->uy
+                << " uz: "      << p->uz
+                << " w: "       << p->w
+                << std::flush
+                << std::endl;
+
+      if ( g->step == 25 )
+        ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    if ( verbose_1 == 180                    &&
+         world_rank == cout_world_rank       &&
+         pipeline_rank == cout_pipeline_rank &&
+         iwdn < iwdn_max )
+    {
+      std::cout << "voxel: "    << p->i
+                << " dx: "      << p->dx
+                << " dy: "      << p->dy
+                << " dz: "      << p->dz
+                << " ux: "      << p->ux
+                << " uy: "      << p->uy
+                << " uz: "      << p->uz
+                << " w: "       << p->w
+                << " p_index: " << p - p0
+                << std::flush
+                << std::endl;
+
+      if ( g->step == 25 )
+        ERROR( ( "Reached step limit for diagnostic prints." ) );
+    }
+
+    iwdn++;
   }
 
   args->seg[pipeline_rank].pm        = pm;

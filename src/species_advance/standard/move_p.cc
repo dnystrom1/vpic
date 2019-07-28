@@ -2,6 +2,8 @@
 
 #include "../species_advance.h"
 
+#include <iostream>
+
 // move_p moves the particle m->p by m->dispx, m->dispy, m->dispz
 // depositing particle current as it goes. If the particle was moved
 // sucessfully (particle mover is no longer in use) returns 0. If the
@@ -49,6 +51,25 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
   int32_t n, voxel;
   int64_t neighbor;
   int type;
+
+  int iwdn;
+  int cout_max_particles = 1024;
+  int iwdn_max           = cout_max_particles + 1;
+  int verbose_0          = 0;
+  int verbose_1          = 1;
+  int verbose_2          = 0;
+  int cout_world_rank    = 3;
+  int cout_pipeline_rank = 0;
+  int n_passes_move_p    = 0;
+
+  if ( verbose_1 == 1 &&
+       world_rank == cout_world_rank )
+  {
+    std::cout << "move_p, entry: Particle number: "
+              << pm->i
+              << std::flush
+              << std::endl;
+  }
 
   load_4x1( &pm->dispx, dr );  n     = pm->i;
   load_4x1( &p[n].dx,   r  );  voxel = p[n].i;
@@ -227,6 +248,25 @@ move_p( particle_t       * ALIGNED(128) p0,
   int64_t neighbor;
   float * a;
   particle_t * ALIGNED(32) p = p0 + pm->i;
+
+  int iwdn;
+  int cout_max_particles = 1024;
+  int iwdn_max           = cout_max_particles + 1;
+  int verbose_0          = 0;
+  int verbose_1          = 1;
+  int verbose_2          = 0;
+  int cout_world_rank    = 3;
+  int cout_pipeline_rank = 0;
+  int n_passes_move_p    = 0;
+
+  if ( verbose_1 == 1 &&
+       world_rank == cout_world_rank )
+  {
+    std::cout << "move_p, entry: Particle number: "
+              << pm->i
+              << std::flush
+              << std::endl;
+  }
 
   q = qsp * p->w;
 
