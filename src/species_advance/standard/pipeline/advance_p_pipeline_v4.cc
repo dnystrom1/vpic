@@ -156,7 +156,8 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
     if ( verbose_1 == 17                     &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-	 iwdn < iwdn_max )
+	 iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       for( int j = 0; j < 4; j++ )
       {
@@ -171,15 +172,13 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
                   << std::flush
                   << std::endl;
       }
-
-      if ( g->step == 25 )
-	ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     if ( verbose_1 == 170                    &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-	 iwdn < iwdn_max )
+	 iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       for( int j = 0; j < 4; j++ )
       {
@@ -195,9 +194,6 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
                   << std::flush
                   << std::endl;
       }
-
-      if ( g->step == 25 )
-	ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     //--------------------------------------------------------------------------
@@ -421,7 +417,8 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
     if ( verbose_1 == 18                     &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-	 iwdn < iwdn_max )
+	 iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       for( int j = 0; j < 4; j++ )
       {
@@ -436,15 +433,13 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
                   << std::flush
                   << std::endl;
       }
-
-      if ( g->step == 25 )
-	ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     if ( verbose_1 == 180                    &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-	 iwdn < iwdn_max )
+	 iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       for( int j = 0; j < 4; j++ )
       {
@@ -460,9 +455,6 @@ advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
                   << std::flush
                   << std::endl;
       }
-
-      if ( g->step == 25 )
-	ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     iwdn++;

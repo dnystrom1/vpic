@@ -158,7 +158,8 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     if ( verbose_1 == 17                     &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-         iwdn < iwdn_max )
+         iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       std::cout << "voxel: "    << p->i
                 << " dx: "      << p->dx
@@ -170,15 +171,13 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                 << " w: "       << p->w
                 << std::flush
                 << std::endl;
-
-      if ( g->step == 25 )
-        ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     if ( verbose_1 == 170                    &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-         iwdn < iwdn_max )
+         iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       std::cout << "voxel: "    << p->i
                 << " dx: "      << p->dx
@@ -191,9 +190,6 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                 << " p_index: " << p - p0
                 << std::flush
                 << std::endl;
-
-      if ( g->step == 25 )
-        ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     dx   = p->dx;                             // Load position
@@ -343,7 +339,8 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     if ( verbose_1 == 18                     &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-         iwdn < iwdn_max )
+         iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       std::cout << "voxel: "    << p->i
                 << " dx: "      << p->dx
@@ -355,15 +352,13 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                 << " w: "       << p->w
                 << std::flush
                 << std::endl;
-
-      if ( g->step == 25 )
-        ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     if ( verbose_1 == 180                    &&
          world_rank == cout_world_rank       &&
          pipeline_rank == cout_pipeline_rank &&
-         iwdn < iwdn_max )
+         iwdn < iwdn_max                     &&
+	 g->step < 25 )
     {
       std::cout << "voxel: "    << p->i
                 << " dx: "      << p->dx
@@ -376,9 +371,6 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                 << " p_index: " << p - p0
                 << std::flush
                 << std::endl;
-
-      if ( g->step == 25 )
-        ERROR( ( "Reached step limit for diagnostic prints." ) );
     }
 
     iwdn++;
