@@ -54,7 +54,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int cout_max_particles = VPIC_COUT_MAX_PARTICLES;
   int iwdn_max           = cout_max_particles + 1;
   int verbose_0          = 1;
-  int verbose_1          = 17;
+  int verbose_1          = 170;
   int verbose_2          = 0;
   int cout_world_rank    = 3;
   int cout_pipeline_rank = 0;
