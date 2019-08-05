@@ -40,6 +40,9 @@ using namespace v8;
 enum { MAX_PBC = 32, MAX_SP = 32 };
 
 #if defined(VPIC_USE_AOSOA_P)
+
+// This is the AoSoA implementation.
+
 void
 boundary_p( particle_bc_t       * RESTRICT pbc_list,
             species_t           * RESTRICT sp_list,
@@ -156,14 +159,14 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_size_recv_buffer( mp,
-			   f2b[ face ],
-			   sizeof( int ) );
+                           f2b[ face ],
+                           sizeof( int ) );
 
       mp_begin_recv( mp,
-		     f2b[ face ],
-		     sizeof( int ),
-		     bc[ face ],
-		     f2rb[ face ] );
+                     f2b[ face ],
+                     sizeof( int ),
+                     bc[ face ],
+                     f2rb[ face ] );
     }
   }
 
@@ -205,8 +208,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       if ( shared[ face ] )
       {
         mp_size_send_buffer( mp,
-			     f2b[ face ],
-			     16 + nm * sizeof( particle_injector_t ) );
+                             f2b[ face ],
+                             16 + nm * sizeof( particle_injector_t ) );
 
         pi_send[ face ] = (particle_injector_t *) ( ( (char *) mp_send_buffer( mp,
                                                                                f2b[ face ] )
@@ -273,7 +276,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // Absorb.
 
         if ( nn == absorb_particles )
-	{
+        {
           // Ideally, we would batch all rhob accumulations together
           // for efficiency.
           ERROR( ( "Need AoSoA implementation of accumulate_rhob." ) );
@@ -285,23 +288,23 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // Send to a neighboring node.
 
         if ( ( ( nn >= 0      ) & ( nn <  rangel ) ) |
-	     ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
-	{
+             ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
+        {
           pi        = &pi_send[ face ] [ n_send[ face ]++ ];
 
           pi->dx    = pb0[ib].dx[ip];
-	  pi->dy    = pb0[ib].dy[ip];
-	  pi->dz    = pb0[ib].dz[ip];
+          pi->dy    = pb0[ib].dy[ip];
+          pi->dz    = pb0[ib].dz[ip];
           pi->i     = nn - range[face];
 
           pi->ux    = pb0[ib].ux[ip];
-	  pi->uy    = pb0[ib].uy[ip];
-	  pi->uz    = pb0[ib].uz[ip];
-	  pi->w     = pb0[ib].w [ip];
+          pi->uy    = pb0[ib].uy[ip];
+          pi->uz    = pb0[ib].uz[ip];
+          pi->w     = pb0[ib].w [ip];
 
           pi->dispx = pm->dispx;
-	  pi->dispy = pm->dispy;
-	  pi->dispz = pm->dispz;
+          pi->dispy = pm->dispy;
+          pi->dispz = pm->dispz;
           pi->sp_id = sp_id;
 
           ( &pi->dx )[ axis[ face ] ] = dir[ face ];
@@ -337,7 +340,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
           ERROR( ( "Need AoSoA implementation for pbc_interact called in boundary_p." ) );
 
           // n_ci += pbc_interact[ nn ]( pbc_params[ nn ],
-          //   	                         sp,
+          //                             sp,
           //                             p0 + i,
           //                             pm,
           //                             ci + n_ci,
@@ -350,8 +353,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // Uh-oh: We fell through.
 
         WARNING( ( "Unknown boundary interaction ... dropping particle "
-		   "(species=%s)",
-		   sp->name ) );
+                   "(species=%s)",
+                   sp->name ) );
 
       backfill:
 
@@ -393,13 +396,13 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       *( (int *) mp_send_buffer( mp,
-				 f2b[face] ) ) = n_send[ face ];
+                                 f2b[face] ) ) = n_send[ face ];
 
       mp_begin_send( mp,
-		     f2b[ face ],
-		     sizeof( int ),
-		     bc[ face ],
-		     f2b[ face ] );
+                     f2b[ face ],
+                     sizeof( int ),
+                     bc[ face ],
+                     f2b[ face ] );
     }
   }
 
@@ -408,20 +411,20 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_recv( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
 
       n_recv[ face ] = *( (int *) mp_recv_buffer( mp,
-						  f2b[ face ] ) );
+                                                  f2b[ face ] ) );
 
       mp_size_recv_buffer( mp,
-			   f2b[ face ],
+                           f2b[ face ],
                            16 + n_recv[ face ] * sizeof( particle_injector_t ) );
 
       mp_begin_recv( mp,
-		     f2b[ face ],
-		     16 + n_recv[ face ] * sizeof( particle_injector_t ),
+                     f2b[ face ],
+                     16 + n_recv[ face ] * sizeof( particle_injector_t ),
                      bc[ face ],
-		     f2rb[ face ] );
+                     f2rb[ face ] );
     }
   }
 
@@ -430,17 +433,17 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_send( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
 
       // FIXME: ASSUMES MP WON'T MUCK WITH REST OF SEND BUFFER. IF WE
       // DID MORE EFFICIENT MOVER ALLOCATION ABOVE, THIS WOULD BE
       // ROBUSTED AGAINST MP IMPLEMENTATION VAGARIES.
 
       mp_begin_send( mp,
-		     f2b[ face ],
-		     16 + n_send[ face ] * sizeof( particle_injector_t ),
+                     f2b[ face ],
+                     16 + n_send[ face ] * sizeof( particle_injector_t ),
                      bc[ face ],
-		     f2b[ face ] );
+                     f2b[ face ] );
     }
   }
 
@@ -463,7 +466,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     {
       if ( shared[ face ] )
       {
-	max_inj += n_recv[ face ];
+        max_inj += n_recv[ face ];
       }
     }
 
@@ -483,8 +486,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         WARNING( ( "Resizing local %s particle storage from %i to %i",
                    sp->name,
-		   sp->max_np,
-		   n ) );
+                   sp->max_np,
+                   n ) );
 
         MALLOC_ALIGNED( new_p, n, 128 );
 
@@ -493,7 +496,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         FREE_ALIGNED( sp->p );
 
         sp->p      = new_p;
-	sp->max_np = n;
+        sp->max_np = n;
       }
 
       n = sp->nm + max_inj;
@@ -504,8 +507,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         WARNING( ( "Resizing local %s mover storage from %i to %i",
                    sp->name,
-		   sp->max_nm,
-		   n ) );
+                   sp->max_nm,
+                   n ) );
 
         MALLOC_ALIGNED( new_pm, n, 128 );
 
@@ -576,30 +579,30 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
       if ( face == 7 )
       {
-	face = 0;
+        face = 0;
       }
 
       if ( face == 6 )
       {
-	pi = ci;
-	n  = n_ci;
+        pi = ci;
+        n  = n_ci;
       }
 
       else if ( shared[ face ] )
       {
         mp_end_recv( mp,
-		     f2b[ face ] );
+                     f2b[ face ] );
 
         pi = (const particle_injector_t *)
              ( ( (char *) mp_recv_buffer( mp,
-					  f2b[ face ] ) ) + 16 );
+                                          f2b[ face ] ) ) + 16 );
 
         n  = n_recv[ face ];
       }
 
       else
       {
-	continue;
+        continue;
       }
 
       // Reverse order injection is done to reduce thrashing of the
@@ -616,48 +619,48 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       {
         id = pi->sp_id;
 
-	// Get a species pointer for this injector.
-	sp = find_species_id( id, sp_list );
+        // Get a species pointer for this injector.
+        sp = find_species_id( id, sp_list );
 
-	// NOTE THAT THIS HAS NOT BEEN COMPLETED.
+        // NOTE THAT THIS HAS NOT BEEN COMPLETED.
 
         pb = sp_pb[id];
-	np = sp_np[id];
+        np = sp_np[id];
 
         pm = sp_pm[id];
-	nm = sp_nm[id];
+        nm = sp_nm[id];
 
         #ifdef DISABLE_DYNAMIC_RESIZING
         if ( np >= sp_max_np[ id ] )
-	{
-	  n_dropped_particles[ id ]++;
+        {
+          n_dropped_particles[ id ]++;
 
-	  continue;
-	}
+          continue;
+        }
         #endif
 
         int ib_np = np / PARTICLE_BLOCK_SIZE;         // Index of particle block.
         int ip_np = np - PARTICLE_BLOCK_SIZE * ib_np; // Index of next particle in block.
 
         pb[ib_np].dx[ip_np] = pi->dx;
-	pb[ib_np].dy[ip_np] = pi->dy;
-	pb[ib_np].dz[ip_np] = pi->dz;
-	pb[ib_np].i [ip_np] = pi->i;
+        pb[ib_np].dy[ip_np] = pi->dy;
+        pb[ib_np].dz[ip_np] = pi->dz;
+        pb[ib_np].i [ip_np] = pi->i;
 
         pb[ib_np].ux[ip_np] = pi->ux;
-	pb[ib_np].uy[ip_np] = pi->uy;
-	pb[ib_np].uz[ip_np] = pi->uz;
-	pb[ib_np].w [ip_np] = pi->w;
+        pb[ib_np].uy[ip_np] = pi->uy;
+        pb[ib_np].uz[ip_np] = pi->uz;
+        pb[ib_np].w [ip_np] = pi->w;
 
         sp_np[id] = np + 1;
 
         #ifdef DISABLE_DYNAMIC_RESIZING
         if ( nm >= sp_max_nm[ id ] )
-	{
-	  n_dropped_movers[ id ]++;
+        {
+          n_dropped_movers[ id ]++;
 
-	  continue;
-	}
+          continue;
+        }
         #endif
 
         #ifdef V4_ACCELERATION
@@ -669,17 +672,17 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         #else
 
         pm[nm].dispx = pi->dispx;
-	pm[nm].dispy = pi->dispy;
-	pm[nm].dispz = pi->dispz;
+        pm[nm].dispy = pi->dispy;
+        pm[nm].dispz = pi->dispz;
         pm[nm].i     = np;
 
         #endif
 
         sp_nm[ id ] = nm + move_p( pb,
-				   pm + nm,
-				   a0,
-				   g,
-				   sp_q[ id ],
+                                   pm + nm,
+                                   a0,
+                                   g,
+                                   sp_q[ id ],
                                    sp );
       }
     } while( face != 5 );
@@ -693,7 +696,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                    "local particle allocation in your simulation setup for "
                    "this species on this node.",
                    n_dropped_particles[ sp->id ],
-		   sp->name ) );
+                   sp->name ) );
       }
 
       if ( n_dropped_movers[ sp->id ] )
@@ -703,7 +706,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                    "local particle mover buffer in your simulation setup "
                    "for this species on this node.",
                    n_dropped_movers[ sp->id ],
-		   sp->name ) );
+                   sp->name ) );
       }
       #endif
 
@@ -717,12 +720,14 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_send( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
     }
   }
 }
 
 #else // VPIC_USE_AOSOA_P not defined, VPIC_USE_AOS_P case.
+
+// This is the AoS implementation.
 
 void
 boundary_p( particle_bc_t       * RESTRICT pbc_list,
@@ -747,7 +752,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                                BOUNDARY( 0, 0,-1) };
 
   // Gives the axis associated with a local face.
-  static const int axis[6]  = { 0, 1, 2,  0,  1,  2 };
+  static const int axis[6]  = { 0, 1, 2, 0, 1, 2 };
 
   // Gives the location of sending face on the receiver.
   static const float dir[6] = { 1, 1, 1, -1, -1, -1 };
@@ -844,14 +849,14 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_size_recv_buffer( mp,
-			   f2b[ face ],
-			   sizeof( int ) );
+                           f2b[ face ],
+                           sizeof( int ) );
 
       mp_begin_recv( mp,
-		     f2b[ face ],
-		     sizeof( int ),
-		     bc[ face ],
-		     f2rb[ face ] );
+                     f2b[ face ],
+                     sizeof( int ),
+                     bc[ face ],
+                     f2rb[ face ] );
     }
   }
 
@@ -893,12 +898,12 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       if ( shared[ face ] )
       {
         mp_size_send_buffer( mp,
-			     f2b[ face ],
-			     16 + nm * sizeof( particle_injector_t ) );
+                             f2b[ face ],
+                             16 + nm * sizeof( particle_injector_t ) );
 
         pi_send[ face ] = (particle_injector_t *) ( ( (char *) mp_send_buffer( mp,
-									       f2b[ face ] )
-						    ) + 16 );
+                                                                               f2b[ face ] )
+                                                    ) + 16 );
 
         n_send[ face ] = 0;
       }
@@ -956,7 +961,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // Absorb.
 
         if ( nn == absorb_particles )
-	{
+        {
           // Ideally, we would batch all rhob accumulations together
           // for efficiency.
           accumulate_rhob( f, p0 + i, g, sp_q );
@@ -967,8 +972,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         // Send to a neighboring node.
 
         if ( ( ( nn >= 0      ) & ( nn <  rangel ) ) |
-	     ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
-	{
+             ( ( nn >  rangeh ) & ( nn <= rangem ) ) )
+        {
           pi = &pi_send[ face ] [ n_send[ face ]++ ];
 
           #ifdef V4_ACCELERATION
@@ -980,17 +985,17 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
           #else
 
           pi->dx    = p0[i].dx;
-	  pi->dy    = p0[i].dy;
-	  pi->dz    = p0[i].dz;
+          pi->dy    = p0[i].dy;
+          pi->dz    = p0[i].dz;
 
           pi->ux    = p0[i].ux;
-	  pi->uy    = p0[i].uy;
-	  pi->uz    = p0[i].uz;
-	  pi->w     = p0[i].w;
+          pi->uy    = p0[i].uy;
+          pi->uz    = p0[i].uz;
+          pi->w     = p0[i].w;
 
           pi->dispx = pm->dispx;
-	  pi->dispy = pm->dispy;
-	  pi->dispz = pm->dispz;
+          pi->dispy = pm->dispy;
+          pi->dispz = pm->dispz;
 
           #endif
 
@@ -1040,13 +1045,13 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         #if 0
         WARNING( ( "Unknown boundary interaction ... dropping particle "
                    "(species=%s)",
-		   sp->name ) );
+                   sp->name ) );
         #endif
 
       backfill:
 
-	// I do not know how to backfill yet with the voxel based scheme.
-	// For now, just leave a hole but clear it.
+        // I do not know how to backfill yet with the voxel based scheme.
+        // For now, just leave a hole but clear it.
         // s_vox = p0[i].i;
 
         // sp->counts[s_vox]--;
@@ -1123,13 +1128,13 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       *( (int *) mp_send_buffer( mp,
-				 f2b[ face ] ) ) = n_send[ face ];
+                                 f2b[ face ] ) ) = n_send[ face ];
 
       mp_begin_send( mp,
-		     f2b[ face ],
-		     sizeof( int ),
-		     bc[ face ],
-		     f2b[ face ] );
+                     f2b[ face ],
+                     sizeof( int ),
+                     bc[ face ],
+                     f2b[ face ] );
     }
   }
 
@@ -1138,20 +1143,20 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_recv( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
 
       n_recv[ face ] = *( (int *) mp_recv_buffer( mp,
-						  f2b[ face ] ) );
+                                                  f2b[ face ] ) );
 
       mp_size_recv_buffer( mp,
-			   f2b[ face ],
+                           f2b[ face ],
                            16 + n_recv[ face ] * sizeof( particle_injector_t ) );
 
       mp_begin_recv( mp,
-		     f2b[ face ],
-		     16 + n_recv[ face ] * sizeof( particle_injector_t ),
+                     f2b[ face ],
+                     16 + n_recv[ face ] * sizeof( particle_injector_t ),
                      bc[ face ],
-		     f2rb[ face ] );
+                     f2rb[ face ] );
     }
   }
 
@@ -1160,17 +1165,17 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_send( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
 
       // FIXME: ASSUMES MP WON'T MUCK WITH REST OF SEND BUFFER. IF WE
       // DID MORE EFFICIENT MOVER ALLOCATION ABOVE, THIS WOULD BE
       // ROBUSTED AGAINST MP IMPLEMENTATION VAGARIES.
 
       mp_begin_send( mp,
-		     f2b[ face ],
-		     16 + n_send[ face ] * sizeof( particle_injector_t ),
+                     f2b[ face ],
+                     16 + n_send[ face ] * sizeof( particle_injector_t ),
                      bc[ face ],
-		     f2b[ face ] );
+                     f2b[ face ] );
     }
   }
 
@@ -1192,7 +1197,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     {
       if ( shared[ face ] )
       {
-	max_inj += n_recv[ face ];
+        max_inj += n_recv[ face ];
       }
     }
 
@@ -1214,8 +1219,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         WARNING( ( "Resizing local %s particle storage from %i to %i",
                    sp->name,
-		   sp->max_np,
-		   n ) );
+                   sp->max_np,
+                   n ) );
 
         MALLOC_ALIGNED( new_p, n, 128 );
 
@@ -1224,35 +1229,37 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         FREE_ALIGNED( sp->p );
 
         sp->p      = new_p;
-	sp->max_np = n;
+        sp->max_np = n;
 
-        /*nm = sp->max_nm * resize_ratio;
+        /*
+        nm = sp->max_nm * resize_ratio;
         WARNING(( "Resizing local %s mover storage from %i to %i",
                   sp->name, sp->max_nm, nm ));
         MALLOC_ALIGNED( new_pm, nm, 128 );
         COPY( new_pm, sp->pm, sp->nm );
         FREE_ALIGNED( sp->pm );
         sp->pm = new_pm;
-        sp->max_nm = nm;*/
+        sp->max_nm = nm;
+        */
       }
 
       else if( sp->max_np > MIN_NP          &&
-	       n          < sp->max_np >> 1 )
+               n          < sp->max_np >> 1 )
       {
         n += 0.125 * n; // Overallocate by less since this rank is decreasing
 
         if ( n < MIN_NP )
-	{
-	  n = MIN_NP;
-	}
+        {
+          n = MIN_NP;
+        }
 
         // float resize_ratio = (float)n/sp->max_np;
 
         WARNING( ( "Resizing (shrinking) local %s particle storage from "
                    "%i to %i",
-		   sp->name,
-		   sp->max_np,
-		   n ) );
+                   sp->name,
+                   sp->max_np,
+                   n ) );
 
         MALLOC_ALIGNED( new_p, n, 128 );
 
@@ -1261,7 +1268,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         FREE_ALIGNED( sp->p );
 
         sp->p      = new_p;
-	sp->max_np = n;
+        sp->max_np = n;
 
         /*
         nm = sp->max_nm * resize_ratio;
@@ -1289,8 +1296,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         WARNING( ( "This happened.  Resizing local %s mover storage from "
                    "%i to %i based on not enough movers",
                    sp->name,
-		   sp->max_nm,
-		   nm ) );
+                   sp->max_nm,
+                   nm ) );
 
         MALLOC_ALIGNED( new_pm, nm, 128 );
 
@@ -1370,30 +1377,30 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
       if ( face == 7 )
       {
-	face = 0;
+        face = 0;
       }
 
       if ( face == 6 )
       {
-	pi = ci;
-	n  = n_ci;
+        pi = ci;
+        n  = n_ci;
       }
 
       else if ( shared[ face ] )
       {
         mp_end_recv( mp,
-		     f2b[ face ] );
+                     f2b[ face ] );
 
         pi = (const particle_injector_t *)
              ( ( (char *) mp_recv_buffer( mp,
-					  f2b[ face ] ) ) + 16 );
+                                          f2b[ face ] ) ) + 16 );
 
         n  = n_recv[ face ];
       }
 
       else
       {
-	continue;
+        continue;
       }
 
       // Reverse order injection is done to reduce thrashing of the
@@ -1410,30 +1417,30 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
       {
         id = pi->sp_id;
 
-	// Get a species pointer for this injector.
-	sp = find_species_id( id, sp_list );
+        // Get a species pointer for this injector.
+        sp = find_species_id( id, sp_list );
 
-	// Get the voxel for the particle in this injector.
-	s_vox = pi->i;
+        // Get the voxel for the particle in this injector.
+        s_vox = pi->i;
 
-	// Get the location in the particle array for the next particle
-	// location at the end of the target voxel particles.
+        // Get the location in the particle array for the next particle
+        // location at the end of the target voxel particles.
         p_loc = sp->partition[s_vox] + sp->counts[s_vox];
 
         p  = sp_p [id];
-	np = sp_np[id];
+        np = sp_np[id];
 
         pm = sp_pm[id];
-	nm = sp_nm[id];
+        nm = sp_nm[id];
 
         #ifdef DISABLE_DYNAMIC_RESIZING
-	// This needs to be changed to use the voxel specific max.
+        // This needs to be changed to use the voxel specific max.
         if ( np >= sp_max_np[ id ] )
-	{
-	  n_dropped_particles[ id ]++;
+        {
+          n_dropped_particles[ id ]++;
 
-	  continue;
-	}
+          continue;
+        }
         #endif
 
         #ifdef V4_ACCELERATION
@@ -1444,14 +1451,14 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         #else
 
         p[p_loc].dx = pi->dx;
-	p[p_loc].dy = pi->dy;
-	p[p_loc].dz = pi->dz;
-	p[p_loc].i  = pi->i;
+        p[p_loc].dy = pi->dy;
+        p[p_loc].dz = pi->dz;
+        p[p_loc].i  = pi->i;
 
         p[p_loc].ux = pi->ux;
-	p[p_loc].uy = pi->uy;
-	p[p_loc].uz = pi->uz;
-	p[p_loc].w  = pi->w;
+        p[p_loc].uy = pi->uy;
+        p[p_loc].uz = pi->uz;
+        p[p_loc].w  = pi->w;
 
         #endif
 
@@ -1459,11 +1466,11 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         #ifdef DISABLE_DYNAMIC_RESIZING
         if ( nm >= sp_max_nm[ id ] )
-	{
-	  n_dropped_movers[ id ]++;
+        {
+          n_dropped_movers[ id ]++;
 
-	  continue;
-	}
+          continue;
+        }
         #endif
 
         #ifdef V4_ACCELERATION
@@ -1475,8 +1482,8 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
         #else
 
         pm[nm].dispx = pi->dispx;
-	pm[nm].dispy = pi->dispy;
-	pm[nm].dispz = pi->dispz;
+        pm[nm].dispy = pi->dispy;
+        pm[nm].dispz = pi->dispz;
         pm[nm].i     = p_loc;
 
         #endif
@@ -1494,7 +1501,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                    "local particle allocation in your simulation setup for "
                    "this species on this node.",
                    n_dropped_particles[ sp->id ],
-		   sp->name ) );
+                   sp->name ) );
       }
 
       if ( n_dropped_movers[ sp->id ] )
@@ -1504,7 +1511,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                    "local particle mover buffer in your simulation setup "
                    "for this species on this node.",
                    n_dropped_movers[ sp->id ],
-		   sp->name ) );
+                   sp->name ) );
       }
       #endif
 
@@ -1519,8 +1526,9 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     if ( shared[ face ] )
     {
       mp_end_send( mp,
-		   f2b[ face ] );
+                   f2b[ face ] );
     }
   }
 }
+
 #endif // End of VPIC_USE_AOSOA_P, VPIC_USE_AOS_P selection.
