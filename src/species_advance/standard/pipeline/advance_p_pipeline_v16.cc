@@ -303,70 +303,82 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
     //--------------------------------------------------------------------------
     // Accumulate current density.
     //--------------------------------------------------------------------------
-    // Accumulate Jx for 16 particles into the v0-v3 vectors.
-    v12  = q*ux;     // v12 = q ux
-    v01  = v12*dy;   // v01 = q ux dy
-    v00  = v12-v01;  // v00 = q ux (1-dy)
-    v01 += v12;      // v01 = q ux (1+dy)
-    v13  = one+dz;   // v13 = 1+dz
-    v02  = v00*v13;  // v02 = q ux (1-dy)(1+dz)
-    v03  = v01*v13;  // v03 = q ux (1+dy)(1+dz)
-    v14  = one-dz;   // v14 = 1-dz
-    v00 *= v14;      // v00 = q ux (1-dy)(1-dz)
-    v01 *= v14;      // v01 = q ux (1+dy)(1-dz)
+    // Accumulate Jx for 16 particles into the v0 - v3 vectors.
 
-    v00 += v15;      // v00 = q ux [ (1-dy)(1-dz) + uy*uz/3 ]
-    v01 -= v15;      // v01 = q ux [ (1+dy)(1-dz) - uy*uz/3 ]
-    v02 -= v15;      // v02 = q ux [ (1-dy)(1+dz) - uy*uz/3 ]
-    v03 += v15;      // v03 = q ux [ (1+dy)(1+dz) + uy*uz/3 ]
+    v12  = q * ux;     // v12 = q ux
+    v01  = v12 * dy;   // v01 = q ux dy
+    v00  = v12 - v01;  // v00 = q ux (1-dy)
+    v01 += v12;        // v01 = q ux (1+dy)
 
-    // Accumulate Jy for 16 particles into the v4-v7 vectors.
-    v12  = q*uy;     // v12 = q uy
-    v05  = v12*dz;   // v05 = q uy dz
-    v04  = v12-v05;  // v04 = q uy (1-dz)
-    v05 += v12;      // v05 = q uy (1+dz)
-    v13  = one+dx;   // v13 = 1+dx
-    v06  = v04*v13;  // v06 = q uy (1-dz)(1+dx)
-    v07  = v05*v13;  // v07 = q uy (1+dz)(1+dx)
-    v14  = one-dx;   // v14 = 1-dx
-    v04 *= v14;      // v04 = q uy (1-dz)(1-dx)
-    v05 *= v14;      // v05 = q uy (1+dz)(1-dx)
+    v13  = one + dz;   // v13 = 1+dz
+    v02  = v00 * v13;  // v02 = q ux (1-dy)(1+dz)
+    v03  = v01 * v13;  // v03 = q ux (1+dy)(1+dz)
 
-    v04 += v15;      // v04 = q uy [ (1-dz)(1-dx) + ux*uz/3 ]
-    v05 -= v15;      // v05 = q uy [ (1+dz)(1-dx) - ux*uz/3 ]
-    v06 -= v15;      // v06 = q uy [ (1-dz)(1+dx) - ux*uz/3 ]
-    v07 += v15;      // v07 = q uy [ (1+dz)(1+dx) + ux*uz/3 ]
+    v14  = one - dz;   // v14 = 1-dz
+    v00 *= v14;        // v00 = q ux (1-dy)(1-dz)
+    v01 *= v14;        // v01 = q ux (1+dy)(1-dz)
 
-    // Accumulate Jz for 16 particles into the v8-v11 vectors.
-    v12  = q*uz;     // v12 = q uz
-    v09  = v12*dx;   // v09 = q uz dx
-    v08  = v12-v09;  // v08 = q uz (1-dx)
-    v09 += v12;      // v09 = q uz (1+dx)
-    v13  = one+dy;   // v13 = 1+dy
-    v10  = v08*v13;  // v10 = q uz (1-dx)(1+dy)
-    v11  = v09*v13;  // v11 = q uz (1+dx)(1+dy)
-    v14  = one-dy;   // v14 = 1-dy
-    v08 *= v14;      // v08 = q uz (1-dx)(1-dy)
-    v09 *= v14;      // v09 = q uz (1+dx)(1-dy)
+    v00 += v15;        // v00 = q ux [ (1-dy)(1-dz) + uy*uz/3 ]
+    v01 -= v15;        // v01 = q ux [ (1+dy)(1-dz) - uy*uz/3 ]
+    v02 -= v15;        // v02 = q ux [ (1-dy)(1+dz) - uy*uz/3 ]
+    v03 += v15;        // v03 = q ux [ (1+dy)(1+dz) + uy*uz/3 ]
 
-    v08 += v15;      // v08 = q uz [ (1-dx)(1-dy) + ux*uy/3 ]
-    v09 -= v15;      // v09 = q uz [ (1+dx)(1-dy) - ux*uy/3 ]
-    v10 -= v15;      // v10 = q uz [ (1-dx)(1+dy) - ux*uy/3 ]
-    v11 += v15;      // v11 = q uz [ (1+dx)(1+dy) + ux*uy/3 ]
+    // Accumulate Jy for 16 particles into the v4 - v7 vectors.
 
-    // Zero the v12-v15 vectors prior to transposing the data.
+    v12  = q * uy;     // v12 = q uy
+    v05  = v12 * dz;   // v05 = q uy dz
+    v04  = v12 - v05;  // v04 = q uy (1-dz)
+    v05 += v12;        // v05 = q uy (1+dz)
+
+    v13  = one + dx;   // v13 = 1+dx
+    v06  = v04 * v13;  // v06 = q uy (1-dz)(1+dx)
+    v07  = v05 * v13;  // v07 = q uy (1+dz)(1+dx)
+
+    v14  = one - dx;   // v14 = 1-dx
+    v04 *= v14;        // v04 = q uy (1-dz)(1-dx)
+    v05 *= v14;        // v05 = q uy (1+dz)(1-dx)
+
+    v04 += v15;        // v04 = q uy [ (1-dz)(1-dx) + ux*uz/3 ]
+    v05 -= v15;        // v05 = q uy [ (1+dz)(1-dx) - ux*uz/3 ]
+    v06 -= v15;        // v06 = q uy [ (1-dz)(1+dx) - ux*uz/3 ]
+    v07 += v15;        // v07 = q uy [ (1+dz)(1+dx) + ux*uz/3 ]
+
+    // Accumulate Jz for 16 particles into the v8 - v11 vectors.
+
+    v12  = q * uz;     // v12 = q uz
+    v09  = v12 * dx;   // v09 = q uz dx
+    v08  = v12 - v09;  // v08 = q uz (1-dx)
+    v09 += v12;        // v09 = q uz (1+dx)
+
+    v13  = one + dy;   // v13 = 1+dy
+    v10  = v08 * v13;  // v10 = q uz (1-dx)(1+dy)
+    v11  = v09 * v13;  // v11 = q uz (1+dx)(1+dy)
+
+    v14  = one - dy;   // v14 = 1-dy
+    v08 *= v14;        // v08 = q uz (1-dx)(1-dy)
+    v09 *= v14;        // v09 = q uz (1+dx)(1-dy)
+
+    v08 += v15;        // v08 = q uz [ (1-dx)(1-dy) + ux*uy/3 ]
+    v09 -= v15;        // v09 = q uz [ (1+dx)(1-dy) - ux*uy/3 ]
+    v10 -= v15;        // v10 = q uz [ (1-dx)(1+dy) - ux*uy/3 ]
+    v11 += v15;        // v11 = q uz [ (1+dx)(1+dy) + ux*uy/3 ]
+
+    // Zero the v12 - v15 vectors prior to transposing the data.
+
     v12 = 0.0;
     v13 = 0.0;
     v14 = 0.0;
     v15 = 0.0;
 
-    // Transpose the data in vectors v0-v15 so it can be added into the
+    // Transpose the data in vectors v0 - v15 so it can be added into the
     // accumulator arrays using vector operations.
+
     transpose( v00, v01, v02, v03, v04, v05, v06, v07,
                v08, v09, v10, v11, v12, v13, v14, v15 );
 
     // Add the contributions to Jx, Jy and Jz from 16 particles into the
     // accumulator arrays for Jx, Jy and Jz.
+
     increment_16x1( vp00, v00 );
     increment_16x1( vp01, v01 );
     increment_16x1( vp02, v02 );
