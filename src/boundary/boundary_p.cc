@@ -183,21 +183,21 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
     // beam simulations, is one buffer gets all the movers).
     //
     // FIXME: We could be several times more efficient in our particle
-    // injector buffer sizing here.  Namely, we could create on local
-    // injector buffer of nm is size.  All injection for all
-    // boundaries would be done here.  The local buffer would then be
-    // counted to determine the size of each send buffer.  The local
-    // buffer would then move all injectors into the approate send
-    // buffers (leaving only the local injectors).  This would require
-    // some extra data motion though.  (But would give a more robust
-    // implementation against variations in MP implementation.)
+    // injector buffer sizing here.  Namely, we could create one local
+    // injector buffer of nm in size.  All injection for all boundaries
+    // would be done here.  The local buffer would then be counted to
+    // determine the size of each send buffer.  The local buffer would
+    // then move all injectors into the appropriate send buffers, leaving
+    // only the local injectors.  This would require some extra data
+    // motion though, but would give a more robust implementation against
+    // variations in MP implementation.
     //
     // FIXME: This presizing assumes that custom boundary conditions
     // inject at most one particle per incident particle.  Currently,
     // the invocation of pbc_interact[*] insures that assumption will
-    // be satisfied (if the handlers conform that it).  We should be
-    // more flexible though in the future (especially given above the
-    // above overalloc).
+    // be satisfied, if the handlers conform that it.  We should be
+    // more flexible though in the future, especially given the above
+    // overalloc.
 
     int nm = 0;
 
@@ -215,7 +215,7 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
                                                                                f2b[ face ] )
                                                     ) + 16 );
 
-        n_send[face] = 0;
+        n_send[ face ] = 0;
       }
     }
 
@@ -1042,11 +1042,9 @@ boundary_p( particle_bc_t       * RESTRICT pbc_list,
 
         // Uh-oh: We fell through.
 
-        #if 0
         WARNING( ( "Unknown boundary interaction ... dropping particle "
                    "(species=%s)",
                    sp->name ) );
-        #endif
 
       backfill:
 

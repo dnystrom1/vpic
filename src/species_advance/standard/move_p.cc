@@ -507,8 +507,8 @@ move_p( particle_t       * RESTRICT ALIGNED(128) p,
         const float                              qsp,
 	species_t        *                       sp )
 {
-  /*const*/ v4float one( 1.f );
-  /*const*/ v4float tiny( 1e-37f );
+  /*const*/ v4float one( 1.0f );
+  /*const*/ v4float tiny( 1.0e-37f );
   /*const*/ v4int   sign_bits( 1<<31 );
 
   v4float dr, r, u, q, q3;
@@ -1047,7 +1047,12 @@ move_p( particle_t       * ALIGNED(128) p0,
     ( &( p->dx ) )[axis] = v0; // Avoid roundoff fiascos--put the particle
                                // _exactly_ on the boundary.
 
-    face = axis; if ( v0 > 0 ) face += 3;
+    face = axis;
+
+    if ( v0 > 0 )
+    {
+      face += 3;
+    }
 
     neighbor = g->neighbor[ 6 * p->i + face ];
 
