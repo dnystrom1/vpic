@@ -213,6 +213,7 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
 #endif
 
 #else
+
 void
 center_p_pipeline_scalar( center_p_pipeline_args_t * args,
                           int pipeline_rank,

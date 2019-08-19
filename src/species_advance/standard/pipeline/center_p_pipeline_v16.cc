@@ -7,6 +7,7 @@
 using namespace v16;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,
@@ -71,10 +72,6 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
     load_16x1( &pb[0].ux[0], ux );
     load_16x1( &pb[0].uy[0], uy );
     load_16x1( &pb[0].uz[0], uz );
-
-    // load_16x8_tr_p( &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
-    //                 &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx,
-    //                 dx, dy, dz, ii, ux, uy, uz, q );
 
     //--------------------------------------------------------------------------
     // Set field interpolation pointers.
@@ -154,13 +151,11 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
     store_16x1( ux, &pb[0].ux[0] );
     store_16x1( uy, &pb[0].uy[0] );
     store_16x1( uz, &pb[0].uz[0] );
-
-    // store_16x8_tr_p( dx, dy, dz, ii, ux, uy, uz, q,
-    //                  &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
-    //                  &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx );
   }
 }
+
 #else
+
 void
 center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,

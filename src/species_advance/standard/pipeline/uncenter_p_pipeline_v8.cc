@@ -7,6 +7,7 @@
 using namespace v8;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
                         int pipeline_rank,
@@ -60,10 +61,6 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     load_8x1( &pb[0].dy[0], dy );
     load_8x1( &pb[0].dz[0], dz );
     load_8x1( &pb[0].i [0], ii );
-
-    // load_8x8( &pb[0].dx[0], &pb[0].dy[0], &pb[0].dz[0], &pb[0].i[0],
-    //           &pb[0].ux[0], &pb[0].uy[0], &pb[0].uz[0], &pb[0].w[0],
-    //           dx, dy, dz, ii, ux, uy, uz, q );
 
     //--------------------------------------------------------------------------
     // Set field interpolation pointers.
@@ -130,10 +127,6 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     load_8x1( &pb[0].uy[0], uy );
     load_8x1( &pb[0].uz[0], uz );
 
-    // load_8x4_tr( &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux,
-    //              &p[4].ux, &p[5].ux, &p[6].ux, &p[7].ux,
-    //              ux, uy, uz, q );
-
     //--------------------------------------------------------------------------
     // Update momentum.
     //--------------------------------------------------------------------------
@@ -162,12 +155,11 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     store_8x1( ux, &pb[0].ux[0] );
     store_8x1( uy, &pb[0].uy[0] );
     store_8x1( uz, &pb[0].uz[0] );
-
-    // store_8x4( ux, uy, uz, q,
-    //            &pb[0].ux[0], &pb[0].uy[0], &pb[0].uz[0], &pb[0].w[0] );
   }
 }
+
 #else
+
 void
 uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
                         int pipeline_rank,
@@ -292,12 +284,15 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
     v03  = v00 * fma( v02, fma( v02, two_fifteenths, one_third ), one );
     v04  = v03 * rcp( fma( v03 * v03, v01, one ) );
     v04 += v04;
+
     v00  = fma( fms(  uy, cbz,  uz * cby ), v03, ux );
     v01  = fma( fms(  uz, cbx,  ux * cbz ), v03, uy );
     v02  = fma( fms(  ux, cby,  uy * cbx ), v03, uz );
+
     ux   = fma( fms( v01, cbz, v02 * cby ), v04, ux );
     uy   = fma( fms( v02, cbx, v00 * cbz ), v04, uy );
     uz   = fma( fms( v00, cby, v01 * cbx ), v04, uz );
+
     ux  += hax;
     uy  += hay;
     uz  += haz;
@@ -310,6 +305,7 @@ uncenter_p_pipeline_v8( center_p_pipeline_args_t * args,
 		  &p[4].ux, &p[5].ux, &p[6].ux, &p[7].ux );
   }
 }
+
 #endif
 
 #else

@@ -7,6 +7,7 @@
 using namespace v8;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 center_p_pipeline_v8( center_p_pipeline_args_t * args,
                       int pipeline_rank,
@@ -60,10 +61,6 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
     load_8x1( &pb[0].dy[0], dy );
     load_8x1( &pb[0].dz[0], dz );
     load_8x1( &pb[0].i [0], ii );
-
-    // load_8x4_tr( &p[0].dx, &p[1].dx, &p[2].dx, &p[3].dx,
-    //              &p[4].dx, &p[5].dx, &p[6].dx, &p[7].dx,
-    //              dx, dy, dz, ii );
 
     //--------------------------------------------------------------------------
     // Set field interpolation pointers.
@@ -130,10 +127,6 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
     load_8x1( &pb[0].uy[0], uy );
     load_8x1( &pb[0].uz[0], uz );
 
-    // load_8x4_tr( &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux,
-    //              &p[4].ux, &p[5].ux, &p[6].ux, &p[7].ux,
-    //              ux, uy, uz, q );
-
     //--------------------------------------------------------------------------
     // Update momentum.
     //--------------------------------------------------------------------------
@@ -162,13 +155,11 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
     store_8x1( ux, &pb[0].ux[0] );
     store_8x1( uy, &pb[0].uy[0] );
     store_8x1( uz, &pb[0].uz[0] );
-
-    // store_8x4_tr( ux, uy, uz, q,
-    //               &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux,
-    //               &p[4].ux, &p[5].ux, &p[6].ux, &p[7].ux );
   }
 }
+
 #else
+
 void
 center_p_pipeline_v8( center_p_pipeline_args_t * args,
                       int pipeline_rank,
@@ -314,6 +305,7 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
 		  &p[4].ux, &p[5].ux, &p[6].ux, &p[7].ux );
   }
 }
+
 #endif
 
 #else

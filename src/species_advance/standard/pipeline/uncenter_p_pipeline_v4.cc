@@ -7,6 +7,7 @@
 using namespace v4;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
                         int pipeline_rank,
@@ -56,9 +57,6 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
     load_4x1( &pb[0].dy[0], dy );
     load_4x1( &pb[0].dz[0], dz );
     load_4x1( &pb[0].i [0], ii );
-
-    // load_4x4( &pb[0].dx[0], &pb[0].dy[0], &pb[0].dz[0], &pb[0].i[0],
-    //           dx, dy, dz, ii );
 
     //--------------------------------------------------------------------------
     // Set field interpolation pointers.
@@ -147,12 +145,11 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
     store_4x1( ux, &pb[0].ux[0] );
     store_4x1( uy, &pb[0].uy[0] );
     store_4x1( uz, &pb[0].uz[0] );
-
-    // store_4x4( ux, uy, uz, q,
-    //            &pb[0].ux[0], &pb[0].uy[0], &pb[0].uz[0], &pb[0].w[0] );
   }
 }
+
 #else
+
 void
 uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
                         int pipeline_rank,
@@ -282,6 +279,7 @@ uncenter_p_pipeline_v4( center_p_pipeline_args_t * args,
 		  &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux );
   }
 }
+
 #endif
 
 #else

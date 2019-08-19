@@ -7,6 +7,7 @@
 using namespace v4;
 
 #if defined(VPIC_USE_AOSOA_P)
+
 void
 center_p_pipeline_v4( center_p_pipeline_args_t * args,
                       int pipeline_rank,
@@ -116,9 +117,6 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
     load_4x1( &pb[0].uy[0], uy );
     load_4x1( &pb[0].uz[0], uz );
 
-    // load_4x4_tr( &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux,
-    //              ux, uy, uz, q );
-
     //--------------------------------------------------------------------------
     // Update momentum.
     //--------------------------------------------------------------------------
@@ -147,12 +145,11 @@ center_p_pipeline_v4( center_p_pipeline_args_t * args,
     store_4x1( ux, &pb[0].ux[0] );
     store_4x1( uy, &pb[0].uy[0] );
     store_4x1( uz, &pb[0].uz[0] );
-
-    // store_4x4_tr( ux, uy, uz, q,
-    //               &p[0].ux, &p[1].ux, &p[2].ux, &p[3].ux );
   }
 }
+
 #else
+
 void
 center_p_pipeline_v4( center_p_pipeline_args_t * args,
                       int pipeline_rank,

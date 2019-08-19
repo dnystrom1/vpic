@@ -273,3 +273,10 @@ species( const char * name,
   return sp;
 }
 #endif
+
+void
+get_constants( float wdn_zero, float wdn_one )
+{
+  wdn_zero = 0.0;
+  wdn_one  = 1.0;
+}

@@ -103,6 +103,16 @@ void
 center_p_pipeline( species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia );
 
+void
+center_p_plus( species_t * RESTRICT sp,
+               accumulator_array_t * RESTRICT aa,
+               const interpolator_array_t * RESTRICT ia );
+
+void
+center_p_plus_pipeline( species_t * RESTRICT sp,
+                        accumulator_array_t * RESTRICT aa,
+                        const interpolator_array_t * RESTRICT ia );
+
 // In uncenter_p.cxx
 
 // This is the inverse of center_p.  Thus, particles with r and u at
@@ -116,6 +126,16 @@ uncenter_p( species_t * RESTRICT sp,
 void
 uncenter_p_pipeline( species_t * RESTRICT sp,
                      const interpolator_array_t * RESTRICT ia );
+
+void
+uncenter_p_plus( species_t * RESTRICT sp,
+                 accumulator_array_t * RESTRICT aa,
+                 const interpolator_array_t * RESTRICT ia );
+
+void
+uncenter_p_plus_pipeline( species_t * RESTRICT sp,
+                          accumulator_array_t * RESTRICT aa,
+                          const interpolator_array_t * RESTRICT ia );
 
 // In energy.cxx
 
@@ -175,6 +195,9 @@ move_p( particle_t       * ALIGNED(128) p0,    // Particle array
         const grid_t     *              g,     // Grid parameters
         const float                     qsp ); // Species particle charge
 #endif
+
+void
+get_constants( float wdn_zero, float wdn_one );
 
 END_C_DECLS
 

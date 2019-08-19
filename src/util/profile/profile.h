@@ -36,6 +36,8 @@
   _( compute_rhob      ) \
   _( center_p          ) \
   _( uncenter_p        ) \
+  _( center_p_plus     ) \
+  _( uncenter_p_plus   ) \
   _( user_initialization ) \
   _( user_particle_collisions ) \
   _( user_particle_injection ) \

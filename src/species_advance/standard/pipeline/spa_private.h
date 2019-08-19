@@ -139,6 +139,26 @@ center_p_pipeline_v16( center_p_pipeline_args_t * args,
                        int pipeline_rank,
                        int n_pipeline );
 
+void
+center_p_plus_pipeline_scalar( advance_p_pipeline_args_t * args,
+                               int pipeline_rank,
+                               int n_pipeline );
+
+void
+center_p_plus_pipeline_v4( advance_p_pipeline_args_t * args,
+                           int pipeline_rank,
+                           int n_pipeline );
+
+void
+center_p_plus_pipeline_v8( advance_p_pipeline_args_t * args,
+                           int pipeline_rank,
+                           int n_pipeline );
+
+void
+center_p_plus_pipeline_v16( advance_p_pipeline_args_t * args,
+                            int pipeline_rank,
+                            int n_pipeline );
+
 // PROTOTYPE_PIPELINE( uncenter_p, center_p_pipeline_args_t );
 
 void
@@ -160,6 +180,26 @@ void
 uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
                          int pipeline_rank,
                          int n_pipeline );
+
+void
+uncenter_p_plus_pipeline_scalar( advance_p_pipeline_args_t * args,
+                                 int pipeline_rank,
+                                 int n_pipeline );
+
+void
+uncenter_p_plus_pipeline_v4( advance_p_pipeline_args_t * args,
+                             int pipeline_rank,
+                             int n_pipeline );
+
+void
+uncenter_p_plus_pipeline_v8( advance_p_pipeline_args_t * args,
+                             int pipeline_rank,
+                             int n_pipeline );
+
+void
+uncenter_p_plus_pipeline_v16( advance_p_pipeline_args_t * args,
+                              int pipeline_rank,
+                              int n_pipeline );
 
 ///////////////////////////////////////////////////////////////////////////////
 // energy_p_pipeline interface
