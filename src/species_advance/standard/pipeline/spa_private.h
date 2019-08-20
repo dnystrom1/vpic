@@ -95,6 +95,26 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
                         int pipeline_rank,
                         int n_pipeline );
 
+void
+test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
+                                int pipeline_rank,
+                                int n_pipeline );
+
+void
+test_advance_p_pipeline_v4( advance_p_pipeline_args_t * args,
+                            int pipeline_rank,
+                            int n_pipeline );
+
+void
+test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
+                            int pipeline_rank,
+                            int n_pipeline );
+
+void
+test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
+                             int pipeline_rank,
+                             int n_pipeline );
+
 ///////////////////////////////////////////////////////////////////////////////
 // center_p_pipeline and uncenter_p_pipeline interface
 

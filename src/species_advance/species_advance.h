@@ -68,7 +68,7 @@ species( const char * name,
 // CAN BE CONSTRUCTED ANALOGOUS TO THE FIELD_ADVANCE KERNELS
 // (THESE FUNCTIONS ARE NECESSARY FOR HIGHER LEVEL CODE)
 
-// In sort_p.c
+// In sort_p.cc
 
 void
 sort_p( species_t * RESTRICT sp );
@@ -76,7 +76,7 @@ sort_p( species_t * RESTRICT sp );
 void
 sort_p_pipeline( species_t * sp );
 
-// In advance_p.cxx
+// In advance_p.cc
 
 void
 advance_p( species_t * RESTRICT sp,
@@ -88,7 +88,19 @@ advance_p_pipeline( species_t * RESTRICT sp,
                     accumulator_array_t * RESTRICT aa,
                     const interpolator_array_t * RESTRICT ia );
 
-// In center_p.cxx
+// In test_advance_p.cc
+
+void
+test_advance_p( species_t * RESTRICT sp,
+                accumulator_array_t * RESTRICT aa,
+                const interpolator_array_t * RESTRICT ia );
+
+void
+test_advance_p_pipeline( species_t * RESTRICT sp,
+                         accumulator_array_t * RESTRICT aa,
+                         const interpolator_array_t * RESTRICT ia );
+
+// In center_p.cc
 
 // This does a half advance field advance and a half Boris rotate on
 // the particles.  As such particles with r at the time step and u
@@ -177,6 +189,9 @@ move_p( particle_t       * ALIGNED(128) p0,    // Particle array
         const float                     qsp,   // Species particle charge
         species_t        *              sp );  // Species pointer
 #endif
+
+void
+get_constants( float wdn_zero, float wdn_one );
 
 END_C_DECLS
 

@@ -1,4 +1,4 @@
- #ifndef _v4_altivec_h_
+#ifndef _v4_altivec_h_
 #define _v4_altivec_h_
 
 #ifndef IN_v4_h
