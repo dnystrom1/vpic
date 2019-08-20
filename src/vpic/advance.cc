@@ -46,6 +46,16 @@ int vpic_simulation::advance(void) {
     TIC apply_collision_op_list( collision_op_list ); TOC( collision_model, 1 );
   TIC user_particle_collisions(); TOC( user_particle_collisions, 1 );
 
+  //-------------------------------------------------------------------------------
+  // Performance testing code.
+  //-------------------------------------------------------------------------------
+  LIST_FOR_EACH( sp, species_list )
+    TIC test_advance_p( sp, accumulator_array, interpolator_array ); TOC( test_advance_p, 1 );
+
+  if( species_list )
+    TIC clear_accumulator_array( accumulator_array ); TOC( clear_accumulators, 1 );
+  //-------------------------------------------------------------------------------
+
   LIST_FOR_EACH( sp, species_list )
     TIC advance_p( sp, accumulator_array, interpolator_array ); TOC( advance_p, 1 );
 
