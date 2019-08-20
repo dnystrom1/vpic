@@ -410,10 +410,10 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
     #undef MOVE_OUTBND
   }
 
-  args->seg[pipeline_rank].pm        = pm;
-  args->seg[pipeline_rank].max_nm    = max_nm;
-  args->seg[pipeline_rank].nm        = nm;
-  args->seg[pipeline_rank].n_ignored = itmp;
+  // args->seg[pipeline_rank].pm        = pm;
+  // args->seg[pipeline_rank].max_nm    = max_nm;
+  // args->seg[pipeline_rank].nm        = nm;
+  // args->seg[pipeline_rank].n_ignored = itmp;
 }
 
 #else
@@ -806,10 +806,10 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
     #undef MOVE_OUTBND
   }
 
-  args->seg[pipeline_rank].pm        = pm;
-  args->seg[pipeline_rank].max_nm    = max_nm;
-  args->seg[pipeline_rank].nm        = nm;
-  args->seg[pipeline_rank].n_ignored = itmp;
+  // args->seg[pipeline_rank].pm        = pm;
+  // args->seg[pipeline_rank].max_nm    = max_nm;
+  // args->seg[pipeline_rank].nm        = nm;
+  // args->seg[pipeline_rank].n_ignored = itmp;
 }
 
 #endif

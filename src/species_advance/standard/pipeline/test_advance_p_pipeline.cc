@@ -264,10 +264,10 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     // }
   }
 
-  args->seg[pipeline_rank].pm        = pm;
-  args->seg[pipeline_rank].max_nm    = max_nm;
-  args->seg[pipeline_rank].nm        = nm;
-  args->seg[pipeline_rank].n_ignored = itmp;
+  // args->seg[pipeline_rank].pm        = pm;
+  // args->seg[pipeline_rank].max_nm    = max_nm;
+  // args->seg[pipeline_rank].nm        = nm;
+  // args->seg[pipeline_rank].n_ignored = itmp;
 }
 
 #else
@@ -515,10 +515,10 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     // }
   }
 
-  args->seg[pipeline_rank].pm        = pm;
-  args->seg[pipeline_rank].max_nm    = max_nm;
-  args->seg[pipeline_rank].nm        = nm;
-  args->seg[pipeline_rank].n_ignored = itmp;
+  // args->seg[pipeline_rank].pm        = pm;
+  // args->seg[pipeline_rank].max_nm    = max_nm;
+  // args->seg[pipeline_rank].nm        = nm;
+  // args->seg[pipeline_rank].n_ignored = itmp;
 }
 
 #endif
@@ -580,7 +580,7 @@ test_advance_p_pipeline( species_t * RESTRICT sp,
   // However, it is worth reconsidering this at some point in the
   // future.
 
-  EXEC_PIPELINES( advance_p, args, 0 );
+  EXEC_PIPELINES( test_advance_p, args, 0 );
 
   WAIT_PIPELINES();
 
@@ -588,22 +588,22 @@ test_advance_p_pipeline( species_t * RESTRICT sp,
   // INSTALLED FOR DEALING WITH PIPELINES.  COMPACT THE PARTICLE
   // MOVERS TO ELIMINATE HOLES FROM THE PIPELINING.
 
-  sp->nm = 0;
-  for( rank = 0; rank <= N_PIPELINE; rank++ )
-  {
-    if ( args->seg[rank].n_ignored )
-    {
-      WARNING( ( "Pipeline %i ran out of storage for %i movers.",
-                 rank, args->seg[rank].n_ignored ) );
-    }
-
-    if ( sp->pm + sp->nm != args->seg[rank].pm )
-    {
-      MOVE( sp->pm + sp->nm, args->seg[rank].pm, args->seg[rank].nm );
-    }
-
-    sp->nm += args->seg[rank].nm;
-  }
+  // sp->nm = 0;
+  // for( rank = 0; rank <= N_PIPELINE; rank++ )
+  // {
+  //   if ( args->seg[rank].n_ignored )
+  //   {
+  //     WARNING( ( "Pipeline %i ran out of storage for %i movers.",
+  //                rank, args->seg[rank].n_ignored ) );
+  //   }
+  // 
+  //   if ( sp->pm + sp->nm != args->seg[rank].pm )
+  //   {
+  //     MOVE( sp->pm + sp->nm, args->seg[rank].pm, args->seg[rank].nm );
+  //   }
+  // 
+  //   sp->nm += args->seg[rank].nm;
+  // }
 }
 
 #else
@@ -658,7 +658,7 @@ test_advance_p_pipeline( species_t * RESTRICT sp,
   // However, it is worth reconsidering this at some point in the
   // future.
 
-  EXEC_PIPELINES( advance_p, args, 0 );
+  EXEC_PIPELINES( test_advance_p, args, 0 );
 
   WAIT_PIPELINES();
 
@@ -666,22 +666,22 @@ test_advance_p_pipeline( species_t * RESTRICT sp,
   // INSTALLED FOR DEALING WITH PIPELINES.  COMPACT THE PARTICLE
   // MOVERS TO ELIMINATE HOLES FROM THE PIPELINING.
 
-  sp->nm = 0;
-  for( rank = 0; rank <= N_PIPELINE; rank++ )
-  {
-    if ( args->seg[rank].n_ignored )
-    {
-      WARNING( ( "Pipeline %i ran out of storage for %i movers.",
-                 rank, args->seg[rank].n_ignored ) );
-    }
-
-    if ( sp->pm + sp->nm != args->seg[rank].pm )
-    {
-      MOVE( sp->pm + sp->nm, args->seg[rank].pm, args->seg[rank].nm );
-    }
-
-    sp->nm += args->seg[rank].nm;
-  }
+  // sp->nm = 0;
+  // for( rank = 0; rank <= N_PIPELINE; rank++ )
+  // {
+  //   if ( args->seg[rank].n_ignored )
+  //   {
+  //     WARNING( ( "Pipeline %i ran out of storage for %i movers.",
+  //                rank, args->seg[rank].n_ignored ) );
+  //   }
+  // 
+  //   if ( sp->pm + sp->nm != args->seg[rank].pm )
+  //   {
+  //     MOVE( sp->pm + sp->nm, args->seg[rank].pm, args->seg[rank].nm );
+  //   }
+  // 
+  //   sp->nm += args->seg[rank].nm;
+  // }
 }
 
 #endif
