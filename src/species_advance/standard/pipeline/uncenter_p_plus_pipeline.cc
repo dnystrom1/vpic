@@ -274,6 +274,8 @@ uncenter_p_plus_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   int itmp, n, nm, max_nm;
 
+  float wdn_zero, wdn_one;
+
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
   // Determine which quads of particles quads this pipeline processes.
