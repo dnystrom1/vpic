@@ -93,7 +93,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   // Process particles for this pipeline.
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   int ib = 0;
   int ip = 0;
@@ -350,7 +350,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   // Process particles for this pipeline.
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   for( ; n; n--, p++ )
   {
