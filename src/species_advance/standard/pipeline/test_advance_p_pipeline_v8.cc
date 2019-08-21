@@ -206,7 +206,7 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   v8float v_wdn_zero( wdn_zero );
   v8float v_wdn_one ( wdn_one  );
@@ -829,7 +829,7 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   v8float v_wdn_zero( wdn_zero );
   v8float v_wdn_one ( wdn_one  );

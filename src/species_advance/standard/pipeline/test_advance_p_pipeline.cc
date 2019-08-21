@@ -211,7 +211,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   ix = first_ix;
   iy = first_iy;
@@ -661,7 +661,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   ix = first_ix;
   iy = first_iy;

@@ -191,7 +191,7 @@ move_p( particle_t       * ALIGNED(128) p0,    // Particle array
 #endif
 
 void
-get_constants( float wdn_zero, float wdn_one );
+get_constants( float wdn_zero, float wdn_one, int nx );
 
 END_C_DECLS
 
