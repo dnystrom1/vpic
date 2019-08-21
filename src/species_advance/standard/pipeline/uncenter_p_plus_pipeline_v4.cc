@@ -95,7 +95,7 @@ uncenter_p_plus_pipeline_v4( advance_p_pipeline_args_t * args,
   // version might allow PARTICLE_BLOCK_SIZE to be an integral multiple of the vector
   // length.
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   v4float v_wdn_zero( wdn_zero );
   v4float v_wdn_one ( wdn_one  );
@@ -389,7 +389,7 @@ uncenter_p_plus_pipeline_v4( advance_p_pipeline_args_t * args,
 
   // Process the particle blocks for this pipeline.
 
-  get_constants( wdn_zero, wdn_one );
+  get_constants( wdn_zero, wdn_one, args->nx );
 
   v4float v_wdn_zero( wdn_zero );
   v4float v_wdn_one ( wdn_one  );
