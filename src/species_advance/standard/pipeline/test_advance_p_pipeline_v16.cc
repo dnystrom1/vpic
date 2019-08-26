@@ -71,8 +71,8 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
 
   int itmp, nq, nm, max_nm, ipart;
 
-  float wdn_zero, wdn_one;
-  v16float ux_old, uy_old, uz_old;
+  float wdn_zero, wdn_one;         // Variables used to confuse compiler.
+  v16float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -114,15 +114,23 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
-  // Process the particle blocks for this pipeline.  For the initial AoSoA version,
-  // assume that PARTICLE_BLOCK_SIZE is the same as the vector length.  A future
-  // version might allow PARTICLE_BLOCK_SIZE to be an integral multiple of the vector
-  // length.
+  //--------------------------------------------------------------------------//
+  // Set some variables used to confuse compiler into performing stores of
+  // data that has not really changed.
+  //--------------------------------------------------------------------------//
+
+  wdn_zero = 100.0;
+  wdn_one  = 1000.0;
 
   get_constants( wdn_zero, wdn_one, args->nx );
 
   v16float v_wdn_zero( wdn_zero );
   v16float v_wdn_one ( wdn_one  );
+
+  // Process the particle blocks for this pipeline.  For the initial AoSoA version,
+  // assume that PARTICLE_BLOCK_SIZE is the same as the vector length.  A future
+  // version might allow PARTICLE_BLOCK_SIZE to be an integral multiple of the vector
+  // length.
 
   for( ; nq; nq--, pb++, ipart += 16 )
   {
@@ -508,8 +516,8 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
 
   int itmp, nq, nm, max_nm;
 
-  float wdn_zero, wdn_one;
-  v16float ux_old, uy_old, uz_old;
+  float wdn_zero, wdn_one;         // Variables used to confuse compiler.
+  v16float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -549,12 +557,20 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
-  // Process the particle blocks for this pipeline.
+  //--------------------------------------------------------------------------//
+  // Set some variables used to confuse compiler into performing stores of
+  // data that has not really changed.
+  //--------------------------------------------------------------------------//
+
+  wdn_zero = 100.0;
+  wdn_one  = 1000.0;
 
   get_constants( wdn_zero, wdn_one, args->nx );
 
   v16float v_wdn_zero( wdn_zero );
   v16float v_wdn_one ( wdn_one  );
+
+  // Process the particle blocks for this pipeline.
 
   for( ; nq; nq--, p+=16 )
   {

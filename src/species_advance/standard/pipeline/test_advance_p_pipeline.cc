@@ -50,8 +50,8 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   int itmp, n, nm, max_nm, ipart;
 
-  float wdn_zero, wdn_one;
-  float ux_old, uy_old, uz_old;
+  float wdn_zero, wdn_one;      // Variables used to confuse compiler.
+  float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -91,9 +91,17 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
-  // Process particles for this pipeline.
+  //--------------------------------------------------------------------------//
+  // Set some variables used to confuse compiler into performing stores of
+  // data that has not really changed.
+  //--------------------------------------------------------------------------//
+
+  wdn_zero = 100.0;
+  wdn_one  = 1000.0;
 
   get_constants( wdn_zero, wdn_one, args->nx );
+
+  // Process particles for this pipeline.
 
   int ib = 0;
   int ip = 0;
@@ -309,8 +317,8 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   int itmp, n, nm, max_nm;
 
-  float wdn_zero, wdn_one;
-  float ux_old, uy_old, uz_old;
+  float wdn_zero, wdn_one;      // Variables used to confuse compiler.
+  float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -348,9 +356,17 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           POW2_CEIL( (args->nx+2)*(args->ny+2)*(args->nz+2), 2 );
   }
 
-  // Process particles for this pipeline.
+  //--------------------------------------------------------------------------//
+  // Set some variables used to confuse compiler into performing stores of
+  // data that has not really changed.
+  //--------------------------------------------------------------------------//
+
+  wdn_zero = 100.0;
+  wdn_one  = 1000.0;
 
   get_constants( wdn_zero, wdn_one, args->nx );
+
+  // Process particles for this pipeline.
 
   for( ; n; n--, p++ )
   {
