@@ -337,11 +337,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           pb[ib].uy[j] = uy_old;
           pb[ib].uz[j] = uz_old;
 
-          // Store momentum.
-          // pb[ib].ux[j] = ux;
-          // pb[ib].uy[j] = uy;
-          // pb[ib].uz[j] = uz;
-
           // Get norm displacement.
           v0   = one / sqrtf( one + ( ux * ux + ( uy * uy + uz * uz ) ) );
 
@@ -383,11 +378,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
             pb[ib].dx[j] = dx;
             pb[ib].dy[j] = dy;
             pb[ib].dz[j] = dz;
-
-            // Store new position.
-            // pb[ib].dx[j] = v3;
-            // pb[ib].dy[j] = v4;
-            // pb[ib].dz[j] = v5;
 
             // Streak midpoint.
             dx = v0;
@@ -784,11 +774,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
         p->uy = uy_old;
         p->uz = uz_old;
 
-        // Store momentum.
-        // p->ux = ux;
-        // p->uy = uy;
-        // p->uz = uz;
-
         // Get norm displacement.
         v0   = one / sqrtf( one + ( ux * ux + ( uy * uy + uz * uz ) ) );
 
@@ -830,11 +815,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           p->dx = dx;
           p->dy = dy;
           p->dz = dz;
-
-          // Store new position.
-          // p->dx = v3;
-          // p->dy = v4;
-          // p->dz = v5;
 
           // Streak midpoint.
           dx = v0;

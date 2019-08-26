@@ -6,18 +6,6 @@
 
 using namespace v16;
 
-//----------------------------------------------------------------------------//
-// Method 4
-//----------------------------------------------------------------------------//
-// This method processes 16 particles at a time instead of 32.
-//----------------------------------------------------------------------------//
-// This method processes the particles in the same order as the reference
-// implementation and gives good reproducibility. This is achieved using
-// modified load_16x8_tr_p and store_16x8_tr_p functions which load or store
-// the particle data in the correct order in a single step instead of using
-// two steps.
-//----------------------------------------------------------------------------//
-
 #if defined(VPIC_USE_AOSOA_P)
 
 void
@@ -310,6 +298,10 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
 
         load_16x1( &pb[ib].w [0], q  );
 
+        //--------------------------------------------------------------------------
+        // Confuse compiler.
+        //--------------------------------------------------------------------------
+
         ux_old = ux + v_wdn_zero;
         uy_old = uy + v_wdn_zero;
         uz_old = uz + v_wdn_zero;
@@ -422,6 +414,10 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v03 = v00 + ux;
         v04 = v01 + uy;
         v05 = v02 + uz;
+
+        //--------------------------------------------------------------------------
+        // Confuse compiler.
+        //--------------------------------------------------------------------------
 
         dx += v_wdn_zero;
         dy += v_wdn_zero;
@@ -954,6 +950,10 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
                         &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx,
                         dx, dy, dz, ii, ux, uy, uz, q );
 
+        //--------------------------------------------------------------------------
+        // Confuse compiler.
+        //--------------------------------------------------------------------------
+
         ux_old = ux + v_wdn_zero;
         uy_old = uy + v_wdn_zero;
         uz_old = uz + v_wdn_zero;
@@ -1068,6 +1068,10 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v04 = v01 + uy;
         v05 = v02 + uz;
 
+        //--------------------------------------------------------------------------
+        // Confuse compiler.
+        //--------------------------------------------------------------------------
+
         dx += v_wdn_zero;
         dy += v_wdn_zero;
         dz += v_wdn_zero;
@@ -1096,10 +1100,6 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
                          &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
                          &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx );
 
-        // store_16x8_tr_p( v03, v04, v05, ii, v06, v07, v08, q,
-        //                  &p[ 0].dx, &p[ 2].dx, &p[ 4].dx, &p[ 6].dx,
-        //                  &p[ 8].dx, &p[10].dx, &p[12].dx, &p[14].dx );
-
         //--------------------------------------------------------------------------
         // Accumulate current of inbnd particles.
         // Note: accumulator values are 4 times the total physical charge that
@@ -1126,7 +1126,7 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         //--------------------------------------------------------------------------
         // Accumulate current density.
         //--------------------------------------------------------------------------
-        // Accumulate Jx for 16 particles into the v0-v3 vectors.
+        // Accumulate Jx for 16 particles into the v0 - v3 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * ux;   // v12 = q ux
@@ -1153,7 +1153,7 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         jx3 += v03;
 
         //--------------------------------------------------------------------------
-        // Accumulate Jy for 16 particles into the v4-v7 vectors.
+        // Accumulate Jy for 16 particles into the v4 - v7 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * uy;   // v12 = q uy
@@ -1180,7 +1180,7 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         jy3 += v07;
 
         //--------------------------------------------------------------------------
-        // Accumulate Jz for 16 particles into the v8-v11 vectors.
+        // Accumulate Jz for 16 particles into the v8 - v11 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * uz;   // v12 = q uz

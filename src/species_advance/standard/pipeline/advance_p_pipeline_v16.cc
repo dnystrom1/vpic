@@ -6,18 +6,6 @@
 
 using namespace v16;
 
-//----------------------------------------------------------------------------//
-// Method 4
-//----------------------------------------------------------------------------//
-// This method processes 16 particles at a time instead of 32.
-//----------------------------------------------------------------------------//
-// This method processes the particles in the same order as the reference
-// implementation and gives good reproducibility. This is achieved using
-// modified load_16x8_tr_p and store_16x8_tr_p functions which load or store
-// the particle data in the correct order in a single step instead of using
-// two steps.
-//----------------------------------------------------------------------------//
-
 #if defined(VPIC_USE_AOSOA_P)
 
 void
@@ -1074,7 +1062,7 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         //--------------------------------------------------------------------------
         // Accumulate current density.
         //--------------------------------------------------------------------------
-        // Accumulate Jx for 16 particles into the v0-v3 vectors.
+        // Accumulate Jx for 16 particles into the v0 - v3 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * ux;   // v12 = q ux
@@ -1101,7 +1089,7 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         jx3 += v03;
 
         //--------------------------------------------------------------------------
-        // Accumulate Jy for 16 particles into the v4-v7 vectors.
+        // Accumulate Jy for 16 particles into the v4 - v7 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * uy;   // v12 = q uy
@@ -1128,7 +1116,7 @@ advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         jy3 += v07;
 
         //--------------------------------------------------------------------------
-        // Accumulate Jz for 16 particles into the v8-v11 vectors.
+        // Accumulate Jz for 16 particles into the v8 - v11 vectors.
         //--------------------------------------------------------------------------
 
         v12  =   q * uz;   // v12 = q uz
