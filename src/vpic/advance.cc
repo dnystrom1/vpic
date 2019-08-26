@@ -58,8 +58,10 @@ int vpic_simulation::advance(void) {
     TIC clear_accumulator_array( accumulator_array ); TOC( clear_accumulators, 1 );
   //-------------------------------------------------------------------------------
 
+  #ifdef VPIC_NORMAL_RUN
   LIST_FOR_EACH( sp, species_list )
     TIC advance_p( sp, accumulator_array, interpolator_array ); TOC( advance_p, 1 );
+  #endif
 
   // Because the partial position push when injecting aged particles might
   // place those particles onto the guard list (boundary interaction) and

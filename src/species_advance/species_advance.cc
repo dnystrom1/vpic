@@ -389,7 +389,7 @@ species( const char * name,
 #endif
 
 void
-get_constants( float wdn_zero, float wdn_one, int nx )
+get_constants( float &wdn_zero, float &wdn_one, int &nx )
 {
   if ( nx < 1024 )
   {
