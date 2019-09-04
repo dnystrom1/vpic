@@ -2,6 +2,8 @@
 
 #include "spa_private.h"
 
+#include "species_advance_pipeline.h"
+
 #if defined(V8_ACCELERATION)
 
 using namespace v8;
@@ -58,6 +60,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
 
   int itmp, nm, max_nm;
 
+  #if 0
   int first_part; // Index of first particle for this thread.
   int  last_part; // Index of last  particle for this thread.
   int     n_part; // Number of particles for this thread.
@@ -69,6 +72,18 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   int          vox; // Index of current voxel.
 
   int sum_part = 0;
+  #endif
+
+  int first_part; // Index of first particle for this thread.
+  int  last_part; // Index of last  particle for this thread.
+  int     n_part; // Number of particles for this thread.
+
+  int      n_vox; // Number of voxels for this thread.
+  int        vox; // Index of current voxel.
+
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -125,6 +140,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   // voxels for each pipeline.
   //--------------------------------------------------------------------------//
 
+  #if 0
   int ix = 0;
   int iy = 0;
   int iz = 0;
@@ -198,14 +214,24 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
                   sp->g->nz );
     }
   }
+  #endif
+
+  //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  distribute_voxels( first_ix, first_iy, first_iz, n_vox,
+		     sp, pipeline_rank, n_pipeline,
+		     n_part, first_part, last_part );
 
   //--------------------------------------------------------------------------//
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  ix = first_ix;
-  iy = first_iy;
-  iz = first_iz;
+  int ix = first_ix;
+  int iy = first_iy;
+  int iz = first_iz;
 
   vox = VOXEL( ix, iy, iz,
                sp->g->nx, sp->g->ny, sp->g->nz );
@@ -679,6 +705,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
 
   int itmp, nm, max_nm;
 
+  #if 0
   int first_part; // Index of first particle for this thread.
   int  last_part; // Index of last  particle for this thread.
   int     n_part; // Number of particles for this thread.
@@ -690,6 +717,18 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   int          vox; // Index of current voxel.
 
   int sum_part = 0;
+  #endif
+
+  int first_part; // Index of first particle for this thread.
+  int  last_part; // Index of last  particle for this thread.
+  int     n_part; // Number of particles for this thread.
+
+  int      n_vox; // Number of voxels for this thread.
+  int        vox; // Index of current voxel.
+
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -738,6 +777,7 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
   // voxels for each pipeline.
   //--------------------------------------------------------------------------//
 
+  #if 0
   int ix = 0;
   int iy = 0;
   int iz = 0;
@@ -811,14 +851,24 @@ advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
                   sp->g->nz );
     }
   }
+  #endif
+
+  //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  distribute_voxels( first_ix, first_iy, first_iz, n_vox,
+		     sp, pipeline_rank, n_pipeline,
+		     n_part, first_part, last_part );
 
   //--------------------------------------------------------------------------//
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  ix = first_ix;
-  iy = first_iy;
-  iz = first_iz;
+  int ix = first_ix;
+  int iy = first_iy;
+  int iz = first_iz;
 
   vox = VOXEL( ix, iy, iz,
                sp->g->nx, sp->g->ny, sp->g->nz );

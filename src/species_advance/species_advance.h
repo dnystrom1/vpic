@@ -190,8 +190,8 @@ move_p( particle_t       * ALIGNED(128) p0,    // Particle array
         species_t        *              sp );  // Species pointer
 #endif
 
-void
-get_constants( float &wdn_zero, float &wdn_one, int &nx );
+// void
+// get_constants( float &wdn_zero, float &wdn_one, int &nx );
 
 END_C_DECLS
 

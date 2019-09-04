@@ -9,6 +9,8 @@
 
 #include "spa_private.h"
 
+#include "species_advance_pipeline.h"
+
 #include "../../../util/pipelines/pipelines_exec.h"
 
 #if defined(VPIC_USE_AOSOA_P)
@@ -65,13 +67,12 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int  last_part; // Index of last  particle for this thread.
   int     n_part; // Number of particles for this thread.
 
-  int previous_vox; // Index of previous voxel.
-  int    first_vox; // Index of first voxel for this thread.
-  int     last_vox; // Index of last  voxel for this thread.
-  int        n_vox; // Number of voxels for this thread.
-  int          vox; // Index of current voxel.
+  int      n_vox; // Number of voxels for this thread.
+  int        vox; // Index of current voxel.
 
-  int sum_part = 0;
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -127,8 +128,15 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   //--------------------------------------------------------------------------//
   // Determine the first and last voxel for each pipeline and the number of
-  // voxels for each pipeline.
+  // voxels for each pipeline.  Inline version.
   //--------------------------------------------------------------------------//
+
+  #if 0
+  int previous_vox; // Index of previous voxel.
+  int    first_vox; // Index of first voxel for this thread.
+  int     last_vox; // Index of last  voxel for this thread.
+
+  int sum_part = 0;
 
   int ix = 0;
   int iy = 0;
@@ -203,14 +211,24 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                   sp->g->nz );
     }
   }
+  #endif
+
+  //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  distribute_voxels( first_ix, first_iy, first_iz, n_vox,
+		     sp, pipeline_rank, n_pipeline,
+		     n_part, first_part, last_part );
 
   //--------------------------------------------------------------------------//
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  ix = first_ix;
-  iy = first_iy;
-  iz = first_iz;
+  int ix = first_ix;
+  int iy = first_iy;
+  int iz = first_iz;
 
   vox = VOXEL( ix, iy, iz,
                sp->g->nx, sp->g->ny, sp->g->nz );
@@ -503,6 +521,18 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int  last_part; // Index of last  particle for this thread.
   int     n_part; // Number of particles for this thread.
 
+  int      n_vox; // Number of voxels for this thread.
+  int        vox; // Index of current voxel.
+
+  int first_ix = 0;
+  int first_iy = 0;
+  int first_iz = 0;
+
+  #if 0
+  int first_part; // Index of first particle for this thread.
+  int  last_part; // Index of last  particle for this thread.
+  int     n_part; // Number of particles for this thread.
+
   int previous_vox; // Index of previous voxel.
   int    first_vox; // Index of first voxel for this thread.
   int     last_vox; // Index of last  voxel for this thread.
@@ -510,6 +540,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int          vox; // Index of current voxel.
 
   int sum_part = 0;
+  #endif
 
   DECLARE_ALIGNED_ARRAY( particle_mover_t, 16, local_pm, 1 );
 
@@ -523,9 +554,10 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   //--------------------------------------------------------------------------//
   // Determine the first and last voxel for each pipeline and the number of
-  // voxels for each pipeline.
+  // voxels for each pipeline.  Inline version.
   //--------------------------------------------------------------------------//
 
+  #if 0
   int ix = 0;
   int iy = 0;
   int iz = 0;
@@ -599,6 +631,7 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
                   sp->g->nz );
     }
   }
+  #endif
 
   // Determine which movers are reserved for this pipeline.
   // Movers (16 bytes) should be reserved for pipelines in at least
@@ -630,12 +663,21 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   }
 
   //--------------------------------------------------------------------------//
+  // Determine the first and last voxel for each pipeline and the number of
+  // voxels for each pipeline.
+  //--------------------------------------------------------------------------//
+
+  distribute_voxels( first_ix, first_iy, first_iz, n_vox,
+		     sp, pipeline_rank, n_pipeline,
+		     n_part, first_part, last_part );
+
+  //--------------------------------------------------------------------------//
   // Loop over voxels.
   //--------------------------------------------------------------------------//
 
-  ix = first_ix;
-  iy = first_iy;
-  iz = first_iz;
+  int ix = first_ix;
+  int iy = first_iy;
+  int iz = first_iz;
 
   vox = VOXEL( ix, iy, iz,
                sp->g->nx, sp->g->ny, sp->g->nz );
