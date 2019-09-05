@@ -387,19 +387,3 @@ species( const char * name,
   return sp;
 }
 #endif
-
-// void
-// get_constants( float &wdn_zero, float &wdn_one, int &nx )
-// {
-//   if ( nx < 1024 )
-//   {
-//     wdn_zero = 0.0;
-//     wdn_one  = 1.0;
-//   }
-//
-//   else
-//   {
-//     wdn_zero = 100.0;
-//     wdn_one  = 1000.0;
-//   }
-// }

@@ -74,20 +74,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int first_iy = 0;
   int first_iz = 0;
 
-  #if 0
-  int first_part; // Index of first particle for this thread.
-  int  last_part; // Index of last  particle for this thread.
-  int     n_part; // Number of particles for this thread.
-
-  int previous_vox; // Index of previous voxel.
-  int    first_vox; // Index of first voxel for this thread.
-  int     last_vox; // Index of last  voxel for this thread.
-  int        n_vox; // Number of voxels for this thread.
-  int          vox; // Index of current voxel.
-
-  int sum_part = 0;
-  #endif
-
   float wdn_zero, wdn_one;      // Variables used to confuse compiler.
   float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
@@ -142,87 +128,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   // a given species.
 
   // q = p->w;
-
-  //--------------------------------------------------------------------------//
-  // Determine the first and last voxel for each pipeline and the number of
-  // voxels for each pipeline.
-  //--------------------------------------------------------------------------//
-
-  #if 0
-  int ix = 0;
-  int iy = 0;
-  int iz = 0;
-
-  int n_voxel = 0; // Number of voxels in this MPI domain.
-
-  int first_ix = 0;
-  int first_iy = 0;
-  int first_iz = 0;
-
-  first_vox = 0;
-  last_vox  = 0;
-  n_vox     = 0;
-
-  if ( n_part > 0 )
-  {
-    first_vox = 2*sp->g->nv; // Initialize with invalid values.
-    last_vox  = 2*sp->g->nv;
-
-    DISTRIBUTE_VOXELS( 1, sp->g->nx,
-                       1, sp->g->ny,
-                       1, sp->g->nz,
-                       1,
-                       0,
-                       1,
-                       ix, iy, iz, n_voxel );
-
-    vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
-
-    for( int i = 0; i < n_voxel; i++ )
-    {
-      sum_part += sp->counts[vox];
-
-      if ( sum_part >= last_part )
-      {
-        if ( pipeline_rank == n_pipeline - 1 )
-        {
-          last_vox = vox;
-
-          n_vox++;
-        }
-        else
-        {
-          last_vox = previous_vox;
-        }
-
-        break;
-      }
-      else if ( sum_part >= first_part   &&
-                first_vox == 2*sp->g->nv )
-      {
-        first_vox = vox;
-        first_ix  = ix;
-        first_iy  = iy;
-        first_iz  = iz;
-      }
-
-      if ( vox >= first_vox )
-      {
-        n_vox++;
-      }
-
-      previous_vox = vox;
-
-      NEXT_VOXEL( vox, ix, iy, iz,
-                  1, sp->g->nx,
-                  1, sp->g->ny,
-                  1, sp->g->nz,
-                  sp->g->nx,
-                  sp->g->ny,
-                  sp->g->nz );
-    }
-  }
-  #endif
 
   //--------------------------------------------------------------------------//
   // Set some variables used to confuse compiler into performing stores of
@@ -559,20 +464,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int first_iy = 0;
   int first_iz = 0;
 
-  #if 0
-  int first_part; // Index of first particle for this thread.
-  int  last_part; // Index of last  particle for this thread.
-  int     n_part; // Number of particles for this thread.
-
-  int previous_vox; // Index of previous voxel.
-  int    first_vox; // Index of first voxel for this thread.
-  int     last_vox; // Index of last  voxel for this thread.
-  int        n_vox; // Number of voxels for this thread.
-  int          vox; // Index of current voxel.
-
-  int sum_part = 0;
-  #endif
-
   float wdn_zero, wdn_one;      // Variables used to confuse compiler.
   float ux_old, uy_old, uz_old; // Variables used to confuse compiler.
 
@@ -585,87 +476,6 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   DISTRIBUTE( args->np, 1, pipeline_rank, n_pipeline, first_part, n_part );
 
   last_part = first_part + n_part - 1;
-
-  //--------------------------------------------------------------------------//
-  // Determine the first and last voxel for each pipeline and the number of
-  // voxels for each pipeline.
-  //--------------------------------------------------------------------------//
-
-  #if 0
-  int ix = 0;
-  int iy = 0;
-  int iz = 0;
-
-  int n_voxel = 0; // Number of voxels in this MPI domain.
-
-  int first_ix = 0;
-  int first_iy = 0;
-  int first_iz = 0;
-
-  first_vox = 0;
-  last_vox  = 0;
-  n_vox     = 0;
-
-  if ( n_part > 0 )
-  {
-    first_vox = 2*sp->g->nv; // Initialize with invalid values.
-    last_vox  = 2*sp->g->nv;
-
-    DISTRIBUTE_VOXELS( 1, sp->g->nx,
-                       1, sp->g->ny,
-                       1, sp->g->nz,
-                       1,
-                       0,
-                       1,
-                       ix, iy, iz, n_voxel );
-
-    vox = VOXEL( ix, iy, iz, sp->g->nx, sp->g->ny, sp->g->nz );
-
-    for( int i = 0; i < n_voxel; i++ )
-    {
-      sum_part += sp->counts[vox];
-
-      if ( sum_part >= last_part )
-      {
-        if ( pipeline_rank == n_pipeline - 1 )
-        {
-          last_vox = vox;
-
-          n_vox++;
-        }
-        else
-        {
-          last_vox = previous_vox;
-        }
-
-        break;
-      }
-      else if ( sum_part >= first_part   &&
-                first_vox == 2*sp->g->nv )
-      {
-        first_vox = vox;
-        first_ix  = ix;
-        first_iy  = iy;
-        first_iz  = iz;
-      }
-
-      if ( vox >= first_vox )
-      {
-        n_vox++;
-      }
-
-      previous_vox = vox;
-
-      NEXT_VOXEL( vox, ix, iy, iz,
-                  1, sp->g->nx,
-                  1, sp->g->ny,
-                  1, sp->g->nz,
-                  sp->g->nx,
-                  sp->g->ny,
-                  sp->g->nz );
-    }
-  }
-  #endif
 
   // Determine which movers are reserved for this pipeline.
   // Movers (16 bytes) should be reserved for pipelines in at least
