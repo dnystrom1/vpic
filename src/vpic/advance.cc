@@ -10,6 +10,11 @@
 
 #include "vpic.h"
 
+// Use this for Intel and VTune.
+#if defined(VPIC_USE_VTUNE_ADVANCE_P) || defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+#include "ittnotify.h"
+#endif
+
 #define FAK field_array->kernel
 
 int vpic_simulation::advance(void) {
@@ -27,7 +32,7 @@ int vpic_simulation::advance(void) {
     if( (sp->sort_interval>0) && ((step() % sp->sort_interval)==0) ) {
       if( rank()==0 ) MESSAGE(( "Performance sorting \"%s\"", sp->name ));
       TIC sort_p( sp ); TOC( sort_p, 1 );
-    } 
+    }
   #endif
 
   // At this point, fields are at E_0 and B_0 and the particle positions
@@ -51,16 +56,39 @@ int vpic_simulation::advance(void) {
   //-------------------------------------------------------------------------------
   // Performance testing code.
   //-------------------------------------------------------------------------------
+
+  // Conditionally resume profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+  __itt_resume();
+  #endif
+
   LIST_FOR_EACH( sp, species_list )
     TIC test_advance_p( sp, accumulator_array, interpolator_array ); TOC( test_advance_p, 1 );
+
+  // Conditionally pause profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+  __itt_pause();
+  #endif
 
   if( species_list )
     TIC clear_accumulator_array( accumulator_array ); TOC( clear_accumulators, 1 );
   //-------------------------------------------------------------------------------
 
   #ifdef VPIC_NORMAL_RUN
+
+  // Conditionally resume profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
+  __itt_resume();
+  #endif
+
   LIST_FOR_EACH( sp, species_list )
     TIC advance_p( sp, accumulator_array, interpolator_array ); TOC( advance_p, 1 );
+
+  // Conditionally pause profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
+  __itt_pause();
+  #endif
+
   #endif
 
   // Because the partial position push when injecting aged particles might
