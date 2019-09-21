@@ -1,6 +1,11 @@
 #include "vpic.h"
 #define FAK field_array->kernel
 
+// Use this for Intel and VTune.
+#if defined(VPIC_USE_VTUNE_CENTER_P)
+#include "ittnotify.h"
+#endif
+
 void
 vpic_simulation::initialize( int argc,
                              char **argv ) {
@@ -53,11 +58,22 @@ vpic_simulation::initialize( int argc,
   }
   //------------------------------------------------------------------------------------------
   LIST_FOR_EACH( sp, species_list ) TIC sort_p( sp ); TOC( sort_p, 1 );
+
+  // Conditionally resume profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_CENTER_P)
+  __itt_resume();
+  #endif
+
   for( int iwdn = 0; iwdn < 100; iwdn++ )
   {
     LIST_FOR_EACH( sp, species_list ) TIC uncenter_p( sp, interpolator_array ); TOC( uncenter_p, 1 );
     LIST_FOR_EACH( sp, species_list ) TIC   center_p( sp, interpolator_array ); TOC(   center_p, 1 );
   }
+
+  // Conditionally pause profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_CENTER_P)
+  __itt_pause();
+  #endif
   //------------------------------------------------------------------------------------------
   // LIST_FOR_EACH( sp, species_list ) TIC sort_p( sp ); TOC( sort_p, 1 );
   // for( int iwdn = 0; iwdn < 100; iwdn++ )

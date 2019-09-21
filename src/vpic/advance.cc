@@ -10,6 +10,11 @@
 
 #include "vpic.h"
 
+// Use this for Intel and VTune.
+#if defined(VPIC_USE_VTUNE_ADVANCE_P) || defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+#include "ittnotify.h"
+#endif
+
 #define FAK field_array->kernel
 
 int vpic_simulation::advance(void) {
@@ -49,15 +54,36 @@ int vpic_simulation::advance(void) {
   //-------------------------------------------------------------------------------
   // Performance testing code.
   //-------------------------------------------------------------------------------
+
+  // Conditionally resume profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+  __itt_resume();
+  #endif
+
   LIST_FOR_EACH( sp, species_list )
     TIC test_advance_p( sp, accumulator_array, interpolator_array ); TOC( test_advance_p, 1 );
+
+  // Conditionally pause profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
+  __itt_pause();
+  #endif
 
   if( species_list )
     TIC clear_accumulator_array( accumulator_array ); TOC( clear_accumulators, 1 );
   //-------------------------------------------------------------------------------
 
+  // Conditionally resume profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
+  __itt_resume();
+  #endif
+
   LIST_FOR_EACH( sp, species_list )
     TIC advance_p( sp, accumulator_array, interpolator_array ); TOC( advance_p, 1 );
+
+  // Conditionally pause profiling with Intel VTune.
+  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
+  __itt_pause();
+  #endif
 
   // Because the partial position push when injecting aged particles might
   // place those particles onto the guard list (boundary interaction) and
