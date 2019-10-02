@@ -10,11 +10,6 @@
 
 #include "vpic.h"
 
-// Use this for Intel and VTune.
-#if defined(VPIC_USE_VTUNE_ADVANCE_P) || defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
-#include "ittnotify.h"
-#endif
-
 #define FAK field_array->kernel
 
 int vpic_simulation::advance(void) {
@@ -49,46 +44,25 @@ int vpic_simulation::advance(void) {
   // yields a first order accurate Trotter factorization (not a second
   // order accurate factorization).
 
+  #ifdef VPIC_NORMAL_RUN
   if( collision_op_list )
     TIC apply_collision_op_list( collision_op_list ); TOC( collision_model, 1 );
   TIC user_particle_collisions(); TOC( user_particle_collisions, 1 );
+  #endif
 
   //-------------------------------------------------------------------------------
   // Performance testing code.
   //-------------------------------------------------------------------------------
-
-  // Conditionally resume profiling with Intel VTune.
-  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
-  __itt_resume();
-  #endif
-
   LIST_FOR_EACH( sp, species_list )
     TIC test_advance_p( sp, accumulator_array, interpolator_array ); TOC( test_advance_p, 1 );
-
-  // Conditionally pause profiling with Intel VTune.
-  #if defined(VPIC_USE_VTUNE_TEST_ADVANCE_P)
-  __itt_pause();
-  #endif
 
   if( species_list )
     TIC clear_accumulator_array( accumulator_array ); TOC( clear_accumulators, 1 );
   //-------------------------------------------------------------------------------
 
   #ifdef VPIC_NORMAL_RUN
-
-  // Conditionally resume profiling with Intel VTune.
-  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
-  __itt_resume();
-  #endif
-
   LIST_FOR_EACH( sp, species_list )
     TIC advance_p( sp, accumulator_array, interpolator_array ); TOC( advance_p, 1 );
-
-  // Conditionally pause profiling with Intel VTune.
-  #if defined(VPIC_USE_VTUNE_ADVANCE_P)
-  __itt_pause();
-  #endif
-
   #endif
 
   // Because the partial position push when injecting aged particles might
@@ -97,21 +71,26 @@ int vpic_simulation::advance(void) {
   // be done after advance_p and before guard list processing. Note:
   // user_particle_injection should be a stub if species_list is empty.
 
+  #ifdef VPIC_NORMAL_RUN
   if( emitter_list )
     TIC apply_emitter_list( emitter_list ); TOC( emission_model, 1 );
   TIC user_particle_injection(); TOC( user_particle_injection, 1 );
+  #endif
 
   // This should be after the emission and injection to allow for the
   // possibility of thread parallelizing these operations
 
+  #ifdef VPIC_NORMAL_RUN
   if( species_list )
     TIC reduce_accumulator_array( accumulator_array ); TOC( reduce_accumulators, 1 );
+  #endif
 
   // At this point, most particle positions are at r_1 and u_{1/2}. Particles
   // that had boundary interactions are now on the guard list. Process the
   // guard lists. Particles that absorbed are added to rhob (using a corrected
   // local accumulation).
 
+  #ifdef VPIC_NORMAL_RUN
   TIC
     for( int round=0; round<num_comm_round; round++ )
       boundary_p( particle_bc_list, species_list,
@@ -200,15 +179,18 @@ int vpic_simulation::advance(void) {
   }
 
   #endif // #if defined(VPIC_USE_AOSOA_P)
+  #endif
 
   // At this point, all particle positions are at r_1 and u_{1/2}, the
   // guard lists are empty and the accumulators on each processor are current.
   // Convert the accumulators into currents.
 
+  #ifdef VPIC_NORMAL_RUN
   TIC FAK->clear_jf( field_array ); TOC( clear_jf, 1 );
   if( species_list )
     TIC unload_accumulator_array( field_array, accumulator_array ); TOC( unload_accumulator, 1 );
   TIC FAK->synchronize_jf( field_array ); TOC( synchronize_jf, 1 );
+  #endif
 
   // At this point, the particle currents are known at jf_{1/2}.
   // Let the user add their own current contributions. It is the users
@@ -217,28 +199,39 @@ int vpic_simulation::advance(void) {
   // rhob_1 = rhob_0 + div juser_{1/2} (corrected local accumulation) if
   // the user wants electric field divergence cleaning to work.
 
+  #ifdef VPIC_NORMAL_RUN
   TIC user_current_injection(); TOC( user_current_injection, 1 );
+  #endif
 
   // Half advance the magnetic field from B_0 to B_{1/2}
 
+  #ifdef VPIC_NORMAL_RUN
   TIC FAK->advance_b( field_array, 0.5 ); TOC( advance_b, 1 );
+  #endif
 
   // Advance the electric field from E_0 to E_1
 
+  #ifdef VPIC_NORMAL_RUN
   TIC FAK->advance_e( field_array, 1.0 ); TOC( advance_e, 1 );
+  #endif
 
   // Let the user add their own contributions to the electric field. It is the
   // users responsibility to insure injected electric fields are consistent
   // across domains.
 
+  #ifdef VPIC_NORMAL_RUN
   TIC user_field_injection(); TOC( user_field_injection, 1 );
+  #endif
 
   // Half advance the magnetic field from B_{1/2} to B_1
 
+  #ifdef VPIC_NORMAL_RUN
   TIC FAK->advance_b( field_array, 0.5 ); TOC( advance_b, 1 );
+  #endif
 
   // Divergence clean e
 
+  #ifdef VPIC_NORMAL_RUN
   if( (clean_div_e_interval>0) && ((step() % clean_div_e_interval)==0) ) {
     if( rank()==0 ) MESSAGE(( "Divergence cleaning electric field" ));
 
@@ -255,9 +248,11 @@ int vpic_simulation::advance(void) {
       TIC FAK->clean_div_e( field_array ); TOC( clean_div_e, 1 );
     }
   }
+  #endif
 
   // Divergence clean b
 
+  #ifdef VPIC_NORMAL_RUN
   if( (clean_div_b_interval>0) && ((step() % clean_div_b_interval)==0) ) {
     if( rank()==0 ) MESSAGE(( "Divergence cleaning magnetic field" ));
 
@@ -270,20 +265,25 @@ int vpic_simulation::advance(void) {
       TIC FAK->clean_div_b( field_array ); TOC( clean_div_b, 1 );
     }
   }
+  #endif
 
   // Synchronize the shared faces
 
+  #ifdef VPIC_NORMAL_RUN
   if( (sync_shared_interval>0) && ((step() % sync_shared_interval)==0) ) {
     if( rank()==0 ) MESSAGE(( "Synchronizing shared tang e, norm b, rho_b" ));
     TIC err = FAK->synchronize_tang_e_norm_b( field_array ); TOC( synchronize_tang_e_norm_b, 1 );
     if( rank()==0 ) MESSAGE(( "Domain desynchronization error = %e (arb units)", err ));
   }
+  #endif
 
   // Fields are updated ... load the interpolator for next time step and
   // particle diagnostics in user_diagnostics if there are any particle
   // species to worry about
 
+  #ifdef VPIC_NORMAL_RUN
   if( species_list ) TIC load_interpolator_array( interpolator_array, field_array ); TOC( load_interpolator, 1 );
+  #endif
 
   step()++;
 
@@ -296,7 +296,9 @@ int vpic_simulation::advance(void) {
 
   // Let the user compute diagnostics
 
+  #ifdef VPIC_NORMAL_RUN
   TIC user_diagnostics(); TOC( user_diagnostics, 1 );
+  #endif
 
   // "return step()!=num_step" is more intuitive. But if a checkpt
   // saved in the call to user_diagnostics() above, is done on the final step
