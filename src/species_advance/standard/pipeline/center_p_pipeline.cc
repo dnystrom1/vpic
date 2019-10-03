@@ -148,17 +148,15 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   int ip = 0;
 
   // for( ; n; n--, p++ )
-  #define VPIC_SIMD_LEN 16    // Hack. Do not hard code this.
-  for( int i = 0 ; i < n; i += VPIC_SIMD_LEN )
+  for( int i = 0 ; i < n; i += PARTICLE_BLOCK_SIZE )
   {
     ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
-    // ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
 
     // Need to deal with issue where last vector is not full.
     #ifdef VPIC_SIMD_LEN
     #pragma omp simd simdlen(VPIC_SIMD_LEN)
     #endif
-    for( int j = 0; j < VPIC_SIMD_LEN; j++ )
+    for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
     {
       dx   = pb[ib].dx[j];                     // Load position
       dy   = pb[ib].dy[j];
