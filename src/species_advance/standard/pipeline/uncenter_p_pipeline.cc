@@ -306,10 +306,11 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
       p = args->p0 + part_start;
 
       // Process the particles in a cell.
+      // for( int i = 0; i < part_count; i++, p++ )
       #ifdef VPIC_SIMD_LEN
       #pragma omp simd simdlen(VPIC_SIMD_LEN)
       #endif
-      for( int i = 0; i < part_count; i++, p++ )
+      for( int i = 0; i < part_count; i += 1, p += 1 )
       {
 	// Load position.
         dx   = p->dx;
