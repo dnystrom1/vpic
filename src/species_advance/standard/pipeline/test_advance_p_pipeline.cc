@@ -376,7 +376,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   #ifdef VPIC_SIMD_LEN
   #pragma omp simd simdlen(VPIC_SIMD_LEN)
   #endif
-  for( ; n; n -= 1, p += 1 )
+  for( int i = 0 ; i < n; i++, p++ )
   {
     dx   = p->dx;                             // Load position
     dy   = p->dy;
