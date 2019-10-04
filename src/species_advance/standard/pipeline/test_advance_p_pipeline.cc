@@ -106,10 +106,11 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   int ib = 0;
   int ip = 0;
 
+  // for( int i = 0 ; i < n; i++, ipart++ )
   #ifdef VPIC_SIMD_LEN
   #pragma omp simd simdlen(VPIC_SIMD_LEN)
   #endif
-  for( int i = 0 ; i < n; i++, ipart++ )
+  for( int i = 0 ; i < n; i += 1, ipart += 1 )
   {
     ib   = i / PARTICLE_BLOCK_SIZE;           // Index of particle block.
     ip   = i - PARTICLE_BLOCK_SIZE * ib;      // Index of next particle in block.
@@ -371,10 +372,11 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   // Process particles for this pipeline.
 
+  // for( ; n; n--, p++ )
   #ifdef VPIC_SIMD_LEN
   #pragma omp simd simdlen(VPIC_SIMD_LEN)
   #endif
-  for( ; n; n--, p++ )
+  for( ; n; n -= 1, p += 1 )
   {
     dx   = p->dx;                             // Load position
     dy   = p->dy;

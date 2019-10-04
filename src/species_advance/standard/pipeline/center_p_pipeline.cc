@@ -52,10 +52,11 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   int ip = 0;
 
 //for( ; n; n--, p++ )
+//for( int i = 0 ; i < n; i++ )
   #ifdef VPIC_SIMD_LEN
   #pragma omp simd simdlen(VPIC_SIMD_LEN)
   #endif
-  for( int i = 0 ; i < n; i++ )
+  for( int i = 0 ; i < n; i += 1 )
   {
     ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
     ip   = i - PARTICLE_BLOCK_SIZE * ib;     // Index of next particle in block.
@@ -153,10 +154,11 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
     ib   = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
 
     // Need to deal with issue where last vector is not full.
+    // for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
     #ifdef VPIC_SIMD_LEN
     #pragma omp simd simdlen(VPIC_SIMD_LEN)
     #endif
-    for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
+    for( int j = 0; j < PARTICLE_BLOCK_SIZE; j += 1 )
     {
       dx   = pb[ib].dx[j];                     // Load position
       dy   = pb[ib].dy[j];
@@ -245,10 +247,11 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   // Process particles for this pipeline.
 
 //for( ; n; n--, p++ )
+//for( int i = 0 ; i < n; i++, p++ )
   #ifdef VPIC_SIMD_LEN
   #pragma omp simd simdlen(VPIC_SIMD_LEN)
   #endif
-  for( int i = 0 ; i < n; i++, p++ )
+  for( int i = 0 ; i < n; i += 1, p += 1 )
   {
     dx   = p->dx;                            // Load position
     dy   = p->dy;
