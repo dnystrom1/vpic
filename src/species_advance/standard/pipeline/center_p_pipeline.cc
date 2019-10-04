@@ -317,7 +317,7 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
       #ifdef VPIC_SIMD_LEN
       #pragma omp simd simdlen(VPIC_SIMD_LEN)
       #endif
-      for( int i = 0; i < part_count; i += 1, p += 1 )
+      for( int i = 0; i < part_count; i++ )
       {
 	// Load position.
         dx   = p->dx;
@@ -366,6 +366,9 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
         p->ux = ux;
         p->uy = uy;
         p->uz = uz;
+
+	// Increment particle pointer.
+	p++;
       }
     }
 

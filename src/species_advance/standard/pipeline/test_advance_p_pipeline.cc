@@ -576,7 +576,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       #ifdef VPIC_SIMD_LEN
       #pragma omp simd simdlen(VPIC_SIMD_LEN)
       #endif
-      for( int i = 0; i < part_count; i += 1, p += 1 )
+      for( int i = 0; i < part_count; i++ )
       {
         // Load position.
         dx   = p->dx;
@@ -748,6 +748,9 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
         //   // }
 	//   //--------------------------------------------------------------------
         // }
+
+	// Increment particle pointer.
+	p++;
       }
     }
 
