@@ -61,6 +61,8 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   float v0, v1, v2, v3, v4, v5;
   float q;
 
+  float ja[12][PARTICLE_BLOCK_SIZE];
+
   int itmp, nm, max_nm;
 
   int first_part; // Index of first particle for this thread.
@@ -192,6 +194,16 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       cbz      = f0[vox].cbz;
       dcbzdz   = f0[vox].dcbzdz;
 
+      // Initialize cell local accumulator to zero.
+
+      for( int k = 0; k < 12; k++ )
+      {
+        for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
+        {
+          ja[k][j] = 0.0f;
+        }
+      }
+
       // Initialize particle pointer to first particle in cell. This assumes part_start
       // is always on a PARTICLE_BLOCK_SIZE boundary.
       pb = args->pb0 + part_start / PARTICLE_BLOCK_SIZE;
@@ -318,7 +330,7 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
             v5 = q * ux * uy * uz * one_third;
 
             // Get accumulator.
-            a  = (float *)( a0 + vox );
+            // a  = (float *)( a0 + vox );
             // a  = (float *)( a0 + ii );
 
             #define ACCUMULATE_J(X,Y,Z,offset)                                \
@@ -336,10 +348,15 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
             v1 -= v5;       /* v1 = q ux [ (1+dy)(1-dz) - uy*uz/3 ] */        \
             v2 -= v5;       /* v2 = q ux [ (1-dy)(1+dz) - uy*uz/3 ] */        \
             v3 += v5;       /* v3 = q ux [ (1+dy)(1+dz) + uy*uz/3 ] */        \
-            a[offset+0] += v0;                                                \
-            a[offset+1] += v1;                                                \
-            a[offset+2] += v2;                                                \
-            a[offset+3] += v3
+            ja[offset+0][j] += v0;                                            \
+            ja[offset+1][j] += v1;                                            \
+            ja[offset+2][j] += v2;                                            \
+            ja[offset+3][j] += v3
+
+            // a[offset+0] += v0;                                                \
+            // a[offset+1] += v1;                                                \
+            // a[offset+2] += v2;                                                \
+            // a[offset+3] += v3
 
             ACCUMULATE_J( x, y, z, 0 );
             ACCUMULATE_J( y, z, x, 4 );
@@ -383,6 +400,29 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
           // }
 	}
       }
+    }
+
+    // Add cell local current density to accumulator array. Can this be done with
+    // instrinsics? And, would it be faster?
+
+    float * ALIGNED(64) p_a0 = ( float * ALIGNED(64) ) ( a0 + vox );
+
+    for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
+    {
+      p_a0[ 0] += ja[ 0][j];
+      p_a0[ 1] += ja[ 1][j];
+      p_a0[ 2] += ja[ 2][j];
+      p_a0[ 3] += ja[ 3][j];
+
+      p_a0[ 4] += ja[ 4][j];
+      p_a0[ 5] += ja[ 5][j];
+      p_a0[ 6] += ja[ 6][j];
+      p_a0[ 7] += ja[ 7][j];
+
+      p_a0[ 8] += ja[ 8][j];
+      p_a0[ 9] += ja[ 9][j];
+      p_a0[10] += ja[10][j];
+      p_a0[11] += ja[11][j];
     }
 
     // Compute next voxel index and its grid indicies.
