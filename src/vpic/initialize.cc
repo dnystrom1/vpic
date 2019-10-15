@@ -6,6 +6,11 @@
 #include "ittnotify.h"
 #endif
 
+// Use this for LikWid.
+#if defined(VPIC_USE_LIKWID_CENTER_P)
+#include <likwid.h>
+#endif
+
 void
 vpic_simulation::initialize( int argc,
                              char **argv ) {
@@ -62,11 +67,21 @@ vpic_simulation::initialize( int argc,
   __itt_resume();
   #endif
 
+  // Conditionally profile marked sections with LikWid..
+  #if defined(VPIC_USE_LIKWID_CENTER_P)
+  LIKWID_MARKER_START( "center_p" );
+  #endif
+
   for( int iwdn = 0; iwdn < 100; iwdn++ )
   {
     LIST_FOR_EACH( sp, species_list ) TIC uncenter_p( sp, interpolator_array ); TOC( uncenter_p, 1 );
     LIST_FOR_EACH( sp, species_list ) TIC   center_p( sp, interpolator_array ); TOC(   center_p, 1 );
   }
+
+  // Conditionally profile marked sections with LikWid..
+  #if defined(VPIC_USE_LIKWID_CENTER_P)
+  LIKWID_MARKER_STOP( "center_p" );
+  #endif
 
   // Conditionally pause profiling with Intel VTune.
   #if defined(VPIC_USE_VTUNE_CENTER_P)
