@@ -8,7 +8,7 @@
 
 // Use this for LikWid.
 #if defined(VPIC_USE_LIKWID_CENTER_P)
-#include <likwid.h>
+#include <likwid-marker.h>
 #endif
 
 void

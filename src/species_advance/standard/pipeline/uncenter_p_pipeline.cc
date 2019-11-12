@@ -131,7 +131,11 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
         ib = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
 
         #ifdef VPIC_SIMD_LEN
+        #ifdef ARM_SVE
+        #pragma omp simd
+        #else
         #pragma omp simd simdlen(VPIC_SIMD_LEN)
+        #endif
         #endif
 	for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
 	{
@@ -308,7 +312,11 @@ uncenter_p_pipeline_scalar( center_p_pipeline_args_t * args,
       // Process the particles in a cell.
       // for( int i = 0; i < part_count; i++, p++ )
       #ifdef VPIC_SIMD_LEN
+      #ifdef ARM_SVE
+      #pragma omp simd
+      #else
       #pragma omp simd simdlen(VPIC_SIMD_LEN)
+      #endif
       #endif
       for( int i = 0; i < part_count; i++ )
       {

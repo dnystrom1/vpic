@@ -186,15 +186,18 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
       int ib = 0;
 
       // Process the particles in a cell.
-      #define VPIC_SIMD_LEN 16  // Do not hard wire this.
-      for( int i = 0; i < part_count; i += VPIC_SIMD_LEN )
+      for( int i = 0; i < part_count; i += PARTICLE_BLOCK_SIZE )
       {
         ib = i / PARTICLE_BLOCK_SIZE;          // Index of particle block.
 
         // #ifdef VPIC_SIMD_LEN
+        // #ifdef ARM_SVE
+        // #pragma omp simd
+        // #else
         // #pragma omp simd simdlen(VPIC_SIMD_LEN)
         // #endif
-	for( int j = 0; j < VPIC_SIMD_LEN; j++ )
+        // #endif
+	for( int j = 0; j < PARTICLE_BLOCK_SIZE; j++ )
 	{
           // Load position.
           dx   = pb[ib].dx[j];
