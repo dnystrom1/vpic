@@ -20,6 +20,12 @@
 #include <likwid-marker.h>
 #endif
 
+// Use this for Armie.
+#if defined(VPIC_USE_ARMIE) || defined(VPIC_USE_ARMIE_ADVANCE)
+#define __ARMIE_START_TRACE() { asm volatile (".inst 0x2520e020"); }
+#define __ARMIE_STOP_TRACE() { asm volatile (".inst 0x2520e040"); }
+#endif
+
 // The simulation variable is set up this way so both the checkpt
 // service and main can see it.  This allows main to find where
 // the restored objects are after a restore.
@@ -80,7 +86,12 @@ int main(int argc, char** argv)
     // TODO: this would be better if it was bool-like in nature
     const char * fbase = strip_cmdline_string(&argc, &argv, "--restore", NULL);
 
-    // Conditionally initialize profiling with LikWid..
+    // Conditionally initialize profiling with Armie.
+    #if defined(VPIC_USE_ARMIE)
+    __ARMIE_START_TRACE();
+    #endif
+
+    // Conditionally initialize profiling with LikWid.
     #if defined(VPIC_USE_LIKWID_ADVANCE) || defined(VPIC_USE_LIKWID_CENTER_P)
     LIKWID_MARKER_INIT;
     #endif
@@ -136,7 +147,13 @@ int main(int argc, char** argv)
 
     // Conditionally profile marked sections with LikWid..
     #if defined(VPIC_USE_LIKWID_ADVANCE)
-    LIKWID_MARKER_START( "advance" );
+    LIKWID_MARKER_START("advance");
+    mp_barrier();
+    #endif
+
+    // Conditionally initialize profiling with Armie.
+    #if defined(VPIC_USE_ARMIE_ADVANCE)
+    __ARMIE_START_TRACE();
     #endif
 
     // Perform the main simulation
@@ -149,9 +166,15 @@ int main(int argc, char** argv)
 
     elapsed = wallclock() - elapsed;
 
+    // Conditionally terminate profiling with Armie.
+    #if defined(VPIC_USE_ARMIE_ADVANCE)
+    __ARMIE_STOP_TRACE();
+    #endif
+
     // Conditionally profile marked sections with LikWid..
     #if defined(VPIC_USE_LIKWID_ADVANCE)
-    LIKWID_MARKER_STOP( "advance" );
+    mp_barrier();
+    LIKWID_MARKER_STOP("advance");
     #endif
 
     // Conditionally pause profiling with Intel VTune.
@@ -179,6 +202,11 @@ int main(int argc, char** argv)
     // Conditionally terminate profiling with LikWid..
     #if defined(VPIC_USE_LIKWID_ADVANCE) || defined(VPIC_USE_LIKWID_CENTER_P)
     LIKWID_MARKER_CLOSE;
+    #endif
+
+    // Conditionally terminate profiling with Armie.
+    #if defined(VPIC_USE_ARMIE)
+    __ARMIE_STOP_TRACE();
     #endif
 
     // Perform Clean up, including de-registering objects

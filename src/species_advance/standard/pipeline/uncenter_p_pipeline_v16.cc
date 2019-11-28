@@ -4,6 +4,12 @@
 
 #include "species_advance_pipeline.h"
 
+#if 0
+// Currently used to print out results of call to pthread_self().  May want to
+// move to cout version at some point.
+#include <iostream>
+#endif
+
 #if defined(V16_ACCELERATION)
 
 using namespace v16;
@@ -51,6 +57,27 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
   int first_ix = 0;
   int first_iy = 0;
   int first_iz = 0;
+
+  //--------------------------------------------------------------------------//
+  // Conditionally print out thread index for pthreads.
+  //--------------------------------------------------------------------------//
+
+  #if 0
+  int verbose_0       = 0;
+  int cout_world_rank = 0;
+
+  if ( verbose_0 == 1 &&
+       world_rank == cout_world_rank )
+  {
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "Entering uncenter_p_pipeline_v16, AoSoA_Cell version."             << std::endl;
+    std::cout << "=================================================================" << std::endl;
+    std::cout << "cout_rank_mpi    = " << cout_world_rank << "   "
+              << "cout_rank_thread = " << pipeline_rank   << "   "
+              << "thread index     = " << pthread_self()                             << std::endl;
+    std::cout << "=================================================================" << std::endl;
+  }
+  #endif
 
   //--------------------------------------------------------------------------//
   // Compute an equal division of particles across pipeline processes.

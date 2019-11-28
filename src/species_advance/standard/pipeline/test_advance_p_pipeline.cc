@@ -61,7 +61,9 @@ test_advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
   float v0, v1, v2, v3, v4, v5;
   float q;
 
-  float ja[12][PARTICLE_BLOCK_SIZE];
+  float ja[12][PARTICLE_BLOCK_SIZE] __attribute__((aligned(64)));
+
+  // float ja[12][PARTICLE_BLOCK_SIZE];
 
   int itmp, nm, max_nm;
 

@@ -11,6 +11,12 @@
 #include <likwid-marker.h>
 #endif
 
+// Use this for Armie.
+#if defined(VPIC_USE_ARMIE_CENTER_P)
+#define __ARMIE_START_TRACE() { asm volatile (".inst 0x2520e020"); }
+#define __ARMIE_STOP_TRACE() { asm volatile (".inst 0x2520e040"); }
+#endif
+
 void
 vpic_simulation::initialize( int argc,
                              char **argv ) {
@@ -69,7 +75,13 @@ vpic_simulation::initialize( int argc,
 
   // Conditionally profile marked sections with LikWid..
   #if defined(VPIC_USE_LIKWID_CENTER_P)
-  LIKWID_MARKER_START( "center_p" );
+  LIKWID_MARKER_START("center_p");
+  barrier();
+  #endif
+
+  // Conditionally initialize profiling with Armie.
+  #if defined(VPIC_USE_ARMIE_CENTER_P)
+  __ARMIE_START_TRACE();
   #endif
 
   for( int iwdn = 0; iwdn < 100; iwdn++ )
@@ -78,9 +90,15 @@ vpic_simulation::initialize( int argc,
     LIST_FOR_EACH( sp, species_list ) TIC   center_p( sp, interpolator_array ); TOC(   center_p, 1 );
   }
 
+  // Conditionally terminate profiling with Armie.
+  #if defined(VPIC_USE_ARMIE_CENTER_P)
+  __ARMIE_STOP_TRACE();
+  #endif
+
   // Conditionally profile marked sections with LikWid..
   #if defined(VPIC_USE_LIKWID_CENTER_P)
-  LIKWID_MARKER_STOP( "center_p" );
+  barrier();
+  LIKWID_MARKER_STOP("center_p");
   #endif
 
   // Conditionally pause profiling with Intel VTune.
