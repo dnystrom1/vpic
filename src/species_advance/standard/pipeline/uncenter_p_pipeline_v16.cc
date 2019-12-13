@@ -216,6 +216,12 @@ uncenter_p_pipeline_v16( center_p_pipeline_args_t * args,
         // Store particle momentum.
         //--------------------------------------------------------------------------
 
+        #if 0
+        stream_16x1( ux, &pb[ib].ux[0] );
+        stream_16x1( uy, &pb[ib].uy[0] );
+        stream_16x1( uz, &pb[ib].uz[0] );
+        #endif
+
         store_16x1( ux, &pb[ib].ux[0] );
         store_16x1( uy, &pb[ib].uy[0] );
         store_16x1( uz, &pb[ib].uz[0] );

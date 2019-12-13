@@ -278,40 +278,19 @@ namespace v8
   inline void load_8x1( const void * ALIGNED(16) p,
 			v8 &a )
   {
-    a.i[0] = ((const int * ALIGNED(16))p)[0];
-    a.i[1] = ((const int * ALIGNED(16))p)[1];
-    a.i[2] = ((const int * ALIGNED(16))p)[2];
-    a.i[3] = ((const int * ALIGNED(16))p)[3];
-    a.i[4] = ((const int * ALIGNED(16))p)[4];
-    a.i[5] = ((const int * ALIGNED(16))p)[5];
-    a.i[6] = ((const int * ALIGNED(16))p)[6];
-    a.i[7] = ((const int * ALIGNED(16))p)[7];
+    a.v = _mm256_load_ps( ( float * ) p );
   }
 
   inline void store_8x1( const v8 &a,
 			 void * ALIGNED(16) p )
   {
-    ((int * ALIGNED(16))p)[0] = a.i[0];
-    ((int * ALIGNED(16))p)[1] = a.i[1];
-    ((int * ALIGNED(16))p)[2] = a.i[2];
-    ((int * ALIGNED(16))p)[3] = a.i[3];
-    ((int * ALIGNED(16))p)[4] = a.i[4];
-    ((int * ALIGNED(16))p)[5] = a.i[5];
-    ((int * ALIGNED(16))p)[6] = a.i[6];
-    ((int * ALIGNED(16))p)[7] = a.i[7];
+    _mm256_store_ps( ( float * ) p, a.v );
   }
 
   inline void stream_8x1( const v8 &a,
 			  void * ALIGNED(16) p )
   {
-    ((int * ALIGNED(16))p)[0] = a.i[0];
-    ((int * ALIGNED(16))p)[1] = a.i[1];
-    ((int * ALIGNED(16))p)[2] = a.i[2];
-    ((int * ALIGNED(16))p)[3] = a.i[3];
-    ((int * ALIGNED(16))p)[4] = a.i[4];
-    ((int * ALIGNED(16))p)[5] = a.i[5];
-    ((int * ALIGNED(16))p)[6] = a.i[6];
-    ((int * ALIGNED(16))p)[7] = a.i[7];
+    _mm256_stream_ps( ( float * ) p, a.v );
   }
 
   inline void clear_8x1( void * ALIGNED(16) p )

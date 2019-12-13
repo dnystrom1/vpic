@@ -308,6 +308,12 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
         // Store particle momentum.
         //--------------------------------------------------------------------------
 
+        #if 0
+        stream_8x1( ux_old, &pb[ib].ux[0] );
+        stream_8x1( uy_old, &pb[ib].uy[0] );
+        stream_8x1( uz_old, &pb[ib].uz[0] );
+        #endif
+
         store_8x1( ux_old, &pb[ib].ux[0] );
         store_8x1( uy_old, &pb[ib].uy[0] );
         store_8x1( uz_old, &pb[ib].uz[0] );
@@ -373,6 +379,12 @@ test_advance_p_pipeline_v8( advance_p_pipeline_args_t * args,
         //--------------------------------------------------------------------------
         // Store particle position.
         //--------------------------------------------------------------------------
+
+        #if 0
+        stream_8x1( dx, &pb[ib].dx[0] );
+        stream_8x1( dy, &pb[ib].dy[0] );
+        stream_8x1( dz, &pb[ib].dz[0] );
+        #endif
 
         store_8x1( dx, &pb[ib].dx[0] );
         store_8x1( dy, &pb[ib].dy[0] );

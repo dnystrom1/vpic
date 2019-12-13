@@ -189,6 +189,12 @@ center_p_pipeline_v8( center_p_pipeline_args_t * args,
         // Store particle momentum.
         //--------------------------------------------------------------------------
 
+        #if 0
+        stream_8x1( ux, &pb[ib].ux[0] );
+        stream_8x1( uy, &pb[ib].uy[0] );
+        stream_8x1( uz, &pb[ib].uz[0] );
+        #endif
+
         store_8x1( ux, &pb[ib].ux[0] );
         store_8x1( uy, &pb[ib].uy[0] );
         store_8x1( uz, &pb[ib].uz[0] );

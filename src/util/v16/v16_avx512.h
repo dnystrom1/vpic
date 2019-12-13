@@ -558,8 +558,7 @@ namespace v16
   inline void stream_16x1( const v16 &a,
 			   void * ALIGNED(64) p )
   {
-    for( int j = 0; j < 16; j++ )
-      ( ( int * ALIGNED(64) ) p )[j] = a.i[j];
+    _mm512_stream_ps( (float *) p, a.v );
   }
 
   inline void clear_16x1( void * ALIGNED(64) p )

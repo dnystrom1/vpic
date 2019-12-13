@@ -230,7 +230,7 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         load_16x1( &pb[ib].w [0], q  );
 
         //--------------------------------------------------------------------------
-        // Confuse compiler.
+        // Confuse compiler.  Need to store velocity before it changes.
         //--------------------------------------------------------------------------
 
         ux_old = ux + v_wdn_zero;
@@ -305,8 +305,27 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         uz  += haz;
 
         //--------------------------------------------------------------------------
+        // Confuse compiler.  Make old velocity depend on new velocity so it will
+        // be stored at proper time as in advance_p_pipeline_v16.
+        //--------------------------------------------------------------------------
+
+        ux_old = fma( v_wdn_zero, ux, ux_old );
+        uy_old = fma( v_wdn_zero, uy, uy_old );
+        uz_old = fma( v_wdn_zero, uz, uz_old );
+
+        // ux_old += v_wdn_zero * ux;
+        // uy_old += v_wdn_zero * uy;
+        // uz_old += v_wdn_zero * uz;
+
+        //--------------------------------------------------------------------------
         // Store particle momentum.
         //--------------------------------------------------------------------------
+
+        #if 0
+        stream_16x1( ux_old, &pb[ib].ux[0] );
+        stream_16x1( uy_old, &pb[ib].uy[0] );
+        stream_16x1( uz_old, &pb[ib].uz[0] );
+        #endif
 
         store_16x1( ux_old, &pb[ib].ux[0] );
         store_16x1( uy_old, &pb[ib].uy[0] );
@@ -347,14 +366,6 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v05 = v02 + uz;
 
         //--------------------------------------------------------------------------
-        // Confuse compiler.
-        //--------------------------------------------------------------------------
-
-        dx += v_wdn_zero;
-        dy += v_wdn_zero;
-        dz += v_wdn_zero;
-
-        //--------------------------------------------------------------------------
         // Determine which particles are out of bounds.
         //--------------------------------------------------------------------------
 
@@ -371,8 +382,27 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v05 = merge( outbnd, dz, v05 );
 
         //--------------------------------------------------------------------------
+        // Confuse compiler.  Make old position depend on new position so it will
+        // be stored at proper time as in advance_p_pipeline_v16.
+        //--------------------------------------------------------------------------
+
+        dx  = fma( v_wdn_zero, v03, dx );
+	dy  = fma( v_wdn_zero, v04, dy );
+	dz  = fma( v_wdn_zero, v05, dz );
+
+        // dx += v_wdn_zero;
+        // dy += v_wdn_zero;
+        // dz += v_wdn_zero;
+
+        //--------------------------------------------------------------------------
         // Store particle position.
         //--------------------------------------------------------------------------
+
+        #if 0
+        stream_16x1( dx, &pb[ib].dx[0] );
+        stream_16x1( dy, &pb[ib].dy[0] );
+        stream_16x1( dz, &pb[ib].dz[0] );
+        #endif
 
         store_16x1( dx, &pb[ib].dx[0] );
         store_16x1( dy, &pb[ib].dy[0] );
@@ -811,7 +841,7 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
                         dx, dy, dz, ii, ux, uy, uz, q );
 
         //--------------------------------------------------------------------------
-        // Confuse compiler.
+        // Confuse compiler.  Need to store velocity before it changes.
         //--------------------------------------------------------------------------
 
         ux_old = ux + v_wdn_zero;
@@ -929,14 +959,6 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v05 = v02 + uz;
 
         //--------------------------------------------------------------------------
-        // Confuse compiler.
-        //--------------------------------------------------------------------------
-
-        dx += v_wdn_zero;
-        dy += v_wdn_zero;
-        dz += v_wdn_zero;
-
-        //--------------------------------------------------------------------------
         // Determine which particles are out of bounds.
         //--------------------------------------------------------------------------
 
@@ -951,6 +973,19 @@ test_advance_p_pipeline_v16( advance_p_pipeline_args_t * args,
         v03 = merge( outbnd, dx, v03 );
         v04 = merge( outbnd, dy, v04 );
         v05 = merge( outbnd, dz, v05 );
+
+        //--------------------------------------------------------------------------
+        // Confuse compiler.  Make old position depend on new position so it will
+        // be stored at proper time as in advance_p_pipeline_v16.
+        //--------------------------------------------------------------------------
+
+        dx  = fma( v_wdn_zero, v03, dx );
+	dy  = fma( v_wdn_zero, v04, dy );
+	dz  = fma( v_wdn_zero, v05, dz );
+
+        // dx += v_wdn_zero;
+        // dy += v_wdn_zero;
+        // dz += v_wdn_zero;
 
         //--------------------------------------------------------------------------
         // Store particle data.
