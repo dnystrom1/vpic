@@ -44,10 +44,10 @@ enum { accumulators_n_block = 256 };
 
 typedef struct accumulators_pipeline_args
 {
-  MEM_PTR( accumulator_t, 128) a; // First accumulator to reduce
-  int n;                          // Number of accumulators to reduce
-  int n_array;                    // Number of accumulator arrays
-  int s_array;                    // Stride between each array
+  MEM_PTR( accumulator_t, 128 ) a; // First accumulator to reduce
+  int n;                           // Number of accumulators to reduce
+  int n_array;                     // Number of accumulator arrays
+  int s_array;                     // Stride between each array
 
   PAD_STRUCT( SIZEOF_MEM_PTR + 3*sizeof(int) )
 

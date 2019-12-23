@@ -21,7 +21,7 @@ reduce_accumulators_pipeline_scalar( accumulators_pipeline_args_t * args,
   int si = sizeof(accumulator_t) / sizeof(float);
   int r;
   int nr = args->n_array - 1;
-  int sr = si*args->s_array;
+  int sr = si * args->s_array;
   int j, k;
 
   DISTRIBUTE( args->n, accumulators_n_block,
@@ -43,8 +43,8 @@ reduce_accumulators_pipeline_scalar( accumulators_pipeline_args_t * args,
 
 # define LOOP(OP)                               \
   for( ; i < i1; i++ )                          \
-  {						\
-    k = i*si;                                   \
+  {                                             \
+    k = i * si;                                 \
     OP(k); OP(k + 4); OP(k + 8);                \
   }
 
@@ -77,7 +77,7 @@ reduce_accumulators_pipeline_scalar( accumulators_pipeline_args_t * args,
 # define LOOP(OP)                                \
   for( ; i < i1; i++ )                           \
   {                                              \
-    k = i*si;                                    \
+    k = i * si;                                  \
     OP(k    ); OP(k + 1); OP(k + 2); OP(k + 3);  \
     OP(k + 4); OP(k + 5); OP(k + 6); OP(k + 7);  \
     OP(k + 8); OP(k + 9); OP(k +10); OP(k +11);  \
@@ -118,7 +118,7 @@ reduce_accumulators_pipeline_scalar( accumulators_pipeline_args_t * args,
 #   if defined(V4_ACCELERATION)
     for( ; i < i1; i++ )
     {
-      j = i*si;
+      j = i * si;
 
       load_4x1( &a[j+0], v0 );
       load_4x1( &a[j+4], v1 );

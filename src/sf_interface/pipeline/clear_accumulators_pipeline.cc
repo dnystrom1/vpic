@@ -22,7 +22,7 @@ clear_accumulators_pipeline_scalar( accumulators_pipeline_args_t * args,
 
   a += i;
 
-  for( ; n_array; n_array--, a+=s_array )
+  for( ; n_array; n_array--, a += s_array )
   {
     CLEAR( a, n );
   }
@@ -51,7 +51,7 @@ clear_accumulator_array_pipeline( accumulator_array_t * RESTRICT aa )
   i0 = ( VOX(1,1,1) / 2 ) * 2; // Round i0 down to even for 128B align on Cell */
 
   args->a       = aa->a + i0;
-  args->n       = ( ( ( VOX(aa->g->nx,aa->g->ny,aa->g->nz) - i0 + 1 ) + 1 ) / 2 ) * 2;
+  args->n       = ( ( ( VOX( aa->g->nx, aa->g->ny, aa->g->nz ) - i0 + 1 ) + 1 ) / 2 ) * 2;
   args->n_array = aa->n_pipeline + 1;
   args->s_array = aa->stride;
 
