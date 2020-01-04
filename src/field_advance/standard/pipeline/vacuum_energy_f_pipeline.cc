@@ -15,7 +15,7 @@ vacuum_energy_f_pipeline_scalar( pipeline_args_t * args,
                                  int n_pipeline )
 {
   DECLARE_STENCIL();
-  
+
   int n_voxel;
 
   DISTRIBUTE_VOXELS( 1,nx, 1,ny, 1,nz, 16,
@@ -55,7 +55,7 @@ vacuum_energy_f_pipeline( double * global,
 
   // Have each pipeline and the host handle a portion of the
   // local voxels
-  
+
   pipeline_args_t args[1];
 
   args->f = fa->f;
