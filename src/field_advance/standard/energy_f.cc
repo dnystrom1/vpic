@@ -12,12 +12,11 @@ void
 energy_f( double * global,
           const field_array_t * RESTRICT fa )
 {
-  if ( !global || !fa )
+  if ( ! global || ! fa )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Conditionally execute this when more abstractions are available.
   energy_f_pipeline( global, fa );
 }
-

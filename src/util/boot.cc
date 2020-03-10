@@ -82,4 +82,3 @@ halt_services( void )
 
   halt_checkpt();
 }
-

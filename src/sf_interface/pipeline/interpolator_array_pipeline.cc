@@ -49,7 +49,7 @@ load_interpolator_pipeline_scalar( load_interpolator_pipeline_args_t * args,
   DISTRIBUTE_VOXELS( 1,nx, 1,ny, 1,nz, 1,
                      pipeline_rank, n_pipeline, x, y, z, n_voxel );
 
-# define LOAD_STENCIL()        \
+  #define LOAD_STENCIL()       \
   pi   = &fi( x,   y,   z   ); \
   pf0  =  &f( x,   y,   z   ); \
   pfx  =  &f( x+1, y,   z   ); \
@@ -128,7 +128,7 @@ load_interpolator_pipeline_scalar( load_interpolator_pipeline_args_t * args,
     }
   }
 
-# undef LOAD_STENCIL
+  #undef LOAD_STENCIL
 }
 
 #if defined(V4_ACCELERATION) && defined(HAS_V4_PIPELINE)
@@ -173,7 +173,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
                      pipeline_rank, n_pipeline,
                      x, y, z, n_voxel );
 
-# define LOAD_STENCIL()        \
+  #define LOAD_STENCIL()       \
   pi   = &fi( x,   y,   z   ); \
   pf0  =  &f( x,   y,   z   ); \
   pfx  =  &f( x+1, y,   z   ); \
@@ -187,7 +187,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
 
   for( ; n_voxel; n_voxel-- )
   {
-    // ex interpolation coefficients 
+    // ex interpolation coefficients
     w0 = toggle_bits( sgn_1_2, v4float(  pf0->ex ) ); // [ w0 -w0 -w0 w0 ]
     w1 =                       v4float(  pfy->ex );   // [ w1  w1  w1 w1 ]
     w2 = toggle_bits( sgn_1_2, v4float(  pfz->ex ) ); // [ w2 -w2 -w2 w2 ]
@@ -196,7 +196,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
     store_4x1( fourth * ( ( w3 + w0 ) + toggle_bits( sgn_2_3, w1 + w2 ) ),
                &pi->ex );
 
-    // ey interpolation coefficients 
+    // ey interpolation coefficients
     w0 = toggle_bits( sgn_1_2, v4float(  pf0->ey ) ); // [ w0 -w0 -w0 w0 ]
     w1 =                       v4float(  pfz->ey );   // [ w1  w1  w1 w1 ]
     w2 = toggle_bits( sgn_1_2, v4float(  pfx->ey ) ); // [ w2 -w2 -w2 w2 ]
@@ -205,7 +205,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
     store_4x1( fourth * ( ( w3 + w0 ) + toggle_bits( sgn_2_3, w1 + w2 ) ),
                &pi->ey );
 
-    // ez interpolation coefficients 
+    // ez interpolation coefficients
     w0 = toggle_bits( sgn_1_2, v4float(  pf0->ez ) ); // [ w0 -w0 -w0 w0 ]
     w1 =                       v4float(  pfx->ez );   // [ w1  w1  w1 w1 ]
     w2 = toggle_bits( sgn_1_2, v4float(  pfy->ez ) ); // [ w2 -w2 -w2 w2 ]
@@ -214,7 +214,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
     store_4x1( fourth * ( ( w3 + w0 ) + toggle_bits( sgn_2_3, w1 + w2 ) ),
                &pi->ez );
 
-    // bx and by interpolation coefficients 
+    // bx and by interpolation coefficients
     w0  = toggle_bits( sgn_1_3,
                        merge( sel_0_1,
                               v4float( pf0->cbx ),
@@ -226,7 +226,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
 
     store_4x1( half * ( w1 + w0 ), &pi->cbx );
 
-    // bz interpolation coefficients 
+    // bz interpolation coefficients
     w0  = toggle_bits( sgn_1_3, v4float( pf0->cbz ) ); // [ w0 -w0 d/c d/c ]
 
     w1  =                       v4float( pfz->cbz );   // [ w1 -w1 d/c d/c ]
@@ -244,7 +244,7 @@ load_interpolator_pipeline_v4( load_interpolator_pipeline_args_t * args,
     }
   }
 
-# undef LOAD_STENCIL
+  #undef LOAD_STENCIL
 }
 
 #endif
@@ -255,14 +255,14 @@ load_interpolator_array_pipeline( interpolator_array_t * RESTRICT ia,
 {
   DECLARE_ALIGNED_ARRAY( load_interpolator_pipeline_args_t, 128, args, 1 );
 
-  if ( !ia              ||
-       !fa              ||
+  if ( ! ia             ||
+       ! fa             ||
        ia->g != fa->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
-# if 0 // Original non-pipelined version
+  #if 0 // Original non-pipelined version
   for( z = 1; z <= nz; z++ )
   {
     for( y = 1; y <= ny; y++ )
@@ -336,7 +336,7 @@ load_interpolator_array_pipeline( interpolator_array_t * RESTRICT ia,
       }
     }
   }
-# endif
+  #endif
 
   args->fi = ia->i;
   args->f  = fa->f;

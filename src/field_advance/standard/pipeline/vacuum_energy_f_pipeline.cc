@@ -48,9 +48,9 @@ void
 vacuum_energy_f_pipeline( double * global,
                           const field_array_t * RESTRICT fa )
 {
-  if ( !global || !fa )
+  if ( ! global || ! fa )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Have each pipeline and the host handle a portion of the

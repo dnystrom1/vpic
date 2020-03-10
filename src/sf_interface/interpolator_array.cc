@@ -44,7 +44,7 @@ delete_interpolator_array( interpolator_array_t * ia )
 }
 
 //----------------------------------------------------------------------------//
-// Top level function to select and call the proper load_interpolator_array
+// Top level function to select and call proper load_interpolator_array
 // function.
 //----------------------------------------------------------------------------//
 
@@ -52,11 +52,11 @@ void
 load_interpolator_array( interpolator_array_t * RESTRICT ia,
                          const field_array_t * RESTRICT fa )
 {
-  if ( !ia              ||
-       !fa              ||
+  if ( ! ia             ||
+       ! fa             ||
        ia->g != fa->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Conditionally execute this when more abstractions are available.

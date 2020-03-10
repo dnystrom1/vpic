@@ -131,7 +131,7 @@ accumulate_rho_p( field_array_t * RESTRICT fa,
 
 void
 accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
-                 const particle_t * RESTRICT ALIGNED(32)  p,
+                 const particle_t * RESTRICT ALIGNED(32) p,
                  const grid_t * RESTRICT g,
                  const float qsp );
 

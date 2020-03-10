@@ -55,12 +55,7 @@ accumulate_hydro_p_pipeline_scalar( accumulate_hydro_p_pipeline_args_t * args,
 
   n1 += n0;
 
-  // c        = sp->g->cvac;
-  // qsp      = sp->q;
-  // mspc     = args->msp * c;
-  // qdt_2mc  = args->qdt_2mc;
-  // qdt_4mc2 = qdt_2mc / ( 2 * c );
-  // r8V      = sp->g->r8V;
+  // Compute stride parameters.
 
   stride_10 = VOXEL( 1, 0, 0, sp->g->nx, sp->g->ny, sp->g->nz ) -
               VOXEL( 0, 0, 0, sp->g->nx, sp->g->ny, sp->g->nz );

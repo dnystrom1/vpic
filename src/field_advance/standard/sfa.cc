@@ -151,7 +151,8 @@ create_sfa_params( grid_t * g,
 }
 
 void
-destroy_sfa_params( sfa_params_t * p ) {
+destroy_sfa_params( sfa_params_t * p )
+{
   FREE_ALIGNED( p->mc );
   FREE( p );
 }
@@ -159,7 +160,8 @@ destroy_sfa_params( sfa_params_t * p ) {
 /*****************************************************************************/
 
 void
-checkpt_standard_field_array( const field_array_t * fa ) {
+checkpt_standard_field_array( const field_array_t * fa )
+{
   sfa_params_t * p = (sfa_params_t *)fa->params; 
   CHECKPT( fa, 1 );
   CHECKPT_ALIGNED( fa->f, fa->g->nv, 128 );
@@ -174,7 +176,8 @@ checkpt_standard_field_array( const field_array_t * fa ) {
 // return field_array_internal( params )).
 
 field_array_t *
-restore_standard_field_array( void ) {
+restore_standard_field_array( void )
+{
   field_array_t * fa; 
   sfa_params_t * p;
   RESTORE( fa );
@@ -190,7 +193,8 @@ restore_standard_field_array( void ) {
 field_array_t *
 new_standard_field_array( grid_t           * RESTRICT g,
                           const material_t * RESTRICT m_list,
-                          float                       damp ) {
+                          float                       damp )
+{
   field_array_t * fa;
   if( !g || !m_list || damp<0 ) ERROR(( "Bad args" ));
   MALLOC( fa, 1 );
@@ -216,7 +220,8 @@ new_standard_field_array( grid_t           * RESTRICT g,
 }
 
 void
-delete_standard_field_array( field_array_t * fa ) {
+delete_standard_field_array( field_array_t * fa )
+{
   if( !fa ) return;
   UNREGISTER_OBJECT( fa );
   destroy_sfa_params( (sfa_params_t *)fa->params );
@@ -229,7 +234,8 @@ delete_standard_field_array( field_array_t * fa ) {
 #define f(x,y,z) f[ VOXEL( x, y, z, nx, ny, nz ) ]
 
 void
-clear_jf( field_array_t * RESTRICT fa ) {
+clear_jf( field_array_t * RESTRICT fa )
+{
   if( !fa ) ERROR(( "Bad args" ));
   field_t * RESTRICT ALIGNED(128) f = fa->f;
   const int nv = fa->g->nv;
@@ -254,5 +260,5 @@ clear_rhof( field_array_t * RESTRICT fa )
   }
 }
 
-// FIXME: ADD clear_jf_and_rhof CALL AND/OR ELIMINATE SOME OF THE ABOVE
-// (MORE EFFICIENT TOO).
+// FIXME: ADD clear_jf_and_rhof CALL AND/OR ELIMINATE SOME OF THE ABOVE.
+// MORE EFFICIENT TOO.

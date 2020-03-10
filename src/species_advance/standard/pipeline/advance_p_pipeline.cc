@@ -88,12 +88,16 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
   for( ; n; n--, p++ )
   {
-    dx   = p->dx;                             // Load position
+    // Load position
+
+    dx   = p->dx;
     dy   = p->dy;
     dz   = p->dz;
     ii   = p->i;
 
-    f    = f0 + ii;                           // Interpolate E
+    f    = f0 + ii;
+
+    // Interpolate E
 
     hax  = qdt_2mc*(    ( f->ex    + dy*f->dexdy    ) +
                      dz*( f->dexdz + dy*f->d2exdydz ) );
@@ -104,46 +108,62 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     haz  = qdt_2mc*(    ( f->ez    + dx*f->dezdx    ) +
                      dy*( f->dezdy + dx*f->d2ezdxdy ) );
 
-    cbx  = f->cbx + dx*f->dcbxdx;             // Interpolate B
+    // Interpolate B
+
+    cbx  = f->cbx + dx*f->dcbxdx;
     cby  = f->cby + dy*f->dcbydy;
     cbz  = f->cbz + dz*f->dcbzdz;
 
-    ux   = p->ux;                             // Load momentum
+    // Load momentum
+
+    ux   = p->ux;
     uy   = p->uy;
     uz   = p->uz;
     q    = p->w;
 
-    ux  += hax;                               // Half advance E
+    // Half advance E
+
+    ux  += hax;
     uy  += hay;
     uz  += haz;
 
-    v0   = qdt_2mc / sqrtf( one + ( ux*ux + ( uy*uy + uz*uz ) ) );
+    v0   = qdt_2mc / sqrtf( one + ( ux * ux + ( uy * uy + uz * uz ) ) );
 
-                                              // Boris - scalars
-    v1   = cbx*cbx + ( cby*cby + cbz*cbz );
-    v2   = ( v0*v0 ) * v1;
+    // Boris - scalars
+
+    v1   = cbx * cbx + ( cby * cby + cbz * cbz );
+    v2   = ( v0 * v0 ) * v1;
     v3   = v0 * ( one + v2 * ( one_third + v2 * two_fifteenths ) );
     v4   = v3 / ( one + v1 * ( v3 * v3 ) );
     v4  += v4;
 
-    v0   = ux + v3*( uy*cbz - uz*cby );       // Boris - uprime
-    v1   = uy + v3*( uz*cbx - ux*cbz );
-    v2   = uz + v3*( ux*cby - uy*cbx );
+    // Boris - uprime
 
-    ux  += v4*( v1*cbz - v2*cby );            // Boris - rotation
-    uy  += v4*( v2*cbx - v0*cbz );
-    uz  += v4*( v0*cby - v1*cbx );
+    v0   = ux + v3 * ( uy * cbz - uz * cby );
+    v1   = uy + v3 * ( uz * cbx - ux * cbz );
+    v2   = uz + v3 * ( ux * cby - uy * cbx );
 
-    ux  += hax;                               // Half advance E
+    // Boris - rotation
+
+    ux  += v4 * ( v1 * cbz - v2 * cby );
+    uy  += v4 * ( v2 * cbx - v0 * cbz );
+    uz  += v4 * ( v0 * cby - v1 * cbx );
+
+    // Half advance E
+
+    ux  += hax;
     uy  += hay;
     uz  += haz;
 
-    p->ux = ux;                               // Store momentum
+    // Store momentum
+
+    p->ux = ux;
     p->uy = uy;
     p->uz = uz;
 
-    v0   = one / sqrtf( one + ( ux*ux+ ( uy*uy + uz*uz ) ) );
-                                              // Get norm displacement
+    v0   = one / sqrtf( one + ( ux * ux+ ( uy * uy + uz * uz ) ) );
+
+    // Get norm displacement
 
     ux  *= cdt_dx;
     uy  *= cdt_dy;
@@ -153,11 +173,15 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
     uy  *= v0;
     uz  *= v0;
 
-    v0   = dx + ux;                           // Streak midpoint (inbnds)
+    // Streak midpoint (inbnds)
+
+    v0   = dx + ux;
     v1   = dy + uy;
     v2   = dz + uz;
 
-    v3   = v0 + ux;                           // New position
+    // New position
+
+    v3   = v0 + ux;
     v4   = v1 + uy;
     v5   = v2 + uz;
 
@@ -171,17 +195,25 @@ advance_p_pipeline_scalar( advance_p_pipeline_args_t * args,
 
       q *= qsp;
 
-      p->dx = v3;                             // Store new position
+      // Store new position
+
+      p->dx = v3;
       p->dy = v4;
       p->dz = v5;
 
-      dx = v0;                                // Streak midpoint
+      // Streak midpoint
+
+      dx = v0;
       dy = v1;
       dz = v2;
 
-      v5 = q*ux*uy*uz*one_third;              // Compute correction
+      // Compute correction
 
-      a  = (float *)( a0 + ii );              // Get accumulator
+      v5 = q * ux * uy * uz * one_third;
+
+      // Get accumulator
+
+      a  = (float *)( a0 + ii );
 
       #define ACCUMULATE_J(X,Y,Z,offset)                                \
       v4  = q*u##X;   /* v2 = q ux                            */        \

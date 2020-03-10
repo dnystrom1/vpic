@@ -17,7 +17,7 @@ typedef struct collision_op collision_op_t;
 
 BEGIN_C_DECLS
 
-/* In collision.c */
+/* In collision.cc */
 
 int
 num_collision_op( const collision_op_t * RESTRICT cop_list );
@@ -32,7 +32,7 @@ collision_op_t *
 append_collision_op( collision_op_t * cop,
                      collision_op_t ** cop_list );
 
-/* In takizuka_abe.c */
+/* In takizuka_abe.cc */
 
 /* The Takizuka-Abe collision model is based on Takizuka and Abe, JCP 1977
    and efficiently models small-angle Coulomb scattering by randomly pairing
@@ -40,7 +40,11 @@ append_collision_op( collision_op_t * cop,
    is fully defined by a single parameter, the base collision frequency nu0.
    In SI units, nu0 is defined by
 
-   nu0 = log(Lambda) / 8 pi sqrt(2) c^3 eps0^2
+   nu0   = log(Lambda) / 8 pi sqrt(2) c^3 eps0^2
+
+   and
+
+   cvar0 = log(Lambda) / 8 pi c^3 eps0^2
 
    where log(Lambda) is the Coulomb logarithm. For a thermal species with
    temperature T, normalized mass m and charge q, the self-scattering momentum
@@ -49,7 +53,7 @@ append_collision_op( collision_op_t * cop,
    nu_s = 4 (mc^2 / T)^3 nu0 / 3 sqrt(pi)
 
    The paper defines variance ~= sqrt(2)*nu_0, and here we expect the user to
-   pass us the base cvar
+   pass us the base cvar.
 */
 
 collision_op_t *
@@ -60,7 +64,7 @@ takizuka_abe( const char       * RESTRICT name,
               const double                cvar0,
               const int                   interval );
 
-/* In langevin.c */
+/* In langevin.cc */
 
 /* The most basic collision model (but implemented with numerical
    sophistication).  nu is the collision frequency of the particles
@@ -87,7 +91,7 @@ langevin( float                 kT,
           rng_pool_t * RESTRICT rp,
           int                   interval );
 
-/* In unary.c */
+/* In unary.cc */
 
 /* A unary_rate_constant_func_t returns the lab-frame rate constant for
    collisions between a monochromatic beam of particles (with rest mass
@@ -156,7 +160,7 @@ unary_collision_model( const char       * RESTRICT name,
                        /**/  rng_pool_t * RESTRICT rp,
                        int                         interval );
 
-/* In binary.c */
+/* In binary.cc */
 
 /* A binary_rate_constant_func_t returns the lab-frame rate constant
    for the collisions between a monochromatic beam of species i
@@ -273,7 +277,7 @@ binary_collision_model( const char       * RESTRICT name,
                         double                      sample,
                         int                         interval );
 
-/* In hard_sphere.c */
+/* In hard_sphere.cc */
 
 /* Based on unary_collision_model */
 
@@ -303,7 +307,7 @@ hard_sphere( const char * RESTRICT name, /* Model name */
              const double sample,        /* Sampling density */
              const int interval );       /* How often to apply this */
 
-/* In large_angle_coulomb.c */
+/* In large_angle_coulomb.cc */
 
 /* Based on unary_collision_model */
 

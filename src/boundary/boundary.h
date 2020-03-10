@@ -62,4 +62,3 @@ get_absorb_tally( particle_bc_t * pbc );
 END_C_DECLS
 
 #endif /* _boundary_h_ */
-

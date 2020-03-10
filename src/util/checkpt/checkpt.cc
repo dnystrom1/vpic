@@ -168,14 +168,13 @@ object_ptr( size_t id ) {
 // TODO: It's common to pass a ** in here, can we change the interface to just
 // be a regular pointer? I think we should avoid void casts where possible..
 // (but I accept checkpoint could possibly be re-written)
-void register_object(
-        void* obj,
-        checkpt_func_t checkpt_func,
-        restore_func_t restore_func,
-        reanimate_func_t reanimate_func
-)
-{
 
+void
+register_object( void * obj,
+                 checkpt_func_t checkpt_func,
+                 restore_func_t restore_func,
+                 reanimate_func_t reanimate_func )
+{
   registry_t * node, * prev;
 
   /* Check input args */

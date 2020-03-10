@@ -410,7 +410,7 @@ vpic_simulation::global_header( const char * base,
                        "Header size for data file headers in bytes");
   fileIO.print("DATA_HEADER_SIZE 123\n\n");
 
-  // Global grid inforation
+  // Global grid information
   print_hashed_comment(fileIO, "Time step increment");
   fileIO.print("GRID_DELTA_T %f\n\n", grid->dt);
 
@@ -447,7 +447,7 @@ vpic_simulation::global_header( const char * base,
   print_hashed_comment(fileIO, "Domain partitions in z-dimension");
   fileIO.print("GRID_TOPOLOGY_Z %d\n\n", pz);
 
-  // Global data inforation
+  // Global data information
   assert(dumpParams.size() >= 2);
 
   print_hashed_comment(fileIO, "Field data information");

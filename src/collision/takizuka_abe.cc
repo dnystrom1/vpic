@@ -63,7 +63,7 @@ takizuka_abe( const char       * RESTRICT name,
   cm->spi      = spi;
   cm->spj      = spj;
   cm->rp       = rp;
-  cm->cvar0      = cvar0;
+  cm->cvar0    = cvar0;
   cm->interval = interval;
 
   return new_collision_op_internal( cm,

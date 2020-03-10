@@ -48,7 +48,7 @@ unload_accumulator_pipeline_scalar( unload_accumulator_pipeline_args_t * args,
   DISTRIBUTE_VOXELS( 1, nx+1, 1, ny+1, 1, nz+1, 1,
                      pipeline_rank, n_pipeline, x, y, z, n_voxel );
 
-# define LOAD_STENCIL()      \
+  #define LOAD_STENCIL()     \
   f0  = &f( x,   y,   z   ); \
   a0  = &a( x,   y,   z   ); \
   ax  = &a( x-1, y,   z   ); \
@@ -77,8 +77,7 @@ unload_accumulator_pipeline_scalar( unload_accumulator_pipeline_args_t * args,
     }
   }
 
-# undef LOAD_STENCIL
-
+  #undef LOAD_STENCIL
 }
 
 #if defined(V4_ACCELERATION) && defined(HAS_V4_PIPELINE)
@@ -93,14 +92,14 @@ unload_accumulator_array_pipeline( field_array_t * RESTRICT fa,
 {
   unload_accumulator_pipeline_args_t args[1];
 
-  if ( !fa              ||
-       !aa              ||
+  if ( ! fa             ||
+       ! aa             ||
        fa->g != aa->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
-# if 0 // Original non-pipelined version.
+  #if 0 // Original non-pipelined version.
   for( z = 1; z <= nz+1; z++ )
   {
     for( y = 1; y <= ny+1; y++ )
@@ -125,7 +124,7 @@ unload_accumulator_array_pipeline( field_array_t * RESTRICT fa,
       }
     }
   }
-# endif
+  #endif
 
   args->f  = fa->f;
   args->a  = aa->a;

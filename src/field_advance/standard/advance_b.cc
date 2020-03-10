@@ -10,9 +10,9 @@ void
 advance_b( field_array_t * RESTRICT fa,
            float _frac )
 {
-  if ( !fa )
+  if ( ! fa )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Conditionally execute this when more abstractions are available.
