@@ -69,6 +69,9 @@ load_interpolator_pipeline_scalar( load_interpolator_pipeline_args_t * args,
     w2 = pfz ->ex;
     w3 = pfyz->ex;
 
+    // The fourth (divsion by 1/4) is the combination of two divisions by 2:
+    // 1) The average when doing the FD calculation across the cell
+    // 2) The cell size where dx/y/z = 2 (fixed cell size of -1..1)
     pi->ex       = fourth * ( ( w3 + w0 ) + ( w1 + w2 ) );
     pi->dexdy    = fourth * ( ( w3 - w0 ) + ( w1 - w2 ) );
     pi->dexdz    = fourth * ( ( w3 - w0 ) - ( w1 - w2 ) );
