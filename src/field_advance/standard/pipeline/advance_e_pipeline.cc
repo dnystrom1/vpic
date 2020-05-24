@@ -50,14 +50,14 @@ void
 advance_e_pipeline( field_array_t * RESTRICT fa,
                     float frac )
 {
-  if ( !fa  )
+  if ( ! fa  )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   if ( frac != 1 )
   {
-    ERROR( ( "standard advance_e does not support frac != 1 yet" ) );
+    ERROR( ( "Standard advance_e does not support frac != 1 yet." ) );
   }
 
   /***************************************************************************
@@ -79,8 +79,9 @@ advance_e_pipeline( field_array_t * RESTRICT fa,
   // stragglers.
 
   pipeline_args_t args[1];
+
   args->f = fa->f;
-  args->p = (sfa_params_t *)fa->params;
+  args->p = (sfa_params_t *) fa->params;
   args->g = fa->g;
 
   EXEC_PIPELINES( advance_e, args, 0 );

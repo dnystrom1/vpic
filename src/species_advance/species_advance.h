@@ -34,7 +34,7 @@
 
 BEGIN_C_DECLS
 
-// In species_advance.c
+// In species_advance.cc
 
 int
 num_species( const species_t * sp_list );
@@ -115,7 +115,7 @@ void
 center_p_pipeline( species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia );
 
-// In uncenter_p.cxx
+// In uncenter_p.cc
 
 // This is the inverse of center_p.  Thus, particles with r and u at
 // the time step are adjusted to have r at the time step and u half a
@@ -129,7 +129,7 @@ void
 uncenter_p_pipeline( species_t * RESTRICT sp,
                      const interpolator_array_t * RESTRICT ia );
 
-// In energy.cxx
+// In energy.cc
 
 // This computes the kinetic energy stored in the particles.  The
 // calculation is done numerically robustly.  All nodes get the same
@@ -143,7 +143,7 @@ double
 energy_p_pipeline( const species_t * RESTRICT sp,
                    const interpolator_array_t * RESTRICT ia );
 
-// In rho_p.cxx
+// In rho_p.cc
 
 void
 accumulate_rho_p( field_array_t * RESTRICT fa,
@@ -158,19 +158,24 @@ accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
 #else
 void
 accumulate_rhob( field_t * RESTRICT ALIGNED(128) f,
-                 const particle_t * RESTRICT ALIGNED(32)  p,
+                 const particle_t * RESTRICT ALIGNED(32) p,
                  const grid_t * RESTRICT g,
                  const float qsp );
 #endif
 
-// In hydro_p.c
+// In hydro_p.cc
 
 void
 accumulate_hydro_p( hydro_array_t * RESTRICT ha,
                     const species_t * RESTRICT sp,
                     const interpolator_array_t * RESTRICT ia );
 
-// In move_p.cxx
+void
+accumulate_hydro_p_pipeline( hydro_array_t * RESTRICT ha,
+                             const species_t * RESTRICT sp,
+                             const interpolator_array_t * RESTRICT ia );
+
+// In move_p.cc
 
 #if defined(VPIC_USE_AOSOA_P)
 int

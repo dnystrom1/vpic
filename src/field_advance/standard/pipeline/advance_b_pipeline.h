@@ -33,7 +33,7 @@ typedef struct pipeline_args
 
 #define f(x,y,z) f[ VOXEL( x, y, z, nx, ny, nz ) ]
 
-#define INIT_STENCIL()  \
+#define INIT_STENCIL()      \
   f0 = &f( x,   y,   z   ); \
   fx = &f( x+1, y,   z   ); \
   fy = &f( x,   y+1, z   ); \

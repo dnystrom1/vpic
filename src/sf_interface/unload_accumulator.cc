@@ -3,7 +3,7 @@
 #include "sf_interface_private.h"
 
 //----------------------------------------------------------------------------//
-// Top level function to select and call the proper unload_accumulator_array
+// Top level function to select and call proper unload_accumulator_array
 // function.
 //----------------------------------------------------------------------------//
 
@@ -11,11 +11,11 @@ void
 unload_accumulator_array( field_array_t * RESTRICT fa,
                           const accumulator_array_t * RESTRICT aa )
 {
-  if ( !fa              ||
-       !aa              ||
+  if ( ! fa             ||
+       ! aa             ||
        fa->g != aa->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Conditionally execute this when more abstractions are available.

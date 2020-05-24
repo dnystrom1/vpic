@@ -1,4 +1,4 @@
-/* 
+/*
  * Written by:
  *   Kevin J. Bowers, Ph.D.
  *   Plasma Physics Group (X-1)
@@ -20,7 +20,7 @@ size_grid( grid_t * g,
            int lnx, int lny, int lnz ) {
   int64_t x,y,z;
   int i, j, k;
-  int64_t ii, jj, kk; 
+  int64_t ii, jj, kk;
 
   if( !g || lnx<1 || lny<1 || lnz<1 ) ERROR(( "Bad args" ));
 
@@ -32,7 +32,7 @@ size_grid( grid_t * g,
   g->nx = lnx; g->ny = lny; g->nz = lnz;
   for( k=-1; k<=1; k++ )
     for( j=-1; j<=1; j++ )
-      for( i=-1; i<=1; i++ ) 
+      for( i=-1; i<=1; i++ )
         g->bc[ BOUNDARY(i,j,k) ] = pec_fields;
   g->bc[ BOUNDARY(0,0,0) ] = world_rank;
 
@@ -133,7 +133,7 @@ join_grid( grid_t * g,
   lnz = g->nz;
   rnc = g->range[rank+1] - g->range[rank]; // Note: rnc <~ 2^31 / 6
 
-# define GLUE_FACE(tag,i,j,k,X,Y,Z) BEGIN_PRIMITIVE {           \
+  #define GLUE_FACE(tag,i,j,k,X,Y,Z) BEGIN_PRIMITIVE {          \
     if( boundary==BOUNDARY(i,j,k) ) {                           \
       if( rnc%((ln##Y+2)*(ln##Z+2))!=0 )                        \
         ERROR(("Remote face is incompatible"));                 \
@@ -142,8 +142,8 @@ join_grid( grid_t * g,
       rn##Z = ln##Z;                                            \
       for( l##Z=1; l##Z<=ln##Z; l##Z++ ) {                      \
         for( l##Y=1; l##Y<=ln##Y; l##Y++ ) {                    \
-          l##X = (i+j+k)<0 ? 1     : ln##X;                     \
-          r##X = (i+j+k)<0 ? rn##X : 1;                         \
+          l##X = ((i)+(j)+(k))<0 ? 1     : ln##X;               \
+          r##X = ((i)+(j)+(k))<0 ? rn##X : 1;                   \
           r##Y = l##Y;                                          \
           r##Z = l##Z;                                          \
           g->neighbor[ 6*LOCAL_CELL_ID(lx,ly,lz) + tag ] =      \
@@ -161,7 +161,7 @@ join_grid( grid_t * g,
   GLUE_FACE(4, 0, 1, 0,y,z,x);
   GLUE_FACE(5, 0, 0, 1,z,x,y);
 
-# undef GLUE_FACE
+  #undef GLUE_FACE
 }
 
 void
@@ -190,16 +190,16 @@ set_pbc( grid_t * g,
   lny = g->ny;
   lnz = g->nz;
 
-# define SET_PBC(tag,i,j,k,X,Y,Z) BEGIN_PRIMITIVE {             \
+  #define SET_PBC(tag,i,j,k,X,Y,Z) BEGIN_PRIMITIVE {            \
     if( boundary==BOUNDARY(i,j,k) ) {                           \
-      l##X = (i+j+k)<0 ? 1 : ln##X;                             \
+      l##X = ((i)+(j)+(k))<0 ? 1 : ln##X;                       \
       for( l##Z=1; l##Z<=ln##Z; l##Z++ )                        \
         for( l##Y=1; l##Y<=ln##Y; l##Y++ )                      \
           g->neighbor[ 6*LOCAL_CELL_ID(lx,ly,lz) + tag ] = pbc; \
       return;                                                   \
     }                                                           \
   } END_PRIMITIVE
-  
+
   SET_PBC(0,-1, 0, 0,x,y,z);
   SET_PBC(1, 0,-1, 0,y,z,x);
   SET_PBC(2, 0, 0,-1,z,x,y);
@@ -207,6 +207,5 @@ set_pbc( grid_t * g,
   SET_PBC(4, 0, 1, 0,y,z,x);
   SET_PBC(5, 0, 0, 1,z,x,y);
 
-# undef SET_PBC
+  #undef SET_PBC
 }
-
