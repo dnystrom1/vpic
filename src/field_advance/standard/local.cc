@@ -1,4 +1,4 @@
-/* 
+/*
  * Written by:
  *   Kevin J. Bowers, Ph.D.
  *   Plasma Physics Group (X-1)
@@ -22,9 +22,9 @@
 
 #define f(x,y,z)         f[ VOXEL(x,y,z, nx,ny,nz) ]
 
-#define XYZ_LOOP(xl,xh,yl,yh,zl,zh)		\
-  for( z=zl; z<=zh; z++ )			\
-    for( y=yl; y<=yh; y++ )			\
+#define XYZ_LOOP(xl,xh,yl,yh,zl,zh)             \
+  for( z=zl; z<=zh; z++ )                       \
+    for( y=yl; y<=yh; y++ )                     \
       for( x=xl; x<=xh; x++ )
 
 #define yz_EDGE_LOOP(x) XYZ_LOOP(x,x,1,ny,1,nz+1)
@@ -64,58 +64,58 @@ local_ghost_tang_b( field_t      * ALIGNED(128) f,
   // a 1st order Mur boundary condition is used.
   higend = ( nx>1 || ny>1 || nz>1 ) ? 1.03527618 : 1.;
 
-# define APPLY_LOCAL_TANG_B(i,j,k,X,Y,Z)                                 \
-  do {                                                                   \
-    bc = g->bc[BOUNDARY(i,j,k)];                                         \
-    if( bc<0 || bc>=world_size ) {                                       \
-      ghost = (i+j+k)<0 ? 0 : n##X+1;                                    \
-      face  = (i+j+k)<0 ? 1 : n##X+1;                                    \
-      switch(bc) {                                                       \
-      case anti_symmetric_fields:                                        \
-	Z##Y##_EDGE_LOOP(ghost) f(x,y,z).cb##Y= f(x-i,y-j,z-k).cb##Y;    \
-	Y##Z##_EDGE_LOOP(ghost) f(x,y,z).cb##Z= f(x-i,y-j,z-k).cb##Z;    \
-	break;                                                           \
-      case symmetric_fields: case pmc_fields:                            \
-	Z##Y##_EDGE_LOOP(ghost) f(x,y,z).cb##Y=-f(x-i,y-j,z-k).cb##Y;    \
-	Y##Z##_EDGE_LOOP(ghost) f(x,y,z).cb##Z=-f(x-i,y-j,z-k).cb##Z;    \
-	break;                                                           \
-      case absorb_fields:                                                \
-        drive = cdt_d##X*higend;                                         \
-        decay = (1-drive)/(1+drive);                                     \
-        drive = 2*drive/(1+drive);                                       \
-	Z##Y##_EDGE_LOOP(ghost) {                                        \
-          fg = &f(x,y,z);                                                \
-          fh = &f(x-i,y-j,z-k);                                          \
-          X = face;                                                      \
-          t1 = cdt_d##X*( f(x-i,y-j,z-k).e##Z - f(x,y,z).e##Z );         \
-          t1 = (i+j+k)<0 ? t1 : -t1;                                     \
-          X = ghost;                                                     \
-          Z++; t2 = f(x-i,y-j,z-k).e##X;                                 \
-          Z--; t2 = cdt_d##Z*( t2 - fh->e##X );                          \
-          fg->cb##Y = decay*fg->cb##Y + drive*fh->cb##Y - t1 + t2;       \
-        }                                                                \
-	Y##Z##_EDGE_LOOP(ghost) {                                        \
-          fg = &f(x,y,z);                                                \
-          fh = &f(x-i,y-j,z-k);                                          \
-          X = face;                                                      \
-          t1 = cdt_d##X*( f(x-i,y-j,z-k).e##Y - f(x,y,z).e##Y );         \
-          t1 = (i+j+k)<0 ? t1 : -t1;                                     \
-          X = ghost;                                                     \
-          Y++; t2 = f(x-i,y-j,z-k).e##X;                                 \
-          Y--; t2 = cdt_d##Y*( t2 - fh->e##X );                          \
-          fg->cb##Z = decay*fg->cb##Z + drive*fh->cb##Z + t1 - t2;       \
-        }                                                                \
-	break;                                                           \
-      default:                                                           \
-	ERROR(("Bad boundary condition encountered."));                  \
-	break;                                                           \
-      }                                                                  \
-    }                                                                    \
+  #define APPLY_LOCAL_TANG_B(i,j,k,X,Y,Z)                                   \
+  do {                                                                      \
+    bc = g->bc[BOUNDARY(i,j,k)];                                            \
+    if( bc<0 || bc>=world_size ) {                                          \
+      ghost = ((i)+(j)+(k))<0 ? 0 : n##X+1;                                 \
+      face  = ((i)+(j)+(k))<0 ? 1 : n##X+1;                                 \
+      switch(bc) {                                                          \
+      case anti_symmetric_fields:                                           \
+        Z##Y##_EDGE_LOOP(ghost) f(x,y,z).cb##Y= f(x-(i),y-(j),z-(k)).cb##Y; \
+        Y##Z##_EDGE_LOOP(ghost) f(x,y,z).cb##Z= f(x-(i),y-(j),z-(k)).cb##Z; \
+        break;                                                              \
+      case symmetric_fields: case pmc_fields:                               \
+        Z##Y##_EDGE_LOOP(ghost) f(x,y,z).cb##Y=-f(x-(i),y-(j),z-(k)).cb##Y; \
+        Y##Z##_EDGE_LOOP(ghost) f(x,y,z).cb##Z=-f(x-(i),y-(j),z-(k)).cb##Z; \
+        break;                                                              \
+      case absorb_fields:                                                   \
+        drive = cdt_d##X*higend;                                            \
+        decay = (1-drive)/(1+drive);                                        \
+        drive = 2*drive/(1+drive);                                          \
+        Z##Y##_EDGE_LOOP(ghost) {                                           \
+          fg = &f(x,y,z);                                                   \
+          fh = &f(x-(i),y-(j),z-(k));                                       \
+          X = face;                                                         \
+          t1 = cdt_d##X*( f(x-(i),y-(j),z-(k)).e##Z - f(x,y,z).e##Z );      \
+          t1 = ((i)+(j)+(k))<0 ? t1 : -t1;                                  \
+          X = ghost;                                                        \
+          Z++; t2 = f(x-(i),y-(j),z-(k)).e##X;                              \
+          Z--; t2 = cdt_d##Z*( t2 - fh->e##X );                             \
+          fg->cb##Y = decay*fg->cb##Y + drive*fh->cb##Y - t1 + t2;          \
+        }                                                                   \
+        Y##Z##_EDGE_LOOP(ghost) {                                           \
+          fg = &f(x,y,z);                                                   \
+          fh = &f(x-(i),y-(j),z-(k));                                       \
+          X = face;                                                         \
+          t1 = cdt_d##X*( f(x-(i),y-(j),z-(k)).e##Y - f(x,y,z).e##Y );      \
+          t1 = ((i)+(j)+(k))<0 ? t1 : -t1;                                  \
+          X = ghost;                                                        \
+          Y++; t2 = f(x-(i),y-(j),z-(k)).e##X;                              \
+          Y--; t2 = cdt_d##Y*( t2 - fh->e##X );                             \
+          fg->cb##Z = decay*fg->cb##Z + drive*fh->cb##Z + t1 - t2;          \
+        }                                                                   \
+        break;                                                              \
+      default:                                                              \
+        ERROR(("Bad boundary condition encountered."));                     \
+        break;                                                              \
+      }                                                                     \
+    }                                                                       \
   } while(0)
 
-  APPLY_LOCAL_TANG_B((-1), 0, 0,x,y,z);
-  APPLY_LOCAL_TANG_B( 0,(-1), 0,y,z,x);
-  APPLY_LOCAL_TANG_B( 0, 0,(-1),z,x,y);
+  APPLY_LOCAL_TANG_B(-1, 0, 0,x,y,z);
+  APPLY_LOCAL_TANG_B( 0,-1, 0,y,z,x);
+  APPLY_LOCAL_TANG_B( 0, 0,-1,z,x,y);
   APPLY_LOCAL_TANG_B( 1, 0, 0,x,y,z);
   APPLY_LOCAL_TANG_B( 0, 1, 0,y,z,x);
   APPLY_LOCAL_TANG_B( 0, 0, 1,z,x,y);
@@ -132,47 +132,47 @@ local_ghost_norm_e( field_t      * ALIGNED(128) f,
   int bc, face, x, y, z;
   field_t * ALIGNED(16) f0, * ALIGNED(16) f1, * ALIGNED(16) f2;
 
-# define APPLY_LOCAL_NORM_E(i,j,k,X,Y,Z)                        \
+  #define APPLY_LOCAL_NORM_E(i,j,k,X,Y,Z)                       \
   do {                                                          \
     bc = g->bc[BOUNDARY(i,j,k)];                                \
     if( bc<0 || bc>=world_size ) {                              \
-      face = (i+j+k)<0 ? 0 : n##X+1;                            \
+      face = ((i)+(j)+(k))<0 ? 0 : n##X+1;                      \
       switch(bc) {                                              \
       case anti_symmetric_fields:                               \
-	X##_NODE_LOOP(face) {                                   \
+        X##_NODE_LOOP(face) {                                   \
           f0 = &f(x,y,z);                                       \
-          f1 = &f(x-i,y-j,z-k);                                 \
+          f1 = &f(x-(i),y-(j),z-(k));                           \
           f0->e##X   = f1->e##X;                                \
           f0->tca##X = f1->tca##X;                              \
         }                                                       \
-	break;                                                  \
+        break;                                                  \
       case symmetric_fields: case pmc_fields:                   \
-	X##_NODE_LOOP(face) {                                   \
+        X##_NODE_LOOP(face) {                                   \
           f0 = &f(x,y,z);                                       \
-          f1 = &f(x-i,y-j,z-k);                                 \
+          f1 = &f(x-(i),y-(j),z-(k));                           \
           f0->e##X   = -f1->e##X;                               \
           f0->tca##X = -f1->tca##X;                             \
         }                                                       \
-	break;                                                  \
+        break;                                                  \
       case absorb_fields:                                       \
-	X##_NODE_LOOP(face) {                                   \
+        X##_NODE_LOOP(face) {                                   \
           f0 = &f(x,y,z);                                       \
-          f1 = &f(x-i,y-j,z-k);                                 \
-          f2 = &f(x-i*2,y-j*2,z-k*2);                           \
+          f1 = &f(x-(i),y-(j),z-(k));                           \
+          f2 = &f(x-(i)*2,y-(j)*2,z-(k)*2);                     \
           f0->e##X   = 2*f1->e##X   - f2->e##X;                 \
           f0->tca##X = 2*f1->tca##X - f2->tca##X;               \
         }                                                       \
-	break;                                                  \
+        break;                                                  \
       default:                                                  \
-	ERROR(("Bad boundary condition encountered."));         \
-	break;                                                  \
+        ERROR(("Bad boundary condition encountered."));         \
+        break;                                                  \
       }                                                         \
     }                                                           \
   } while(0)
 
-  APPLY_LOCAL_NORM_E((-1), 0, 0,x,y,z);
-  APPLY_LOCAL_NORM_E( 0,(-1), 0,y,z,x);
-  APPLY_LOCAL_NORM_E( 0, 0,(-1),z,x,y);
+  APPLY_LOCAL_NORM_E(-1, 0, 0,x,y,z);
+  APPLY_LOCAL_NORM_E( 0,-1, 0,y,z,x);
+  APPLY_LOCAL_NORM_E( 0, 0,-1,z,x,y);
   APPLY_LOCAL_NORM_E( 1, 0, 0,x,y,z);
   APPLY_LOCAL_NORM_E( 0, 1, 0,y,z,x);
   APPLY_LOCAL_NORM_E( 0, 0, 1,z,x,y);
@@ -184,31 +184,31 @@ local_ghost_div_b( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define APPLY_LOCAL_DIV_B(i,j,k,X,Y,Z)					    \
-  do {									    \
-    bc = g->bc[BOUNDARY(i,j,k)];					    \
-    if( bc<0 || bc>=world_size ) {                                          \
-      face = (i+j+k)<0 ? 0 : n##X+1;					    \
-      switch(bc) {							    \
-      case anti_symmetric_fields:					    \
-	X##_FACE_LOOP(face) f(x,y,z).div_b_err =  f(x-i,y-j,z-k).div_b_err; \
-	break;								    \
-      case symmetric_fields: case pmc_fields:				    \
-	X##_FACE_LOOP(face) f(x,y,z).div_b_err = -f(x-i,y-j,z-k).div_b_err; \
-	break;								    \
-      case absorb_fields:						    \
-	X##_FACE_LOOP(face) f(x,y,z).div_b_err = 0;			    \
-	break;								    \
-      default:								    \
-	ERROR(("Bad boundary condition encountered."));	                    \
-	break;								    \
-      }									    \
-    }									    \
+  #define APPLY_LOCAL_DIV_B(i,j,k,X,Y,Z)                                          \
+  do {                                                                            \
+    bc = g->bc[BOUNDARY(i,j,k)];                                                  \
+    if( bc<0 || bc>=world_size ) {                                                \
+      face = ((i)+(j)+(k))<0 ? 0 : n##X+1;                                        \
+      switch(bc) {                                                                \
+      case anti_symmetric_fields:                                                 \
+        X##_FACE_LOOP(face) f(x,y,z).div_b_err =  f(x-(i),y-(j),z-(k)).div_b_err; \
+        break;                                                                    \
+      case symmetric_fields: case pmc_fields:                                     \
+        X##_FACE_LOOP(face) f(x,y,z).div_b_err = -f(x-(i),y-(j),z-(k)).div_b_err; \
+        break;                                                                    \
+      case absorb_fields:                                                         \
+        X##_FACE_LOOP(face) f(x,y,z).div_b_err = 0;                               \
+        break;                                                                    \
+      default:                                                                    \
+        ERROR(("Bad boundary condition encountered."));                           \
+        break;                                                                    \
+      }                                                                           \
+    }                                                                             \
   } while(0)
-  
-  APPLY_LOCAL_DIV_B((-1), 0, 0,x,y,z);
-  APPLY_LOCAL_DIV_B( 0,(-1), 0,y,z,x);
-  APPLY_LOCAL_DIV_B( 0, 0,(-1),z,x,y);
+
+  APPLY_LOCAL_DIV_B(-1, 0, 0,x,y,z);
+  APPLY_LOCAL_DIV_B( 0,-1, 0,y,z,x);
+  APPLY_LOCAL_DIV_B( 0, 0,-1,z,x,y);
   APPLY_LOCAL_DIV_B( 1, 0, 0,x,y,z);
   APPLY_LOCAL_DIV_B( 0, 1, 0,y,z,x);
   APPLY_LOCAL_DIV_B( 0, 0, 1,z,x,y);
@@ -228,36 +228,36 @@ local_adjust_tang_e( field_t      * ALIGNED(128) f,
   int bc, face, x, y, z;
   field_t *fs;
 
-# define ADJUST_TANG_E(i,j,k,X,Y,Z)                                     \
+  #define ADJUST_TANG_E(i,j,k,X,Y,Z)                                    \
   do {                                                                  \
     bc = g->bc[BOUNDARY(i,j,k)];                                        \
     if( bc<0 || bc>=world_size ) {                                      \
-      face = (i+j+k)<0 ? 1 : n##X+1;                                    \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                              \
       switch(bc) {                                                      \
       case anti_symmetric_fields:                                       \
-	Y##Z##_EDGE_LOOP(face) {                                        \
+        Y##Z##_EDGE_LOOP(face) {                                        \
           fs = &f(x,y,z);                                               \
           fs->e##Y = 0;                                                 \
           fs->tca##Y = 0;                                               \
         }                                                               \
-	Z##Y##_EDGE_LOOP(face) {                                        \
+        Z##Y##_EDGE_LOOP(face) {                                        \
           fs = &f(x,y,z);                                               \
           fs->e##Z = 0;                                                 \
           fs->tca##Z = 0;                                               \
         }                                                               \
-	break;                                                          \
+        break;                                                          \
       case symmetric_fields: case pmc_fields: case absorb_fields:       \
         break;                                                          \
       default:                                                          \
-	ERROR(("Bad boundary condition encountered."));                 \
-	break;                                                          \
+        ERROR(("Bad boundary condition encountered."));                 \
+        break;                                                          \
       }                                                                 \
     }                                                                   \
   } while(0)
 
-  ADJUST_TANG_E((-1), 0, 0,x,y,z);
-  ADJUST_TANG_E( 0,(-1), 0,y,z,x);
-  ADJUST_TANG_E( 0, 0,(-1),z,x,y);
+  ADJUST_TANG_E(-1, 0, 0,x,y,z);
+  ADJUST_TANG_E( 0,-1, 0,y,z,x);
+  ADJUST_TANG_E( 0, 0,-1,z,x,y);
   ADJUST_TANG_E( 1, 0, 0,x,y,z);
   ADJUST_TANG_E( 0, 1, 0,y,z,x);
   ADJUST_TANG_E( 0, 0, 1,z,x,y);
@@ -269,27 +269,27 @@ local_adjust_norm_b( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define ADJUST_NORM_B(i,j,k,X,Y,Z)                                     \
+  #define ADJUST_NORM_B(i,j,k,X,Y,Z)                                    \
   do {                                                                  \
     bc = g->bc[BOUNDARY(i,j,k)];                                        \
     if( bc<0 || bc>=world_size ) {                                      \
-      face = (i+j+k)<0 ? 1 : n##X+1;                                    \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                              \
       switch(bc) {                                                      \
       case anti_symmetric_fields: case pmc_fields: case absorb_fields:  \
-	break;                                                          \
+        break;                                                          \
       case symmetric_fields:                                            \
-	X##_FACE_LOOP(face) f(x,y,z).cb##X = 0;                         \
-	break;                                                          \
+        X##_FACE_LOOP(face) f(x,y,z).cb##X = 0;                         \
+        break;                                                          \
       default:                                                          \
-	ERROR(("Bad boundary condition encountered."));                 \
-	break;                                                          \
+        ERROR(("Bad boundary condition encountered."));                 \
+        break;                                                          \
       }                                                                 \
     }                                                                   \
   } while(0)
 
-  ADJUST_NORM_B((-1), 0, 0,x,y,z);
-  ADJUST_NORM_B( 0,(-1), 0,y,z,x);
-  ADJUST_NORM_B( 0, 0,(-1),z,x,y);
+  ADJUST_NORM_B(-1, 0, 0,x,y,z);
+  ADJUST_NORM_B( 0,-1, 0,y,z,x);
+  ADJUST_NORM_B( 0, 0,-1,z,x,y);
   ADJUST_NORM_B( 1, 0, 0,x,y,z);
   ADJUST_NORM_B( 0, 1, 0,y,z,x);
   ADJUST_NORM_B( 0, 0, 1,z,x,y);
@@ -301,34 +301,34 @@ local_adjust_div_e( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define ADJUST_DIV_E_ERR(i,j,k,X,Y,Z)			         \
-  do {							         \
-    bc = g->bc[BOUNDARY(i,j,k)];				 \
-    if( bc<0 || bc>=world_size ) {				 \
-      face = (i+j+k)<0 ? 1 : n##X+1;				 \
-      switch(bc) {						 \
-      case anti_symmetric_fields: case absorb_fields:		 \
+  #define ADJUST_DIV_E_ERR(i,j,k,X,Y,Z)                          \
+  do {                                                           \
+    bc = g->bc[BOUNDARY(i,j,k)];                                 \
+    if( bc<0 || bc>=world_size ) {                               \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                       \
+      switch(bc) {                                               \
+      case anti_symmetric_fields: case absorb_fields:            \
         X##_NODE_LOOP(face) f(x,y,z).div_e_err = 0;              \
         break;                                                   \
-      case symmetric_fields: case pmc_fields:			 \
+      case symmetric_fields: case pmc_fields:                    \
         break;                                                   \
-      default:							 \
-	ERROR(("Bad boundary condition encountered."));          \
-	break;							 \
-      }								 \
-    }								 \
+      default:                                                   \
+        ERROR(("Bad boundary condition encountered."));          \
+        break;                                                   \
+      }                                                          \
+    }                                                            \
   } while(0)
 
-  ADJUST_DIV_E_ERR((-1), 0, 0,x,y,z);
-  ADJUST_DIV_E_ERR( 0,(-1), 0,y,z,x);
-  ADJUST_DIV_E_ERR( 0, 0,(-1),z,x,y);
+  ADJUST_DIV_E_ERR(-1, 0, 0,x,y,z);
+  ADJUST_DIV_E_ERR( 0,-1, 0,y,z,x);
+  ADJUST_DIV_E_ERR( 0, 0,-1,z,x,y);
   ADJUST_DIV_E_ERR( 1, 0, 0,x,y,z);
   ADJUST_DIV_E_ERR( 0, 1, 0,y,z,x);
   ADJUST_DIV_E_ERR( 0, 0, 1,z,x,y);
 }
 
 // anti_symmetric => Opposite sign image charges (zero jf_tang)
-// symmetric      => Same sign image charges (double jf_tang) 
+// symmetric      => Same sign image charges (double jf_tang)
 // absorbing      => No image charges, half cell accumulation (double jf_tang)
 // (rhob/jf_norm account for particles that hit boundary and reflect/stick)
 
@@ -338,30 +338,30 @@ local_adjust_jf( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define ADJUST_JF(i,j,k,X,Y,Z)                                         \
+  #define ADJUST_JF(i,j,k,X,Y,Z)                                        \
   do {                                                                  \
     bc = g->bc[BOUNDARY(i,j,k)];                                        \
     if( bc<0 || bc>=world_size ) {                                      \
-      face = (i+j+k)<0 ? 1 : n##X+1;                                    \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                              \
       switch(bc) {                                                      \
       case anti_symmetric_fields:                                       \
-	Y##Z##_EDGE_LOOP(face) f(x,y,z).jf##Y = 0;                      \
+        Y##Z##_EDGE_LOOP(face) f(x,y,z).jf##Y = 0;                      \
         Z##Y##_EDGE_LOOP(face) f(x,y,z).jf##Z = 0;                      \
-	break;                                                          \
+        break;                                                          \
       case symmetric_fields: case pmc_fields: case absorb_fields:       \
-	Y##Z##_EDGE_LOOP(face) f(x,y,z).jf##Y *= 2.;                    \
+        Y##Z##_EDGE_LOOP(face) f(x,y,z).jf##Y *= 2.;                    \
         Z##Y##_EDGE_LOOP(face) f(x,y,z).jf##Z *= 2.;                    \
-	break;                                                          \
+        break;                                                          \
       default:                                                          \
-	ERROR(("Bad boundary condition encountered."));                 \
-	break;                                                          \
+        ERROR(("Bad boundary condition encountered."));                 \
+        break;                                                          \
       }                                                                 \
     }                                                                   \
   } while(0)
-  
-  ADJUST_JF((-1), 0, 0,x,y,z);
-  ADJUST_JF( 0,(-1), 0,y,z,x);
-  ADJUST_JF( 0, 0,(-1),z,x,y);
+
+  ADJUST_JF(-1, 0, 0,x,y,z);
+  ADJUST_JF( 0,-1, 0,y,z,x);
+  ADJUST_JF( 0, 0,-1,z,x,y);
   ADJUST_JF( 1, 0, 0,x,y,z);
   ADJUST_JF( 0, 1, 0,y,z,x);
   ADJUST_JF( 0, 0, 1,z,x,y);
@@ -379,28 +379,28 @@ local_adjust_rhof( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define ADJUST_RHOF(i,j,k,X,Y,Z)                                       \
+  #define ADJUST_RHOF(i,j,k,X,Y,Z)                                      \
   do {                                                                  \
     bc = g->bc[BOUNDARY(i,j,k)];                                        \
     if( bc<0 || bc>=world_size ) {                                      \
-      face = (i+j+k)<0 ? 1 : n##X+1;                                    \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                              \
       switch(bc) {                                                      \
       case anti_symmetric_fields:                                       \
-	X##_NODE_LOOP(face) f(x,y,z).rhof = 0;                          \
-	break;                                                          \
+        X##_NODE_LOOP(face) f(x,y,z).rhof = 0;                          \
+        break;                                                          \
       case symmetric_fields: case pmc_fields: case absorb_fields:       \
-	X##_NODE_LOOP(face) f(x,y,z).rhof *= 2;                         \
+        X##_NODE_LOOP(face) f(x,y,z).rhof *= 2;                         \
         break;                                                          \
       default:                                                          \
-	ERROR(("Bad boundary condition encountered."));                 \
-	break;                                                          \
+        ERROR(("Bad boundary condition encountered."));                 \
+        break;                                                          \
       }                                                                 \
     }                                                                   \
   } while(0)
-  
-  ADJUST_RHOF((-1), 0, 0,x,y,z);
-  ADJUST_RHOF( 0,(-1), 0,y,z,x);
-  ADJUST_RHOF( 0, 0,(-1),z,x,y);
+
+  ADJUST_RHOF(-1, 0, 0,x,y,z);
+  ADJUST_RHOF( 0,-1, 0,y,z,x);
+  ADJUST_RHOF( 0, 0,-1,z,x,y);
   ADJUST_RHOF( 1, 0, 0,x,y,z);
   ADJUST_RHOF( 0, 1, 0,y,z,x);
   ADJUST_RHOF( 0, 0, 1,z,x,y);
@@ -417,29 +417,28 @@ local_adjust_rhob( field_t      * ALIGNED(128) f,
   const int nx = g->nx, ny = g->ny, nz = g->nz;
   int bc, face, x, y, z;
 
-# define ADJUST_RHOB(i,j,k,X,Y,Z)                                       \
+  #define ADJUST_RHOB(i,j,k,X,Y,Z)                                      \
   do {                                                                  \
     bc = g->bc[BOUNDARY(i,j,k)];                                        \
     if( bc<0 || bc>=world_size ) {                                      \
-      face = (i+j+k)<0 ? 1 : n##X+1;                                    \
+      face = ((i)+(j)+(k))<0 ? 1 : n##X+1;                              \
       switch(bc) {                                                      \
       case anti_symmetric_fields:                                       \
-	X##_NODE_LOOP(face) f(x,y,z).rhob = 0;                          \
-	break;                                                          \
+        X##_NODE_LOOP(face) f(x,y,z).rhob = 0;                          \
+        break;                                                          \
       case symmetric_fields: case pmc_fields: case absorb_fields:       \
         break;                                                          \
       default:                                                          \
-	ERROR(("Bad boundary condition encountered."));                 \
-	break;                                                          \
+        ERROR(("Bad boundary condition encountered."));                 \
+        break;                                                          \
       }                                                                 \
     }                                                                   \
   } while(0)
-  
-  ADJUST_RHOB((-1), 0, 0,x,y,z);
-  ADJUST_RHOB( 0,(-1), 0,y,z,x);
-  ADJUST_RHOB( 0, 0,(-1),z,x,y);
+
+  ADJUST_RHOB(-1, 0, 0,x,y,z);
+  ADJUST_RHOB( 0,-1, 0,y,z,x);
+  ADJUST_RHOB( 0, 0,-1,z,x,y);
   ADJUST_RHOB( 1, 0, 0,x,y,z);
   ADJUST_RHOB( 0, 1, 0,y,z,x);
   ADJUST_RHOB( 0, 0, 1,z,x,y);
 }
-

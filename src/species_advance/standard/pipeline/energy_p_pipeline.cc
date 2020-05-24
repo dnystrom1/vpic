@@ -66,11 +66,11 @@ energy_p_pipeline_scalar( energy_p_pipeline_args_t * RESTRICT args,
     v2  = p[n].uz + qdt_2mc*(    ( f[i].ez    + dx*f[i].dezdx    ) +
                               dy*( f[i].dezdy + dx*f[i].d2ezdxdy ) );
 
-    v0  = v0*v0 + v1*v1 + v2*v2;
+    v0  = v0 * v0 + v1 * v1 + v2 * v2;
 
-    v0  = (msp * p[n].w) * (v0 / (one + sqrtf(one + v0)));
+    v0  = ( msp * p[n].w ) * ( v0 / ( one + sqrtf( one + v0 ) ) );
 
-    en += ( double ) v0;
+    en += (double) v0;
   }
 
   args->en[pipeline_rank] = en;
@@ -111,9 +111,11 @@ energy_p_pipeline( const species_t * RESTRICT sp,
   double local, global;
   int rank;
 
-  if ( !sp || !ia || sp->g != ia->g )
+  if ( ! sp             ||
+       ! ia             ||
+       sp->g != ia->g )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   // Have the pipelines do the bulk of particles in blocks and have the
@@ -122,7 +124,7 @@ energy_p_pipeline( const species_t * RESTRICT sp,
   args->p       = sp->p;
   args->f       = ia->i;
   args->en      = en;
-  args->qdt_2mc = (sp->q*sp->g->dt)/(2*sp->m*sp->g->cvac);
+  args->qdt_2mc = ( sp->q * sp->g->dt ) / ( 2 * sp->m * sp->g->cvac );
   args->msp     = sp->m;
   args->np      = sp->np;
 
@@ -138,7 +140,7 @@ energy_p_pipeline( const species_t * RESTRICT sp,
 
   mp_allsum_d( &local, &global, 1 );
 
-  return global * ( ( double ) sp->g->cvac *
-		    ( double ) sp->g->cvac );
+  return global * ( (double) sp->g->cvac *
+		    (double) sp->g->cvac );
 }
 #endif

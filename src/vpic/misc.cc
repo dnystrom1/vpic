@@ -335,7 +335,7 @@ vpic_simulation::modify( const char *fname ) {
 
     // RFB: No existing decks I know of use these quantities. They are for
     // striding output and are a legacy hangover from 407
-#ifdef EXTEND_MODIFY
+    #ifdef EXTEND_MODIFY
     ITEST( ndfld, "ndfld", (iarg<0 ? 0 : iarg) );
     ITEST( ndhyd, "ndhyd", (iarg<0 ? 0 : iarg) );
     ITEST( ndpar, "ndpar", (iarg<0 ? 0 : iarg) );
@@ -349,8 +349,7 @@ vpic_simulation::modify( const char *fname ) {
     ITEST( pstride, "pstride", (iarg<1 ? 1 : iarg) );
     ITEST( stepdigit, "stepdigit", (iarg<0 ? 0 : iarg) );
     ITEST( rankdigit, "rankdigit", (iarg<0 ? 0 : iarg) );
-#endif
-
+    #endif
   }
 }
 

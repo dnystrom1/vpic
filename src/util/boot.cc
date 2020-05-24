@@ -28,22 +28,29 @@ boot_services( int * pargc,
 
   // Boot up the communications layer
 
-#if defined(VPIC_USE_PTHREADS)
+  #if defined(VPIC_USE_PTHREADS)
+
   #if defined(VPIC_SWAP_MPI_PTHREAD_INIT)
-    boot_mp( pargc, pargv );      // Boot communication layer first.
-    serial.boot( pargc, pargv );
-    thread.boot( pargc, pargv );
+  boot_mp( pargc, pargv );      // Boot communication layer first.
+  serial.boot( pargc, pargv );
+  thread.boot( pargc, pargv );
   #else
-    serial.boot( pargc, pargv );
-    thread.boot( pargc, pargv );
-    boot_mp( pargc, pargv );      // Boot communication layer last.
+  serial.boot( pargc, pargv );
+  thread.boot( pargc, pargv );
+  boot_mp( pargc, pargv );      // Boot communication layer last.
   #endif
 
-#elif defined(VPIC_USE_OPENMP)
-  boot_mp( pargc, pargv );        // Boot communication layer first.
+  int num_threads = thread.n_pipeline;
+
+  #elif defined(VPIC_USE_OPENMP)
+
+  boot_mp( pargc, pargv );      // Boot communication layer first.
+
   omp_helper.boot( pargc, pargv );
 
-#endif
+  int num_threads = omp_get_num_threads();
+
+  #endif
 
   // Set the boot_timestamp
 
@@ -51,9 +58,11 @@ boot_services( int * pargc,
   _boot_timestamp = 0;
   _boot_timestamp = uptime();
 
-  if (_world_rank == 0)
+  if ( _world_rank == 0 )
   {
-      printf("Booting with %d threads and %d (MPI) ranks \n", thread.n_pipeline, _world_size);
+      printf( "Booting with %d threads (pipelines) and %d (MPI) ranks \n",
+	      num_threads,
+	      _world_size );
   }
 }
 
@@ -64,22 +73,23 @@ halt_services( void )
 {
   _boot_timestamp = 0;
 
-#if defined(VPIC_USE_PTHREADS)
+  #if defined(VPIC_USE_PTHREADS)
+
   #if defined(VPIC_SWAP_MPI_PTHREAD_INIT)
-    thread.halt();
-    serial.halt();
-    halt_mp();
+  thread.halt();
+  serial.halt();
+  halt_mp();
   #else
-    halt_mp();
-    thread.halt();
-    serial.halt();
+  halt_mp();
+  thread.halt();
+  serial.halt();
   #endif
 
-#elif defined(VPIC_USE_OPENMP)
+  #elif defined(VPIC_USE_OPENMP)
+
   halt_mp();
 
-#endif
+  #endif
 
   halt_checkpt();
 }
-

@@ -10,14 +10,14 @@ void
 advance_e( field_array_t * RESTRICT fa,
            float frac )
 {
-  if ( !fa )
+  if ( ! fa )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
 
   if ( frac != 1 )
   {
-    ERROR( ( "standard advance_e does not support frac != 1 yet" ) );
+    ERROR( ( "Standard advance_e does not support frac != 1 yet." ) );
   }
 
   // Conditionally execute this when more abstractions are available.

@@ -52,11 +52,11 @@ void
 advance_b_pipeline( field_array_t * RESTRICT fa,
                     float _frac )
 {
-  if ( !fa )
+  if ( ! fa )
   {
-    ERROR( ( "Bad args" ) );
+    ERROR( ( "Bad args." ) );
   }
-  
+
   // Do the bulk of the magnetic fields in the pipelines.  The host
   // handles stragglers.
 

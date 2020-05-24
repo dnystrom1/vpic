@@ -252,51 +252,69 @@ center_p_pipeline_scalar( center_p_pipeline_args_t * args,
   #endif
   for( int i = 0 ; i < n; i++ )
   {
-    dx   = p->dx;                            // Load position
+    // Load position
+
+    dx   = p->dx;
     dy   = p->dy;
     dz   = p->dz;
     ii   = p->i;
 
-    f    = f0 + ii;                          // Interpolate E
+    f    = f0 + ii;
 
-    hax  = qdt_2mc*(    ( f->ex    + dy*f->dexdy    ) +
-                     dz*( f->dexdz + dy*f->d2exdydz ) );
+    // Interpolate E
 
-    hay  = qdt_2mc*(    ( f->ey    + dz*f->deydz    ) +
-                     dx*( f->deydx + dz*f->d2eydzdx ) );
+    hax  = qdt_2mc * (      ( f->ex    + dy * f->dexdy    ) +
+                       dz * ( f->dexdz + dy * f->d2exdydz ) );
 
-    haz  = qdt_2mc*(    ( f->ez    + dx*f->dezdx    ) +
-                     dy*( f->dezdy + dx*f->d2ezdxdy ) );
+    hay  = qdt_2mc * (      ( f->ey    + dz * f->deydz    ) +
+                       dx * ( f->deydx + dz * f->d2eydzdx ) );
 
-    cbx  = f->cbx + dx*f->dcbxdx;            // Interpolate B
-    cby  = f->cby + dy*f->dcbydy;
-    cbz  = f->cbz + dz*f->dcbzdz;
+    haz  = qdt_2mc * (      ( f->ez    + dx * f->dezdx    ) +
+                       dy * ( f->dezdy + dx * f->d2ezdxdy ) );
 
-    ux   = p->ux;                            // Load momentum
+    // Interpolate B
+
+    cbx  = f->cbx + dx * f->dcbxdx;
+    cby  = f->cby + dy * f->dcbydy;
+    cbz  = f->cbz + dz * f->dcbzdz;
+
+    // Load momentum
+
+    ux   = p->ux;
     uy   = p->uy;
     uz   = p->uz;
 
-    ux  += hax;                              // Half advance E
+    // Half advance E
+
+    ux  += hax;
     uy  += hay;
     uz  += haz;
 
-    v0   = qdt_4mc/(float)sqrt(one + (ux*ux + (uy*uy + uz*uz)));
-    /**/                                     // Boris - scalars
-    v1   = cbx*cbx + (cby*cby + cbz*cbz);
-    v2   = (v0*v0)*v1;
-    v3   = v0*(one+v2*(one_third+v2*two_fifteenths));
-    v4   = v3/(one+v1*(v3*v3));
+    v0   = qdt_4mc / (float) sqrt( one + ( ux * ux + ( uy * uy + uz * uz ) ) );
+
+    // Boris - scalars
+
+    v1   = cbx * cbx + ( cby * cby + cbz * cbz );
+    v2   = ( v0 * v0 ) * v1;
+    v3   = v0 * ( one + v2 * ( one_third + v2 * two_fifteenths ) );
+    v4   = v3 / ( one + v1 * ( v3 * v3 ) );
     v4  += v4;
 
-    v0   = ux + v3*( uy*cbz - uz*cby );      // Boris - uprime
-    v1   = uy + v3*( uz*cbx - ux*cbz );
-    v2   = uz + v3*( ux*cby - uy*cbx );
+    // Boris - uprime
 
-    ux  += v4*( v1*cbz - v2*cby );           // Boris - rotation
-    uy  += v4*( v2*cbx - v0*cbz );
-    uz  += v4*( v0*cby - v1*cbx );
+    v0   = ux + v3 * ( uy * cbz - uz * cby );
+    v1   = uy + v3 * ( uz * cbx - ux * cbz );
+    v2   = uz + v3 * ( ux * cby - uy * cbx );
 
-    p->ux = ux;                              // Store momentum
+    // Boris - rotation
+
+    ux  += v4 * ( v1 * cbz - v2 * cby );
+    uy  += v4 * ( v2 * cbx - v0 * cbz );
+    uz  += v4 * ( v0 * cby - v1 * cbx );
+
+    // Store momentum
+
+    p->ux = ux;
     p->uy = uy;
     p->uz = uz;
 
@@ -344,8 +362,8 @@ center_p_pipeline( species_t * RESTRICT sp,
 {
   DECLARE_ALIGNED_ARRAY( center_p_pipeline_args_t, 128, args, 1 );
 
-  if ( !sp ||
-       !ia ||
+  if ( ! sp             ||
+       ! ia             ||
        sp->g != ia->g )
   {
     ERROR( ( "Bad args." ) );
