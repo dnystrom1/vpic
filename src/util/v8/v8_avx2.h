@@ -319,6 +319,8 @@ namespace v8
     _mm256_store_ps( ( float * ) p, a.v );
   }
 
+  #if 0
+  // Portable version.
   inline void stream_8x1( const v8 &a,
 			  void * ALIGNED(16) p )
   {
@@ -330,6 +332,13 @@ namespace v8
     ((int * ALIGNED(16))p)[5] = a.i[5];
     ((int * ALIGNED(16))p)[6] = a.i[6];
     ((int * ALIGNED(16))p)[7] = a.i[7];
+  }
+  #endif
+
+  inline void stream_8x1( const v8 &a,
+			  void * ALIGNED(16) p )
+  {
+    _mm256_stream_ps( ( float * ) p, a.v );
   }
 
   inline void clear_8x1( void * ALIGNED(16) p )
