@@ -17,6 +17,7 @@
 // accumulated with a charge conserving algorithm.
 
 #if defined(VPIC_USE_AOSOA_P)
+void
 accumulate_hydro_p_pipeline_scalar( accumulate_hydro_p_pipeline_args_t * args,
                                     int pipeline_rank,
                                     int n_pipeline )
