@@ -68,15 +68,21 @@ option(USE_V4_AVX "Enable V4 AVX" OFF)
 
 option(USE_V4_AVX2 "Enable V4 AVX2" OFF)
 
+option(USE_V4_SVE "Enable V4 SVE" OFF)
+
 option(USE_V8_PORTABLE "Enable V8 Portable" OFF)
 
 option(USE_V8_AVX "Enable V8 AVX" OFF)
 
 option(USE_V8_AVX2 "Enable V8 AVX2" OFF)
 
+option(USE_V8_SVE "Enable V8 SVE" OFF)
+
 option(USE_V16_PORTABLE "Enable V16 Portable" OFF)
 
 option(USE_V16_AVX512 "Enable V16 AVX512" OFF)
+
+option(USE_V16_SVE "Enable V16 SVE" OFF)
 
 option(USE_LEGACY_SORT "Enable Legacy Sort Implementation" OFF)
 
@@ -220,6 +226,12 @@ if(USE_V4_NEON)
   set(USE_V4 True)
 endif(USE_V4_NEON)
 
+if(USE_V4_SVE)
+  add_definitions(-DUSE_V4_SVE)
+  set(VPIC_CXX_FLAGS "${VPIC_CXX_FLAGS} -DUSE_V4_SVE")
+  set(USE_V4 True)
+endif(USE_V4_SVE)
+
 #------------------------------------------------------------------------------#
 # Add options for building with v8 simd vector support.
 #------------------------------------------------------------------------------#
@@ -244,6 +256,12 @@ if(USE_V8_AVX2)
   set(USE_V8 True)
 endif(USE_V8_AVX2)
 
+if(USE_V8_SVE)
+  add_definitions(-DUSE_V8_SVE)
+  set(VPIC_CXX_FLAGS "${VPIC_CXX_FLAGS} -DUSE_V8_SVE")
+  set(USE_V8 True)
+endif(USE_V8_SVE)
+
 #------------------------------------------------------------------------------#
 # Add options for building with v16 simd vector support.
 #------------------------------------------------------------------------------#
@@ -262,17 +280,22 @@ if(USE_V16_AVX512)
   set(USE_V16 True)
 endif(USE_V16_AVX512)
 
-# TODO: Can we improve the way this is done so it's detection of a positive not
-# multiple negatives?
+if(USE_V16_SVE)
+  add_definitions(-DUSE_V16_SVE)
+  set(VPIC_CXX_FLAGS "${VPIC_CXX_FLAGS} -DUSE_V16_SVE")
+  set(USE_V16 True)
+endif(USE_V16_SVE)
+
+# TODO: Can we improve the way this is done so it is detection of a positive and
+# not multiple negatives?
 if (NOT USE_V4 AND NOT USE_V8 AND NOT USE_V16)
-    # This option is intended to indicate that we're not using any of the
+    # This option is intended to indicate that we are not using any of the
     # specialized intrinsics code paths, and we can expect numerical answer to
     # be the same as the "reference" (serial/auto-vec) implementation. This can
     # be especially useful when trying to test small differences in expressions
     # and we want bitwise answers to a known implementation
     set(NO_EXPLICIT_VECTOR True)
 endif()
-
 
 #------------------------------------------------------------------------------#
 # Add options for building with explicit autovec support.
@@ -424,6 +447,18 @@ if(ENABLE_UNIT_TESTS)
     add_test(NAME v4 COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 1 ${MPIEXEC_PREFLAGS} ./v4)
   endif(USE_V4)
 
+  # Add tests individually
+  if (USE_V8)
+    add_executable(v8 src/util/v8/test/v8.cc)
+    add_test(NAME v8 COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 1 ${MPIEXEC_PREFLAGS} ./v8)
+  endif(USE_V8)
+
+  # Add tests individually
+  if (USE_V16)
+    add_executable(v16 src/util/v16/test/v16.cc)
+    add_test(NAME v16 COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 1 ${MPIEXEC_PREFLAGS} ./v16)
+  endif(USE_V16)
+
   # RNG tests
   add_executable(rng src/util/rng/test/rng.cc)
   target_link_libraries(rng vpic)
@@ -438,6 +473,7 @@ if(ENABLE_PERFORMANCE_TESTS)
   include_directories(${CATCH_DIR})
   add_subdirectory(test/performance)
 endif(ENABLE_PERFORMANCE_TESTS)
+
 #~---------------------------------------------------------------------------~-#
 # vim: set tabstop=2 shiftwidth=2 expandtab :
 #~---------------------------------------------------------------------------~-#
