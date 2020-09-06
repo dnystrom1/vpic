@@ -77,6 +77,15 @@
                                                                         \
   } while(0)
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+takizuka_abe_pipeline_scalar( takizuka_abe_t * RESTRICT cm,
+                              int pipeline_rank,
+                              int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 takizuka_abe_pipeline_scalar( takizuka_abe_t * RESTRICT cm,
                               int pipeline_rank,
@@ -214,6 +223,7 @@ takizuka_abe_pipeline_scalar( takizuka_abe_t * RESTRICT cm,
   }
 
 }
+#endif
 
 #undef CMOV
 #undef takizuka_abe_collision
