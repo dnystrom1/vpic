@@ -6,6 +6,15 @@
 
 using namespace v8;
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+accumulate_hydro_p_pipeline_v8( accumulate_hydro_p_pipeline_args_t * args,
+                                int pipeline_rank,
+                                int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 accumulate_hydro_p_pipeline_v8( accumulate_hydro_p_pipeline_args_t * args,
                                 int pipeline_rank,
@@ -249,6 +258,7 @@ accumulate_hydro_p_pipeline_v8( accumulate_hydro_p_pipeline_args_t * args,
     #undef INCREMENT
   }
 }
+#endif
 
 #else
 
