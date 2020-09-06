@@ -16,6 +16,15 @@
 // hydro jx,jy,jz are for diagnostic purposes only; they are not
 // accumulated with a charge conserving algorithm.
 
+#if defined(VPIC_USE_AOSOA_P)
+void
+accumulate_hydro_p_pipeline_scalar( accumulate_hydro_p_pipeline_args_t * args,
+                                    int pipeline_rank,
+                                    int n_pipeline )
+{
+  ERROR(("Need AoSoA implementation."));
+}
+#else
 void
 accumulate_hydro_p_pipeline_scalar( accumulate_hydro_p_pipeline_args_t * args,
                                     int pipeline_rank,
@@ -206,6 +215,7 @@ accumulate_hydro_p_pipeline_scalar( accumulate_hydro_p_pipeline_args_t * args,
     #undef ACCUM_HYDRO
   }
 }
+#endif
 
 //----------------------------------------------------------------------------//
 // Top level function to select and call the proper accumulate_hydro_p
